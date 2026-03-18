@@ -15,9 +15,3 @@ try:
     print("Result:", res)
 except Exception as e:
     print("Error:", e)
-```
-```
-4. Scroll down → Commit changes
-5. Run workflow
-6. Check logs — will show Result: {"ok":true...}
-7. Check Telegram
