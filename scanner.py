@@ -367,7 +367,7 @@ def main():
             time.sleep(1)
         save_state(state)
     else:
-        send_telegram("✅ MSNR Scanner is live and working!")
+        send_telegram(" MSNR Scanner is live and working!")
         print("No setups — no alert sent")
 
     print("=== Scan complete ===")
