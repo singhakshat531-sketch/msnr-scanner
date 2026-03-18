@@ -343,16 +343,39 @@ let chartTF = '1d';
 let priceChart = null;
 let equityChart = null;
 
-// Simulator state
-let sim = JSON.parse(localStorage.getItem('eo_sim_v4') || JSON.stringify({
+// Simulator state — loaded from GitHub trades.json
+let sim = {
   balance: SIM_START,
   activeTrades: [],
   history: [],
-  equityCurve: [SIM_START],
-}));
+  equityCurve: [{t:'start',v:SIM_START}],
+  stats: {totalTrades:0,wins:0,losses:0,be:0,netR:0,bestR:0},
+  lastUpdated: null
+};
+
+async function loadSimFromGitHub() {
+  const url = 'https://raw.githubusercontent.com/singhakshat531-sketch/msnr-scanner/main/trades.json?t=' + Date.now();
+  try {
+    const r = await fetch(url);
+    if (r.ok) {
+      const data = await r.json();
+      sim = data;
+      console.log('Sim loaded from GitHub:', sim.balance);
+    }
+  } catch(e) {
+    console.log('trades.json not found yet — using defaults');
+  }
+}
 
 // ── INIT ─────────────────────────────────────────────────────────────────────
-window.onload = () => { runScan(); setInterval(runScan, REFRESH); };
+window.onload = async () => {
+  await loadSimFromGitHub();
+  runScan();
+  setInterval(async () => {
+    await loadSimFromGitHub();
+    runScan();
+  }, REFRESH);
+};
 
 async function runScan() {
   setLive(true);
@@ -637,13 +660,10 @@ function updateSimulator(){
   renderSimulator(curPrice);
 }
 
-function saveSim(){localStorage.setItem('eo_sim_v4',JSON.stringify(sim));}
+function saveSim(){ /* Data saved by scanner.py to GitHub */ }
 
 function resetSim(){
-  if(!confirm('Reset simulator? This clears all paper trades.'))return;
-  sim={balance:SIM_START,activeTrades:[],history:[],equityCurve:[SIM_START]};
-  saveSim();renderSimulator(btcData.h1.at(-1)?.c||0);renderEquityChart();
-  showNotif('Simulator reset to $1,000');
+  showNotif('Reset done by scanner.py — data syncs every 15 min from GitHub');
 }
 
 function renderSimulator(curPrice){
@@ -959,11 +979,18 @@ function renderChart(){
 function renderEquityChart(){
   const ctx=document.getElementById('equityChart').getContext('2d');
   if(equityChart)equityChart.destroy();
-  const curve=sim.equityCurve.length>1?sim.equityCurve:[SIM_START,SIM_START];
+  const rawCurve=sim.equityCurve||[{t:'start',v:SIM_START}];
+  const curve=rawCurve.map(p=>typeof p==='object'?p.v:p);
+  const curveLabels=rawCurve.map((p,i)=>{
+    if(typeof p==='object'&&p.t&&p.t!=='start'){
+      try{return new Date(p.t).toLocaleDateString('en-US',{month:'short',day:'numeric'});}catch(e){return 'T'+i;}
+    }
+    return i===0?'Start':'T'+i;
+  });
   const color=curve.at(-1)>=SIM_START?'rgba(0,212,170,.9)':'rgba(255,77,109,.9)';
   equityChart=new Chart(ctx,{
     type:'line',
-    data:{labels:curve.map((_,i)=>i===0?'Start':`T${i}`),datasets:[{data:curve,borderColor:color,borderWidth:1.5,pointRadius:0,fill:true,backgroundColor:curve.at(-1)>=SIM_START?'rgba(0,212,170,.06)':'rgba(255,77,109,.06)',tension:.3}]},
+    data:{labels:curveLabels,datasets:[{data:curve,borderColor:color,borderWidth:1.5,pointRadius:0,fill:true,backgroundColor:curve.at(-1)>=SIM_START?'rgba(0,212,170,.06)':'rgba(255,77,109,.06)',tension:.3}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(4,4,6,.95)',borderColor:'rgba(0,212,170,.3)',borderWidth:1,bodyFont:{family:'JetBrains Mono',size:9},callbacks:{label:ctx=>`$${fmt(ctx.parsed.y,2)}`}}},scales:{x:{display:false},y:{grid:{color:'rgba(22,22,31,.8)'},ticks:{color:'rgba(58,58,80,.8)',font:{family:'JetBrains Mono',size:7},callback:v=>'$'+fmt(v,0)}}}}
   });
 }
