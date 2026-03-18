@@ -20,41 +20,55 @@ PAIRS = ["BTCUSDT"]  # add XAUUSD if you have Twelve Data key
 MIN_RR = 3.0
 LOOKBACK = 3  # candles each side for A/V level detection
 
-# ── FETCH BYBIT (no geo-restrictions, replaces Binance) ──────────────────────
+# ── FETCH KLINES — CoinGecko + fallback (no API key, no geo-block) ───────────
 def fetch_binance(symbol, interval, limit=120):
-    """Uses Bybit API — same data, works globally including India."""
-    interval_map = {"1d":"D","4h":"240","1h":"60","30m":"30","15m":"15","5m":"5"}
-    bybit_iv = interval_map.get(interval, interval)
-    url = f"https://api.bybit.com/v5/market/kline?category=spot&symbol={symbol}&interval={bybit_iv}&limit={limit}"
+    """
+    Uses CoinGecko API — completely free, no API key, no geo-restrictions.
+    Converts OHLC data to candle format compatible with scanner.
+    """
+    # Map symbol to CoinGecko coin id
+    coin_map = {"BTCUSDT": "bitcoin", "XAUUSD": "gold"}
+    coin = coin_map.get(symbol, "bitcoin")
+
+    # Map interval to CoinGecko days parameter
+    # CoinGecko OHLC: 1=1d, 7=4h, 14=1h granularity (approximate)
+    interval_days = {"1d": 90, "4h": 16, "1h": 2}
+    days = interval_days.get(interval, 7)
+
+    url = f"https://api.coingecko.com/api/v3/coins/{coin}/ohlc?vs_currency=usd&days={days}"
     try:
-        with urllib.request.urlopen(url, timeout=15) as r:
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=15) as r:
             data = json.loads(r.read())
-        if data.get("retCode") != 0:
-            print(f"Bybit error {symbol} {interval}: {data.get('retMsg')}")
+        if not data or not isinstance(data, list):
+            print(f"CoinGecko empty response {symbol} {interval}")
             return []
-        candles = list(reversed(data["result"]["list"]))
-        return [{"t": int(k[0]), "o": float(k[1]), "h": float(k[2]),
-                 "l": float(k[3]), "c": float(k[4])} for k in candles]
+        # data = [[timestamp, open, high, low, close], ...]
+        candles = [{"t": k[0], "o": float(k[1]), "h": float(k[2]),
+                    "l": float(k[3]), "c": float(k[4])} for k in data]
+        # Return last `limit` candles
+        return candles[-limit:]
     except Exception as e:
-        print(f"Bybit fetch error {symbol} {interval}: {e}")
+        print(f"CoinGecko fetch error {symbol} {interval}: {e}")
         return []
 
-# ── FETCH TWELVE DATA (Gold) ─────────────────────────────────────────────────
+# ── FETCH TWELVE DATA (Gold) — with CoinGecko fallback ───────────────────────
 def fetch_twelve(symbol, interval, outputsize=120):
-    if not TWELVE_DATA_KEY:
-        return []
-    url = f"https://api.twelvedata.com/time_series?symbol={symbol}&interval={interval}&outputsize={outputsize}&apikey={TWELVE_DATA_KEY}"
-    try:
-        with urllib.request.urlopen(url, timeout=10) as r:
-            data = json.loads(r.read())
-        if "values" not in data:
-            return []
-        vals = list(reversed(data["values"]))
-        return [{"t": i, "o": float(v["open"]), "h": float(v["high"]),
-                 "l": float(v["low"]), "c": float(v["close"])} for i, v in enumerate(vals)]
-    except Exception as e:
-        print(f"Twelve Data fetch error {symbol} {interval}: {e}")
-        return []
+    # Try Twelve Data first if key exists
+    if TWELVE_DATA_KEY:
+        url = f"https://api.twelvedata.com/time_series?symbol={symbol}&interval={interval}&outputsize={outputsize}&apikey={TWELVE_DATA_KEY}"
+        try:
+            with urllib.request.urlopen(url, timeout=10) as r:
+                data = json.loads(r.read())
+            if "values" in data:
+                vals = list(reversed(data["values"]))
+                return [{"t": i, "o": float(v["open"]), "h": float(v["high"]),
+                         "l": float(v["low"]), "c": float(v["close"])} for i, v in enumerate(vals)]
+        except Exception as e:
+            print(f"Twelve Data fetch error {symbol} {interval}: {e}")
+    # Fallback: CoinGecko for gold
+    print(f"Using CoinGecko fallback for {symbol} {interval}")
+    return fetch_binance("XAUUSD", interval, outputsize)
 
 # ── TREND DETECTION ──────────────────────────────────────────────────────────
 def get_trend(candles):
