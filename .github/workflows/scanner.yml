@@ -2,10 +2,8 @@ name: MSNR CRT Scanner
 
 on:
   schedule:
-    # Runs every 30 minutes
-    - cron: '*/30 * * * *'
+    - cron: '*/15 * * * *'
   workflow_dispatch:
-    # Allows manual trigger from GitHub Actions tab
 
 jobs:
   scan:
@@ -23,5 +21,19 @@ jobs:
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          TWELVE_DATA_KEY: ${{ secrets.TWELVE_DATA_KEY }}
         run: python scanner.py
+
+      - name: Save alert state
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: alert-state
+          path: last_alerts.json
+          if-no-files-found: ignore
+          retention-days: 1
+
+      - name: Restore alert state
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: alert-state
