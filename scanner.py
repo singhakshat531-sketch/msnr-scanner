@@ -20,16 +20,23 @@ PAIRS = ["BTCUSDT"]  # add XAUUSD if you have Twelve Data key
 MIN_RR = 3.0
 LOOKBACK = 3  # candles each side for A/V level detection
 
-# ── FETCH BINANCE ────────────────────────────────────────────────────────────
+# ── FETCH BYBIT (no geo-restrictions, replaces Binance) ──────────────────────
 def fetch_binance(symbol, interval, limit=120):
-    url = f"https://api.binance.com/api/v3/klines?symbol={symbol}&interval={interval}&limit={limit}"
+    """Uses Bybit API — same data, works globally including India."""
+    interval_map = {"1d":"D","4h":"240","1h":"60","30m":"30","15m":"15","5m":"5"}
+    bybit_iv = interval_map.get(interval, interval)
+    url = f"https://api.bybit.com/v5/market/kline?category=spot&symbol={symbol}&interval={bybit_iv}&limit={limit}"
     try:
-        with urllib.request.urlopen(url, timeout=10) as r:
+        with urllib.request.urlopen(url, timeout=15) as r:
             data = json.loads(r.read())
-        return [{"t": k[0], "o": float(k[1]), "h": float(k[2]),
-                 "l": float(k[3]), "c": float(k[4])} for k in data]
+        if data.get("retCode") != 0:
+            print(f"Bybit error {symbol} {interval}: {data.get('retMsg')}")
+            return []
+        candles = list(reversed(data["result"]["list"]))
+        return [{"t": int(k[0]), "o": float(k[1]), "h": float(k[2]),
+                 "l": float(k[3]), "c": float(k[4])} for k in candles]
     except Exception as e:
-        print(f"Binance fetch error {symbol} {interval}: {e}")
+        print(f"Bybit fetch error {symbol} {interval}: {e}")
         return []
 
 # ── FETCH TWELVE DATA (Gold) ─────────────────────────────────────────────────
