@@ -1,0 +1,21 @@
+{
+  "balance": 1000.0,
+  "activeTrades": [],
+  "history": [],
+  "equityCurve": [
+    {
+      "t": "2026-03-18T06:35:23.065846",
+      "v": 1000.0
+    }
+  ],
+  "alerts": {},
+  "stats": {
+    "totalTrades": 0,
+    "wins": 0,
+    "losses": 0,
+    "be": 0,
+    "netR": 0.0,
+    "bestR": 0.0
+  },
+  "lastUpdated": "2026-03-18T06:35:27.654206"
+}
