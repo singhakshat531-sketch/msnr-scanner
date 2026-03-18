@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MSNR Scanner — Elite Observer</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg:       #040406;
+  --s1:       #08080d;
+  --s2:       #0c0c14;
+  --s3:       #10101a;
+  --border:   #16161f;
+  --border2:  #1e1e2e;
+  --green:    #00d4aa;
+  --green2:   #00a882;
+  --green-bg: #001a15;
+  --red:      #ff4d6d;
+  --red2:     #cc3d57;
+  --red-bg:   #1a000a;
+  --gold:     #ffd166;
+  --gold-bg:  #1a1200;
+  --purple:   #a78bfa;
+  --blue:     #60a5fa;
+  --white:    #f0f0f8;
+  --t1:       #c8c8d8;
+  --t2:       #787890;
+  --t3:       #3a3a50;
+  --t4:       #1e1e2e;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--t1);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Subtle grid background */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,212,170,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,170,0.02) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── HEADER ─────────────────────────────────────────────── */
+.header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(4,4,6,0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 28px;
+  height: 52px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.logo {
+  display: flex; align-items: center; gap: 14px;
+}
+
+.logo-icon {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--green-bg), #002a20);
+  border: 1px solid var(--green2);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 700; color: var(--green);
+  position: relative;
+}
+
+.logo-icon::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  background: linear-gradient(135deg, var(--green), transparent);
+  opacity: 0.1;
+}
+
+.logo-name {
+  font-size: 13px; font-weight: 600;
+  color: var(--white); letter-spacing: 0.05em;
+}
+
+.logo-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: var(--t3);
+  letter-spacing: 0.15em; margin-top: 1px;
+}
+
+.header-right {
+  display: flex; align-items: center; gap: 20px;
+}
+
+.live-indicator {
+  display: flex; align-items: center; gap: 7px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--t2); letter-spacing: 0.1em;
+}
+
+.live-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+  animation: livepulse 2s infinite;
+}
+
+@keyframes livepulse {
+  0%,100% { opacity:1; box-shadow: 0 0 8px var(--green); }
+  50% { opacity:0.4; box-shadow: 0 0 3px var(--green); }
+}
+
+.upd-time {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--t3);
+}
+
+.refresh-btn {
+  background: var(--s2); border: 1px solid var(--border2);
+  color: var(--t2); padding: 5px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: 0.1em;
+  cursor: pointer; transition: all 0.2s;
+}
+
+.refresh-btn:hover {
+  border-color: var(--green2); color: var(--green);
+  background: var(--green-bg);
+}
+
+/* ── LAYOUT ─────────────────────────────────────────────── */
+.main {
+  position: relative; z-index: 1;
+  padding: 24px 28px;
+  max-width: 1440px; margin: 0 auto;
+}
+
+.section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: 0.2em;
+  color: var(--t3); text-transform: uppercase;
+  margin-bottom: 12px;
+  display: flex; align-items: center; gap: 12px;
+}
+
+.section-label::after {
+  content: ''; flex: 1; height: 1px;
+  background: linear-gradient(to right, var(--border), transparent);
+}
+
+/* ── PRICE STRIP ────────────────────────────────────────── */
+.price-strip {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px; margin-bottom: 24px;
+}
+
+.price-card {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  padding: 16px 20px;
+  position: relative; overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.price-card::before {
+  content: ''; position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(to right, var(--green2), transparent);
+}
+
+.price-card.bear::before {
+  background: linear-gradient(to right, var(--red2), transparent);
+}
+
+.pc-sym {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: 0.15em;
+  color: var(--t3); margin-bottom: 8px;
+}
+
+.pc-price {
+  font-size: 28px; font-weight: 700;
+  color: var(--white); letter-spacing: -0.02em;
+  margin-bottom: 4px; font-family: 'JetBrains Mono', monospace;
+}
+
+.pc-change {
+  font-size: 11px; font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.pc-change.up { color: var(--green); }
+.pc-change.down { color: var(--red); }
+
+.trend-pill {
+  position: absolute; top: 14px; right: 16px;
+  font-size: 9px; font-weight: 700; letter-spacing: 0.1em;
+  padding: 3px 10px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.trend-pill.bull { background: var(--green-bg); color: var(--green); border: 1px solid var(--green2); }
+.trend-pill.bear { background: var(--red-bg); color: var(--red); border: 1px solid var(--red2); }
+.trend-pill.neutral { background: var(--s3); color: var(--t2); border: 1px solid var(--border2); }
+
+/* ── CHART ──────────────────────────────────────────────── */
+.chart-section {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  padding: 0; margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.chart-header {
+  padding: 12px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  background: var(--s2);
+}
+
+.chart-title {
+  font-size: 11px; font-weight: 600;
+  color: var(--white); letter-spacing: 0.05em;
+}
+
+.chart-controls {
+  display: flex; gap: 4px;
+}
+
+.chart-btn {
+  background: none; border: 1px solid var(--border);
+  color: var(--t3); padding: 3px 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; cursor: pointer; transition: all 0.15s;
+  letter-spacing: 0.08em;
+}
+
+.chart-btn.active, .chart-btn:hover {
+  border-color: var(--green2); color: var(--green);
+  background: var(--green-bg);
+}
+
+.chart-wrap {
+  position: relative; height: 320px; padding: 16px;
+}
+
+.chart-legend {
+  padding: 10px 20px;
+  display: flex; gap: 20px; flex-wrap: wrap;
+  border-top: 1px solid var(--border);
+  background: var(--s2);
+}
+
+.legend-item {
+  display: flex; align-items: center; gap: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: var(--t2);
+}
+
+.legend-dot {
+  width: 8px; height: 2px;
+}
+
+/* ── SETUPS GRID ────────────────────────────────────────── */
+.setups-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 10px; margin-bottom: 24px;
+}
+
+.setup-card {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.setup-card:hover {
+  border-color: var(--border2);
+  transform: translateY(-1px);
+}
+
+.setup-card.aplus { border-left: 2px solid var(--green); }
+.setup-card.a     { border-left: 2px solid var(--green2); }
+.setup-card.b     { border-left: 2px solid var(--gold); }
+
+.sc-top {
+  padding: 10px 14px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  background: var(--s2);
+}
+
+.sc-pair {
+  font-size: 12px; font-weight: 700; color: var(--white);
+}
+
+.sc-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: var(--t2); margin-top: 2px;
+}
+
+.grade-chip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; font-weight: 700;
+  padding: 3px 9px; letter-spacing: 0.08em;
+}
+
+.grade-chip.aplus { background: var(--green-bg); color: var(--green); border: 1px solid var(--green2); }
+.grade-chip.a     { background: var(--green-bg); color: var(--green2); border: 1px solid #003328; }
+.grade-chip.b     { background: var(--gold-bg);  color: var(--gold);   border: 1px solid #3a2e00; }
+
+.sc-levels {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  border-bottom: 1px solid var(--border);
+}
+
+.sc-level-cell {
+  padding: 10px 12px; text-align: center;
+  border-right: 1px solid var(--border);
+}
+
+.sc-level-cell:last-child { border-right: none; }
+
+.scl-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px; color: var(--t3);
+  letter-spacing: 0.08em; margin-bottom: 4px;
+}
+
+.scl-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 700;
+}
+
+.scl-val.entry { color: var(--gold); }
+.scl-val.sl    { color: var(--red); }
+.scl-val.tp    { color: var(--green); }
+
+.sc-rows { padding: 8px 14px; border-bottom: 1px solid var(--border); }
+
+.sc-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 3px 0; border-bottom: 1px solid var(--border);
+}
+
+.sc-row:last-child { border-bottom: none; }
+
+.sc-row-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8.5px; color: var(--t3);
+}
+
+.sc-row-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; font-weight: 600; color: var(--t1);
+}
+
+.sc-row-val.green  { color: var(--green); }
+.sc-row-val.gold   { color: var(--gold); }
+.sc-row-val.red    { color: var(--red); }
+.sc-row-val.purple { color: var(--purple); }
+
+.sc-rr {
+  padding: 8px 14px;
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid var(--border);
+}
+
+.sc-rr-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8.5px; color: var(--t3);
+}
+
+.sc-rr-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px; font-weight: 700; color: var(--green);
+}
+
+.sc-orders {
+  padding: 8px 14px;
+}
+
+.sc-orders-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px; color: var(--t3);
+  letter-spacing: 0.1em; margin-bottom: 6px;
+}
+
+.order-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 8px; margin-bottom: 4px;
+  background: var(--s3); border: 1px solid var(--border);
+}
+
+.order-row.best {
+  background: var(--green-bg); border-color: var(--green2);
+}
+
+.order-num {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--s2); border: 1px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px; font-weight: 700; color: var(--t2);
+  flex-shrink: 0;
+}
+
+.order-row.best .order-num {
+  background: var(--green); color: #000; border-color: var(--green);
+}
+
+.order-desc {
+  flex: 1;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8.5px; color: var(--t2);
+}
+
+.order-row.best .order-desc { color: var(--green); }
+
+.order-price {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; font-weight: 700; color: var(--gold);
+}
+
+.order-size {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px; color: var(--t3);
+}
+
+/* ── LEVELS TABLE ───────────────────────────────────────── */
+.table-wrap { overflow-x: auto; margin-bottom: 24px; }
+
+.data-table { width: 100%; border-collapse: collapse; }
+
+.data-table th {
+  text-align: left;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8.5px; letter-spacing: 0.12em;
+  color: var(--t3); padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--s2);
+  white-space: nowrap;
+}
+
+.data-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+}
+
+.data-table tr:hover td { background: var(--s2); }
+
+.fresh-tag {
+  display: inline-block; padding: 1px 7px;
+  font-size: 8px; font-weight: 700; letter-spacing: 0.06em;
+}
+
+.fresh-tag.fresh   { background: var(--green-bg); color: var(--green);  border: 1px solid var(--green2); }
+.fresh-tag.unfresh { background: var(--gold-bg);  color: var(--gold);   border: 1px solid #3a2e00; }
+.fresh-tag.dead    { background: var(--red-bg);   color: var(--red2);   border: 1px solid #4a1a1a; }
+
+/* ── BACKTEST ───────────────────────────────────────────── */
+.result-tag {
+  display: inline-block; padding: 1px 8px;
+  font-size: 8px; font-weight: 700; letter-spacing: 0.06em;
+}
+
+.result-tag.win     { background: var(--green-bg); color: var(--green); border: 1px solid var(--green2); }
+.result-tag.loss    { background: var(--red-bg);   color: var(--red);   border: 1px solid var(--red2); }
+.result-tag.pending { background: var(--s3);       color: var(--t2);    border: 1px solid var(--border2); }
+
+/* ── STATS ──────────────────────────────────────────────── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 8px; margin-bottom: 24px;
+}
+
+.stat-box {
+  background: var(--s1); border: 1px solid var(--border);
+  padding: 14px 16px;
+}
+
+.stat-box-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px; color: var(--t3);
+  letter-spacing: 0.12em; margin-bottom: 8px;
+}
+
+.stat-box-val {
+  font-size: 22px; font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── TRACKER ────────────────────────────────────────────── */
+.tracker-empty {
+  background: var(--s1); border: 1px solid var(--border);
+  padding: 40px; text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--t3); letter-spacing: 0.12em;
+}
+
+/* ── TABS ───────────────────────────────────────────────── */
+.tabs {
+  display: flex; border-bottom: 1px solid var(--border);
+  margin-bottom: 14px; gap: 0;
+}
+
+.tab-btn {
+  padding: 9px 18px; background: none;
+  border: none; border-bottom: 2px solid transparent;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: 0.1em;
+  color: var(--t3); cursor: pointer; transition: all 0.15s;
+}
+
+.tab-btn.active { color: var(--green); border-bottom-color: var(--green); }
+.tab-btn:hover:not(.active) { color: var(--t1); }
+
+/* ── EMPTY ──────────────────────────────────────────────── */
+.empty {
+  background: var(--s1); border: 1px solid var(--border);
+  padding: 50px; text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--t3); letter-spacing: 0.12em;
+  grid-column: 1 / -1;
+}
+
+.spinner {
+  display: inline-block; width: 14px; height: 14px;
+  border: 1px solid var(--border2); border-top-color: var(--green);
+  border-radius: 50%; animation: spin 0.7s linear infinite;
+  vertical-align: middle; margin-right: 8px;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── NOTIF ──────────────────────────────────────────────── */
+.notif {
+  position: fixed; bottom: 20px; right: 20px;
+  background: var(--s2); border: 1px solid var(--green2);
+  padding: 10px 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--green); z-index: 200;
+  display: none; animation: nin 0.3s ease;
+}
+
+@keyframes nin {
+  from { transform: translateX(20px); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+@media (max-width: 640px) {
+  .main { padding: 12px; }
+  .price-strip { grid-template-columns: 1fr; }
+  .setups-grid { grid-template-columns: 1fr; }
+  .header { padding: 0 14px; }
+  .pc-price { font-size: 22px; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">
+    <div class="logo-icon">EO</div>
+    <div>
+      <div class="logo-name">MSNR · CRT SCANNER</div>
+      <div class="logo-tag">ELITE OBSERVER · HIGH RR SETUP FINDER</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="live-indicator">
+      <div class="live-dot" id="liveDot"></div>
+      <span id="liveStatus">SCANNING</span>
+    </div>
+    <div class="upd-time" id="updTime">—</div>
+    <button class="refresh-btn" onclick="runScan()">↻ REFRESH</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- PRICES -->
+  <div class="section-label">MARKET STATUS</div>
+  <div class="price-strip">
+    <div class="price-card" id="btcCard">
+      <div class="pc-sym">BTCUSDT · CRYPTOCOMPARE</div>
+      <div class="pc-price" id="btcPrice">—</div>
+      <div class="pc-change" id="btcChange">—</div>
+      <div class="trend-pill neutral" id="btcTrend">LOADING</div>
+    </div>
+    <div class="price-card" id="goldCard">
+      <div class="pc-sym">XAUUSD · GOLD (add Twelve Data key for live)</div>
+      <div class="pc-price" id="goldPrice">—</div>
+      <div class="pc-change" id="goldChange">—</div>
+      <div class="trend-pill neutral" id="goldTrend">NO KEY</div>
+    </div>
+  </div>
+
+  <!-- CHART -->
+  <div class="section-label">PRICE CHART WITH MSNR LEVELS</div>
+  <div class="chart-section">
+    <div class="chart-header">
+      <div class="chart-title">BTCUSDT — MSNR LEVELS OVERLAY</div>
+      <div class="chart-controls">
+        <button class="chart-btn active" onclick="setChartTF('1d',this)">1D</button>
+        <button class="chart-btn" onclick="setChartTF('4h',this)">4H</button>
+        <button class="chart-btn" onclick="setChartTF('1h',this)">1H</button>
+      </div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="priceChart"></canvas>
+    </div>
+    <div class="chart-legend">
+      <div class="legend-item">
+        <div class="legend-dot" style="background:var(--green)"></div>
+        V-Level (Support)
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:var(--red)"></div>
+        A-Level (Resistance)
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:var(--gold);height:1px;border-top:1px dashed var(--gold)"></div>
+        Fresh Level
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background:var(--t3);height:1px;border-top:1px dashed var(--t3)"></div>
+        Unfresh Level
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTIVE SETUPS -->
+  <div class="section-label">ACTIVE SETUPS</div>
+  <div class="setups-grid" id="setupsGrid">
+    <div class="empty"><span class="spinner"></span>SCANNING FOR MSNR + CRT SETUPS...</div>
+  </div>
+
+  <!-- MSNR LEVELS -->
+  <div class="section-label">MSNR LEVELS — ALL TIMEFRAMES</div>
+  <div class="table-wrap" id="levelsWrap">
+    <div class="empty"><span class="spinner"></span>CALCULATING LEVELS...</div>
+  </div>
+
+  <!-- TABS: BACKTEST / STATS / TRACKER -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('bt',this)">BACKTEST</button>
+    <button class="tab-btn" onclick="showTab('stats',this)">PERFORMANCE</button>
+    <button class="tab-btn" onclick="showTab('tracker',this)">LIVE TRACKER</button>
+  </div>
+
+  <div id="tab-bt">
+    <div class="table-wrap" id="btWrap">
+      <div class="empty"><span class="spinner"></span>RUNNING BACKTEST...</div>
+    </div>
+  </div>
+
+  <div id="tab-stats" style="display:none">
+    <div class="stats-grid" id="statsGrid"></div>
+  </div>
+
+  <div id="tab-tracker" style="display:none">
+    <div id="trackerWrap">
+      <div class="tracker-empty">
+        No setups tracked yet.<br>
+        Click + TRACK on any active setup above.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="notif" id="notif"></div>
+
+<script>
+// ── STATE ────────────────────────────────────────────────────────────────────
+const REFRESH_MS = 15 * 60 * 1000;
+let btcData = { d1:[], h4:[], h1:[] };
+let allLevels = { d1:[], h4:[], h1:[] };
+let allSetups = [];
+let btResults = [];
+let tracked   = JSON.parse(localStorage.getItem('eo_tracked_v4') || '[]');
+let chartTF   = '1d';
+let priceChart = null;
+const tdKey   = localStorage.getItem('td_key') || '';
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+window.onload = () => { runScan(); setInterval(runScan, REFRESH_MS); };
+
+async function runScan() {
+  setLive(true);
+  try {
+    await fetchBTC();
+    renderPrices();
+    detectLevels();
+    renderLevelsTable();
+    detectSetups();
+    renderSetups();
+    runBacktest();
+    renderBacktest();
+    renderStats();
+    renderTracker();
+    renderChart();
+    document.getElementById('updTime').textContent =
+      'UPDATED ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  } catch(e) { console.error(e); }
+  setLive(false);
+}
+
+function setLive(on) {
+  document.getElementById('liveStatus').textContent = on ? 'SCANNING' : 'LIVE';
+  document.getElementById('liveDot').style.background = on ? 'var(--gold)' : 'var(--green)';
+}
+
+// ── FETCH ────────────────────────────────────────────────────────────────────
+async function fetchBTC() {
+  const [d1,h4,h1] = await Promise.all([
+    cc('BTC','1d',90), cc('BTC','4h',150), cc('BTC','1h',150)
+  ]);
+  btcData = {d1,h4,h1};
+}
+
+async function cc(sym, interval, limit) {
+  const ep  = interval === '1d' ? 'histoday' : 'histohour';
+  const agg = interval === '4h' ? 4 : 1;
+  const url = `https://min-api.cryptocompare.com/data/v2/${ep}?fsym=${sym}&tsym=USD&limit=${limit}&aggregate=${agg}`;
+  try {
+    const r = await fetch(url);
+    const d = await r.json();
+    if (d.Response !== 'Success') return [];
+    return d.Data.Data
+      .filter(k => !(k.open===0&&k.close===0))
+      .map(k => ({t:k.time*1000,o:+k.open,h:+k.high,l:+k.low,c:+k.close,v:+k.volumeto}));
+  } catch(e) { return []; }
+}
+
+// ── TREND ────────────────────────────────────────────────────────────────────
+function trend(candles) {
+  if (candles.length < 10) return 'UNKNOWN';
+  const c = candles.slice(-20).map(x=>x.c);
+  let bull=0, bear=0;
+  for (let i=2;i<c.length;i++) {
+    if (c[i]>c[i-1]&&c[i-1]>c[i-2]) bull++;
+    if (c[i]<c[i-1]&&c[i-1]<c[i-2]) bear++;
+  }
+  if (bull>bear+2) return 'BULLISH';
+  if (bear>bull+2) return 'BEARISH';
+  return 'RANGING';
+}
+
+// ── PRICES ───────────────────────────────────────────────────────────────────
+function renderPrices() {
+  if (!btcData.d1.length) return;
+  const last=btcData.d1.at(-1), prev=btcData.d1.at(-2);
+  const chg=((last.c-prev.c)/prev.c*100);
+  document.getElementById('btcPrice').textContent = '$'+fmt(last.c,0);
+  const ce=document.getElementById('btcChange');
+  ce.textContent=(chg>=0?'+':'')+chg.toFixed(2)+'%';
+  ce.className='pc-change '+(chg>=0?'up':'down');
+  const tr=trend(btcData.d1);
+  const te=document.getElementById('btcTrend');
+  te.textContent=tr;
+  te.className='trend-pill '+(tr==='BULLISH'?'bull':tr==='BEARISH'?'bear':'neutral');
+}
+
+// ── MSNR LEVELS ──────────────────────────────────────────────────────────────
+function findLevels(candles, lb, maxDist) {
+  if (candles.length < lb*2+2) return [];
+  const closes=candles.map(c=>c.c), cur=closes.at(-1), levels=[];
+  for (let i=lb;i<closes.length-lb;i++) {
+    let isA=true,isV=true;
+    for (let j=1;j<=lb;j++) {
+      if (closes[i]<=closes[i-j]||closes[i]<=closes[i+j]) isA=false;
+      if (closes[i]>=closes[i-j]||closes[i]>=closes[i+j]) isV=false;
+    }
+    if (!isA&&!isV) continue;
+    const price=closes[i], dist=Math.abs(cur-price)/cur*100;
+    if (dist>maxDist) continue;
+    const t=isA?'A':'V';
+    let wicks=0,dead=false;
+    for (const fc of candles.slice(i+1)) {
+      if (t==='A'){if(fc.c>price){dead=true;break}if(fc.h>=price)wicks++}
+      else{if(fc.c<price){dead=true;break}if(fc.l<=price)wicks++}
+    }
+    if (dead) continue;
+    const hsl=closes.slice(0,i).filter(pc=>Math.abs(pc-price)/price<0.005).length>=2;
+    levels.push({type:t,price,freshness:wicks===0?'fresh':'unfresh',hsl,dist,wicks,candle:candles[i]});
+  }
+  return levels.sort((a,b)=>a.dist-b.dist).slice(0,8);
+}
+
+function detectLevels() {
+  allLevels.d1 = findLevels(btcData.d1, 2, 12);
+  allLevels.h4 = findLevels(btcData.h4, 3, 8);
+  allLevels.h1 = findLevels(btcData.h1, 3, 5);
+}
+
+function renderLevelsTable() {
+  const wrap=document.getElementById('levelsWrap');
+  const all=[
+    ...allLevels.d1.map(l=>({...l,tf:'1D'})),
+    ...allLevels.h4.map(l=>({...l,tf:'4H'})),
+    ...allLevels.h1.map(l=>({...l,tf:'1H'})),
+  ].sort((a,b)=>a.dist-b.dist);
+
+  if (!all.length) { wrap.innerHTML='<div class="empty">No levels detected.</div>'; return; }
+  const cur=btcData.d1.at(-1)?.c||0;
+
+  let h=`<table class="data-table"><thead><tr>
+    <th>TF</th><th>TYPE</th><th>PRICE</th><th>FRESHNESS</th>
+    <th>HSL</th><th>DIST%</th><th>TOUCHES</th><th>DIRECTION</th>
+  </tr></thead><tbody>`;
+
+  for (const l of all) {
+    const above=cur<l.price;
+    h+=`<tr>
+      <td style="color:${l.tf==='1D'?'var(--gold)':l.tf==='4H'?'var(--purple)':'var(--blue)'}">${l.tf}</td>
+      <td style="color:${l.type==='A'?'var(--red)':'var(--green)'}">${l.type==='A'?'A-Level (Resist)':'V-Level (Support)'}</td>
+      <td style="font-weight:700;color:var(--white)">$${fmt(l.price,0)}</td>
+      <td><span class="fresh-tag ${l.freshness}">${l.freshness.toUpperCase()}</span></td>
+      <td style="color:${l.hsl?'var(--green)':'var(--t3)'}">${l.hsl?'YES':'NO'}</td>
+      <td style="color:${l.dist<2?'var(--gold)':'var(--t2)'}">${l.dist.toFixed(2)}%</td>
+      <td style="color:var(--t2)">${l.wicks}</td>
+      <td style="color:var(--t2)">${above?'↑ ABOVE PRICE':'↓ BELOW PRICE'}</td>
+    </tr>`;
+  }
+  wrap.innerHTML=h+'</tbody></table>';
+}
+
+// ── CRT DETECTION ────────────────────────────────────────────────────────────
+function findCRT(c1h, level, tr) {
+  if (c1h.length<15||tr==='RANGING') return null;
+  const bull=level.type==='V';
+  if (bull&&tr!=='BULLISH') return null;
+  if (!bull&&tr!=='BEARISH') return null;
+
+  for (let i=Math.max(5,c1h.length-48);i<c1h.length-1;i++) {
+    let rs=i-1;
+    while(rs>1){
+      const a=c1h[rs],b=c1h[rs-1];
+      if(bull&&a.c>=b.c)break;
+      if(!bull&&a.c<=b.c)break;
+      rs--;
+    }
+    const seg=c1h.slice(rs,i+1);
+    const rH=Math.max(...seg.map(x=>x.h));
+    const rL=Math.min(...seg.map(x=>x.l));
+    if((rH-rL)/c1h.at(-1).c<0.002) continue;
+
+    const sw=c1h[i],cf=c1h[i+1];
+    const crt2=bull?(sw.l<=level.price&&sw.c>level.price&&sw.c>rL)
+                   :(sw.h>=level.price&&sw.c<level.price&&sw.c<rH);
+    if(!crt2) continue;
+
+    const body=Math.abs(cf.c-cf.o),cr=cf.h-cf.l;
+    const br=cr>0?body/cr:0;
+    const crt3=bull?(cf.c>rH&&br>0.5):(cf.c<rL&&br>0.5);
+    if(!crt3) continue;
+
+    return {sw,cf,br,rH,rL};
+  }
+  return null;
+}
+
+function buildSetup(level, crt, tr, tf, conf4h) {
+  const bull=level.type==='V';
+  const entry=level.price;
+  const sl=bull?crt.sw.l*0.9992:crt.sw.h*1.0008;
+  const risk=Math.abs(entry-sl);
+  const tp1=bull?entry+risk*3:entry-risk*3;
+  const tp2=bull?entry+risk*7:entry-risk*7;
+  const tp3=bull?entry+risk*12:entry-risk*12;
+  const rr1=Math.abs(tp1-entry)/risk;
+  const rr2=Math.abs(tp2-entry)/risk;
+  if(rr1<3) return null;
+
+  let score=0;
+  if(level.freshness==='fresh') score+=2;
+  if(level.hsl) score++;
+  if(conf4h) score+=2;
+  if(crt.br>0.65) score++;
+  if(level.dist<3) score++;
+
+  const grade=tf==='1D'&&conf4h?'aplus':
+               tf==='1D'?'a':
+               tf==='4H'&&conf4h?'a':'b';
+
+  const pf=p=>'$'+fmt(p,0);
+
+  return {
+    pair:'BTCUSDT',direction:bull?'LONG':'SHORT',
+    grade,gradeLabel:grade==='aplus'?'A+':grade.toUpperCase(),
+    score,tf,
+    entry:pf(entry),sl:pf(sl),tp1:pf(tp1),tp2:pf(tp2),tp3:pf(tp3),
+    ord1:pf(crt.cf.c),ord2:pf(crt.sw.o),ord3:pf(entry),
+    rr1:rr1.toFixed(1),rr2:rr2.toFixed(1),
+    level:pf(level.price),levelType:level.type,
+    freshness:level.freshness,hsl:level.hsl,
+    confluence:!!conf4h,
+    confLevel:conf4h?pf(conf4h.price):'—',
+    br:crt.br.toFixed(2),trend:tr,
+    rawEntry:entry,rawLevel:level.price,
+    detectedAt:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})
+  };
+}
+
+function detectSetups() {
+  allSetups=[];
+  const tr=trend(btcData.d1);
+  const seen=new Set();
+
+  // 1D levels
+  for (const lv of allLevels.d1) {
+    const key=`${lv.type}_${Math.round(lv.price)}`;
+    if(seen.has(key)) continue;
+    const conf4h=allLevels.h4.find(l=>l.type===lv.type&&Math.abs(l.price-lv.price)/lv.price*100<=1);
+    const crt=findCRT(btcData.h1,lv,tr);
+    if(crt){
+      const s=buildSetup(lv,crt,tr,'1D',conf4h);
+      if(s){allSetups.push(s);seen.add(key);}
+    }
+  }
+
+  // 4H levels
+  for (const lv of allLevels.h4) {
+    const key=`${lv.type}_${Math.round(lv.price)}`;
+    if(seen.has(key)) continue;
+    const already=allSetups.find(s=>Math.abs(s.rawLevel-lv.price)/lv.price<0.01);
+    if(already) continue;
+    const crt=findCRT(btcData.h1,lv,tr);
+    if(crt){
+      const s=buildSetup(lv,crt,tr,'4H',null);
+      if(s){allSetups.push(s);seen.add(key);}
+    }
+  }
+
+  allSetups.sort((a,b)=>b.score-a.score);
+}
+
+function renderSetups() {
+  const grid=document.getElementById('setupsGrid');
+  if(!allSetups.length){
+    grid.innerHTML=`<div class="empty">
+      No MSNR + CRT setups detected currently.<br>
+      <span style="font-size:9px;color:var(--t3)">
+        Refreshes every 15 min · Requires trending market + fresh MSNR level + valid 1H CRT pattern
+      </span>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML=allSetups.map(s=>{
+    const dc=s.direction==='LONG'?'var(--green)':'var(--red)';
+    const distEntry=(Math.abs((btcData.d1.at(-1)?.c||0)-s.rawEntry)/s.rawEntry*100).toFixed(2);
+    const atLevel=parseFloat(distEntry)<0.5;
+
+    return `<div class="setup-card ${s.grade}">
+      <div class="sc-top">
+        <div>
+          <div class="sc-pair">${s.pair}</div>
+          <div class="sc-meta">${s.tf} LEVEL · ${s.direction} · Detected ${s.detectedAt}</div>
+        </div>
+        <span class="grade-chip ${s.grade}">${s.gradeLabel}</span>
+      </div>
+
+      <div class="sc-levels">
+        <div class="sc-level-cell">
+          <div class="scl-label">ENTRY</div>
+          <div class="scl-val entry">${s.entry}</div>
+        </div>
+        <div class="sc-level-cell">
+          <div class="scl-label">STOP LOSS</div>
+          <div class="scl-val sl">${s.sl}</div>
+        </div>
+        <div class="sc-level-cell">
+          <div class="scl-label">TP1 (+${s.rr1}R)</div>
+          <div class="scl-val tp">${s.tp1}</div>
+        </div>
+      </div>
+
+      <div class="sc-rows">
+        <div class="sc-row">
+          <span class="sc-row-label">TREND</span>
+          <span class="sc-row-val ${s.trend==='BULLISH'?'green':'red'}">${s.trend}</span>
+        </div>
+        <div class="sc-row">
+          <span class="sc-row-label">MSNR LEVEL</span>
+          <span class="sc-row-val gold">${s.level} · ${s.freshness.toUpperCase()}</span>
+        </div>
+        <div class="sc-row">
+          <span class="sc-row-label">4H CONFLUENCE</span>
+          <span class="sc-row-val ${s.confluence?'green':''}">${s.confluence?'YES — '+s.confLevel:'NO'}</span>
+        </div>
+        <div class="sc-row">
+          <span class="sc-row-label">HSL</span>
+          <span class="sc-row-val ${s.hsl?'green':''}">${s.hsl?'YES':'NO'}</span>
+        </div>
+        <div class="sc-row">
+          <span class="sc-row-label">CRT BODY RATIO</span>
+          <span class="sc-row-val ${parseFloat(s.br)>0.65?'green':'gold'}">${s.br}</span>
+        </div>
+        <div class="sc-row">
+          <span class="sc-row-label">DIST TO ENTRY</span>
+          <span class="sc-row-val ${atLevel?'green':'gold'}">${distEntry}% ${atLevel?'← AT LEVEL':''}</span>
+        </div>
+      </div>
+
+      <div class="sc-rr">
+        <span class="sc-rr-label">TP2 TARGET</span>
+        <span class="sc-rr-val">+${s.rr2}R → ${s.tp2}</span>
+      </div>
+
+      <div class="sc-orders">
+        <div class="sc-orders-label">3 LIMIT ORDERS — PLACE ALL · WALK AWAY</div>
+        <div class="order-row">
+          <div class="order-num">1</div>
+          <div class="order-desc">Range breakout</div>
+          <div style="text-align:right">
+            <div class="order-price">${s.ord1}</div>
+            <div class="order-size">20% size</div>
+          </div>
+        </div>
+        <div class="order-row">
+          <div class="order-num">2</div>
+          <div class="order-desc">MSS shared open</div>
+          <div style="text-align:right">
+            <div class="order-price">${s.ord2}</div>
+            <div class="order-size">35% size</div>
+          </div>
+        </div>
+        <div class="order-row best">
+          <div class="order-num">3</div>
+          <div class="order-desc">1D MSNR level — best RR</div>
+          <div style="text-align:right">
+            <div class="order-price">${s.ord3}</div>
+            <div class="order-size" style="color:var(--green)">45% size</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding:8px 14px;display:flex;justify-content:space-between;align-items:center">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--t3)">
+          TP3: ${s.tp3} (trail)
+        </span>
+        <button onclick="addTrack('${s.rawLevel}_${s.direction}')"
+          style="background:none;border:1px solid var(--border2);color:var(--t2);
+          padding:3px 10px;font-family:'JetBrains Mono',monospace;font-size:8px;
+          cursor:pointer;letter-spacing:.08em"
+          onmouseover="this.style.borderColor='var(--green2)';this.style.color='var(--green)'"
+          onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--t2)'">
+          + TRACK
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── CHART ────────────────────────────────────────────────────────────────────
+function setChartTF(tf, btn) {
+  chartTF=tf;
+  document.querySelectorAll('.chart-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderChart();
+}
+
+function renderChart() {
+  const data = chartTF==='1d'?btcData.d1:chartTF==='4h'?btcData.h4:btcData.h1;
+  const levels = chartTF==='1d'?allLevels.d1:chartTF==='4h'?allLevels.h4:allLevels.h1;
+  if (!data.length) return;
+
+  const slice = data.slice(-60);
+  const labels = slice.map(c=>{
+    const d=new Date(c.t);
+    return chartTF==='1d'?d.toLocaleDateString('en-US',{month:'short',day:'numeric'}):
+           d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  });
+  const closes = slice.map(c=>c.c);
+
+  // Build level annotations as horizontal lines
+  const annotations = {};
+  levels.forEach((lv,i)=>{
+    annotations[`level_${i}`] = {
+      type: 'line',
+      yMin: lv.price, yMax: lv.price,
+      borderColor: lv.type==='A'?'rgba(255,77,109,0.6)':'rgba(0,212,170,0.6)',
+      borderWidth: 1,
+      borderDash: lv.freshness==='fresh'?[]:[4,4],
+      label: {
+        display: true,
+        content: `${lv.type} $${fmt(lv.price,0)}`,
+        position: 'start',
+        backgroundColor: 'transparent',
+        color: lv.type==='A'?'rgba(255,77,109,0.8)':'rgba(0,212,170,0.8)',
+        font: { family:'JetBrains Mono', size:9 },
+        padding: 2,
+      }
+    };
+  });
+
+  const ctx = document.getElementById('priceChart').getContext('2d');
+  if (priceChart) priceChart.destroy();
+
+  priceChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'BTC Price',
+        data: closes,
+        borderColor: 'rgba(0,212,170,0.9)',
+        borderWidth: 1.5,
+        pointRadius: 0,
+        pointHoverRadius: 3,
+        fill: true,
+        backgroundColor: (ctx) => {
+          const g = ctx.chart.ctx.createLinearGradient(0,0,0,ctx.chart.height);
+          g.addColorStop(0,'rgba(0,212,170,0.08)');
+          g.addColorStop(1,'rgba(0,212,170,0)');
+          return g;
+        },
+        tension: 0.1,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { intersect:false, mode:'index' },
+      plugins: {
+        legend: { display:false },
+        tooltip: {
+          backgroundColor: 'rgba(8,8,13,0.95)',
+          borderColor: 'rgba(0,212,170,0.3)',
+          borderWidth: 1,
+          titleFont: { family:'JetBrains Mono', size:9 },
+          bodyFont: { family:'JetBrains Mono', size:10 },
+          titleColor: 'rgba(120,120,144,0.8)',
+          bodyColor: '#f0f0f8',
+          callbacks: {
+            label: ctx => ` $${fmt(ctx.parsed.y,0)}`
+          }
+        },
+        annotation: { annotations }
+      },
+      scales: {
+        x: {
+          grid: { color:'rgba(22,22,31,0.8)', drawBorder:false },
+          ticks: {
+            color:'rgba(58,58,80,0.8)',
+            font:{ family:'JetBrains Mono', size:8 },
+            maxTicksLimit: 8,
+          }
+        },
+        y: {
+          grid: { color:'rgba(22,22,31,0.8)', drawBorder:false },
+          ticks: {
+            color:'rgba(58,58,80,0.8)',
+            font:{ family:'JetBrains Mono', size:8 },
+            callback: v => '$'+fmt(v,0)
+          }
+        }
+      }
+    },
+    plugins: [
+      // chartjs-plugin-annotation loaded inline
+      {
+        id:'msnrLines',
+        afterDraw(chart) {
+          const {ctx,chartArea:{left,right,top,bottom},scales:{y}} = chart;
+          levels.forEach(lv=>{
+            const yPos = y.getPixelForValue(lv.price);
+            if (yPos<top||yPos>bottom) return;
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(left,yPos); ctx.lineTo(right,yPos);
+            ctx.strokeStyle = lv.type==='A'?'rgba(255,77,109,0.5)':'rgba(0,212,170,0.5)';
+            ctx.lineWidth = 1;
+            if (lv.freshness!=='fresh') {ctx.setLineDash([4,4]);}
+            ctx.stroke();
+            ctx.setLineDash([]);
+            // Label
+            ctx.fillStyle = lv.type==='A'?'rgba(255,77,109,0.8)':'rgba(0,212,170,0.8)';
+            ctx.font = '9px JetBrains Mono';
+            ctx.fillText(`${lv.type} $${fmt(lv.price,0)}`, left+4, yPos-3);
+            ctx.restore();
+          });
+        }
+      }
+    ]
+  });
+}
+
+// ── BACKTEST ──────────────────────────────────────────────────────────────────
+function runBacktest() {
+  btResults=[];
+  const tr=trend(btcData.d1);
+  const allLvls=[...allLevels.d1.map(l=>({...l,tf:'1D'})),...allLevels.h4.map(l=>({...l,tf:'4H'}))];
+
+  for (const lv of allLvls) {
+    const bull=lv.type==='V';
+    if(bull&&tr!=='BULLISH') continue;
+    if(!bull&&tr!=='BEARISH') continue;
+    const c=btcData.h1;
+
+    for (let i=10;i<c.length-5;i++) {
+      let rs=i-1;
+      while(rs>1){const a=c[rs],b=c[rs-1];if(bull&&a.c>=b.c)break;if(!bull&&a.c<=b.c)break;rs--;}
+      const seg=c.slice(rs,i+1);
+      const rH=Math.max(...seg.map(x=>x.h));
+      const rL=Math.min(...seg.map(x=>x.l));
+      if((rH-rL)/c.at(-1).c<0.002) continue;
+      const sw=c[i],cf=i+1<c.length?c[i+1]:null;
+      if(!cf) continue;
+      const crt2=bull?(sw.l<=lv.price&&sw.c>lv.price&&sw.c>rL):(sw.h>=lv.price&&sw.c<lv.price&&sw.c<rH);
+      if(!crt2) continue;
+      const body=Math.abs(cf.c-cf.o),cr=cf.h-cf.l,br=cr>0?body/cr:0;
+      const crt3=bull?(cf.c>rH&&br>0.5):(cf.c<rL&&br>0.5);
+      if(!crt3) continue;
+
+      const entry=lv.price;
+      const sl=bull?sw.l*0.9992:sw.h*1.0008;
+      const risk=Math.abs(entry-sl);
+      const tp1=bull?entry+risk*3:entry-risk*3;
+      const tp2=bull?entry+risk*7:entry-risk*7;
+
+      let result='pending',pnl=0,rrA=0;
+      for (const fc of c.slice(i+2,i+35)) {
+        if(bull){
+          if(fc.l<=sl){result='loss';pnl=-1;break}
+          if(fc.h>=tp2){result='win';pnl=7;rrA=7;break}
+          if(fc.h>=tp1&&result!=='win'){result='win';pnl=3;rrA=3}
+        } else {
+          if(fc.h>=sl){result='loss';pnl=-1;break}
+          if(fc.l<=tp2){result='win';pnl=7;rrA=7;break}
+          if(fc.l<=tp1&&result!=='win'){result='win';pnl=3;rrA=3}
+        }
+      }
+      if(result==='pending'&&rrA>0) result='win';
+
+      btResults.push({
+        tf:lv.tf,dir:bull?'LONG':'SHORT',
+        entry:'$'+fmt(entry,0),sl:'$'+fmt(sl,0),
+        tp1:'$'+fmt(tp1,0),tp2:'$'+fmt(tp2,0),
+        result,pnl,rrA,time:new Date(sw.t)
+      });
+      break;
+    }
+  }
+}
+
+function renderBacktest() {
+  const wrap=document.getElementById('btWrap');
+  if(!btResults.length){wrap.innerHTML='<div class="empty">No backtest data available.</div>';return;}
+  let h=`<table class="data-table"><thead><tr>
+    <th>TIME</th><th>TF</th><th>DIR</th><th>ENTRY</th>
+    <th>SL</th><th>TP1</th><th>TP2</th><th>RESULT</th><th>R GAINED</th>
+  </tr></thead><tbody>`;
+  for (const r of [...btResults].reverse().slice(0,25)) {
+    const pc=r.result==='win'?'var(--green)':r.result==='loss'?'var(--red)':'var(--t2)';
+    h+=`<tr>
+      <td style="color:var(--t3)">${r.time.toLocaleDateString('en-US',{month:'short',day:'numeric'})}</td>
+      <td style="color:${r.tf==='1D'?'var(--gold)':'var(--purple)'}">${r.tf}</td>
+      <td style="color:${r.dir==='LONG'?'var(--green)':'var(--red)'}">${r.dir}</td>
+      <td style="color:var(--gold)">${r.entry}</td>
+      <td style="color:var(--red)">${r.sl}</td>
+      <td style="color:var(--green)">${r.tp1}</td>
+      <td style="color:var(--green)">${r.tp2}</td>
+      <td><span class="result-tag ${r.result}">${r.result.toUpperCase()}</span></td>
+      <td style="color:${pc};font-weight:700">${r.result==='win'?'+'+r.pnl+'R':r.result==='loss'?'−1R':'—'}</td>
+    </tr>`;
+  }
+  wrap.innerHTML=h+'</tbody></table>';
+}
+
+function renderStats() {
+  const done=btResults.filter(r=>r.result!=='pending');
+  const wins=done.filter(r=>r.result==='win');
+  const losses=done.filter(r=>r.result==='loss');
+  const net=done.reduce((a,r)=>a+r.pnl,0);
+  const wr=done.length?((wins.length/done.length)*100).toFixed(0):0;
+  const avg=wins.length?(wins.reduce((a,r)=>a+r.rrA,0)/wins.length).toFixed(1):'—';
+  const best=wins.length?Math.max(...wins.map(r=>r.rrA)):0;
+  const pf=losses.length?(wins.reduce((a,r)=>a+r.rrA,0)/losses.length).toFixed(2):'∞';
+
+  const stats=[
+    {label:'TOTAL SETUPS',val:done.length,color:'var(--white)'},
+    {label:'WIN RATE',val:wr+'%',color:+wr>=50?'var(--green)':'var(--red)'},
+    {label:'AVG WIN',val:avg+'R',color:'var(--green)'},
+    {label:'BEST TRADE',val:best?'+'+best+'R':'—',color:'var(--green)'},
+    {label:'NET R',val:(net>=0?'+':'')+net.toFixed(1)+'R',color:net>=0?'var(--green)':'var(--red)'},
+    {label:'PROFIT FACTOR',val:pf,color:'var(--gold)'},
+  ];
+
+  document.getElementById('statsGrid').innerHTML=stats.map(s=>`
+    <div class="stat-box">
+      <div class="stat-box-label">${s.label}</div>
+      <div class="stat-box-val" style="color:${s.color}">${s.val}</div>
+    </div>
+  `).join('');
+}
+
+// ── TRACKER ───────────────────────────────────────────────────────────────────
+function addTrack(id) {
+  const s=allSetups.find(x=>`${x.rawLevel}_${x.direction}`===id);
+  if(!s) return;
+  if(tracked.find(t=>t.id===id)){showNotif('Already tracking');return;}
+  tracked.push({...s,id,trackedAt:Date.now()});
+  localStorage.setItem('eo_tracked_v4',JSON.stringify(tracked));
+  renderTracker();
+  showNotif('Added to tracker');
+}
+
+function removeTrack(id) {
+  tracked=tracked.filter(t=>t.id!==id);
+  localStorage.setItem('eo_tracked_v4',JSON.stringify(tracked));
+  renderTracker();
+}
+
+function renderTracker() {
+  const wrap=document.getElementById('trackerWrap');
+  if(!tracked.length){
+    wrap.innerHTML='<div class="tracker-empty">No setups tracked yet.<br>Click + TRACK on any active setup above.</div>';
+    return;
+  }
+  const cur=btcData.h1.at(-1)?.c||0;
+  let h=`<table class="data-table"><thead><tr>
+    <th>PAIR</th><th>DIR</th><th>ENTRY</th><th>CURRENT</th>
+    <th>SL</th><th>TP1</th><th>STATUS</th><th>CURRENT R</th><th></th>
+  </tr></thead><tbody>`;
+
+  for (const t of tracked) {
+    const risk=Math.abs(t.rawEntry-(t.direction==='LONG'?t.rawEntry*0.9992:t.rawEntry*1.0008));
+    let curR=0,status='ACTIVE';
+    if(cur>0&&risk>0){
+      curR=t.direction==='LONG'?(cur-t.rawEntry)/risk:(t.rawEntry-cur)/risk;
+      if(t.direction==='LONG'){
+        if(cur<=t.rawEntry*0.9992) status='SL HIT';
+        else if(cur>=t.rawEntry*1.07) status='TP2+ HIT';
+        else if(cur>=t.rawEntry*1.03) status='TP1 HIT';
+      } else {
+        if(cur>=t.rawEntry*1.0008) status='SL HIT';
+        else if(cur<=t.rawEntry*0.93) status='TP2+ HIT';
+        else if(cur<=t.rawEntry*0.97) status='TP1 HIT';
+      }
+    }
+    const sc=status==='SL HIT'?'var(--red)':status.includes('TP')?'var(--green)':'var(--gold)';
+    const rc=curR>=0?'var(--green)':'var(--red)';
+    h+=`<tr>
+      <td style="font-weight:700;color:var(--white)">${t.pair}</td>
+      <td style="color:${t.direction==='LONG'?'var(--green)':'var(--red)'}">${t.direction}</td>
+      <td style="color:var(--gold)">${t.entry}</td>
+      <td style="color:var(--white)">${cur?'$'+fmt(cur,0):'—'}</td>
+      <td style="color:var(--red)">${t.sl}</td>
+      <td style="color:var(--green)">${t.tp1}</td>
+      <td style="color:${sc}">${status}</td>
+      <td style="color:${rc};font-weight:700">${cur?(curR>=0?'+':'')+curR.toFixed(1)+'R':'—'}</td>
+      <td><button onclick="removeTrack('${t.id}')"
+        style="background:none;border:none;color:var(--t3);cursor:pointer;font-size:12px">✕</button></td>
+    </tr>`;
+  }
+  wrap.innerHTML=h+'</tbody></table>';
+}
+
+// ── TABS ──────────────────────────────────────────────────────────────────────
+function showTab(id,btn) {
+  ['bt','stats','tracker'].forEach(t=>{
+    document.getElementById('tab-'+t).style.display=t===id?'block':'none';
+  });
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function fmt(n,d){return Number(n).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function showNotif(msg){
+  const el=document.getElementById('notif');
+  el.textContent=msg; el.style.display='block';
+  setTimeout(()=>el.style.display='none',3000);
+}
+</script>
+</body>
+</html>
