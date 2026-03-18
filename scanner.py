@@ -20,36 +20,53 @@ PAIRS = ["BTCUSDT"]  # add XAUUSD if you have Twelve Data key
 MIN_RR = 3.0
 LOOKBACK = 3  # candles each side for A/V level detection
 
-# ── FETCH KLINES — CoinGecko + fallback (no API key, no geo-block) ───────────
+# ── FETCH KLINES — CryptoCompare (free, no key, no geo-block) ────────────────
 def fetch_binance(symbol, interval, limit=120):
     """
-    Uses CoinGecko API — completely free, no API key, no geo-restrictions.
-    Converts OHLC data to candle format compatible with scanner.
+    Uses CryptoCompare API — completely free, no API key, no geo-restrictions.
+    Works from any server including GitHub Actions.
     """
-    # Map symbol to CoinGecko coin id
-    coin_map = {"BTCUSDT": "bitcoin", "XAUUSD": "gold"}
-    coin = coin_map.get(symbol, "bitcoin")
+    # CryptoCompare endpoints by interval
+    base_map = {
+        "1d":  "https://min-api.cryptocompare.com/data/v2/histoday",
+        "4h":  "https://min-api.cryptocompare.com/data/v2/histohour",
+        "1h":  "https://min-api.cryptocompare.com/data/v2/histohour",
+        "30m": "https://min-api.cryptocompare.com/data/v2/histominute",
+        "15m": "https://min-api.cryptocompare.com/data/v2/histominute",
+    }
+    # For 4h we fetch hourly and aggregate
+    aggregate_map = {"1d": 1, "4h": 4, "1h": 1, "30m": 30, "15m": 15}
 
-    # Map interval to CoinGecko days parameter
-    # CoinGecko OHLC: 1=1d, 7=4h, 14=1h granularity (approximate)
-    interval_days = {"1d": 90, "4h": 16, "1h": 2}
-    days = interval_days.get(interval, 7)
+    fsym_map = {"BTCUSDT": "BTC", "XAUUSD": "XAU"}
+    fsym = fsym_map.get(symbol, "BTC")
+    tsym = "USD"
 
-    url = f"https://api.coingecko.com/api/v3/coins/{coin}/ohlc?vs_currency=usd&days={days}"
+    base_url = base_map.get(interval, base_map["1h"])
+    aggregate = aggregate_map.get(interval, 1)
+
+    url = f"{base_url}?fsym={fsym}&tsym={tsym}&limit={limit}&aggregate={aggregate}"
     try:
         req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
         with urllib.request.urlopen(req, timeout=15) as r:
             data = json.loads(r.read())
-        if not data or not isinstance(data, list):
-            print(f"CoinGecko empty response {symbol} {interval}")
+        if data.get("Response") != "Success":
+            print(f"CryptoCompare error {symbol} {interval}: {data.get('Message')}")
             return []
-        # data = [[timestamp, open, high, low, close], ...]
-        candles = [{"t": k[0], "o": float(k[1]), "h": float(k[2]),
-                    "l": float(k[3]), "c": float(k[4])} for k in data]
-        # Return last `limit` candles
-        return candles[-limit:]
+        candles = data["Data"]["Data"]
+        result = []
+        for k in candles:
+            if k["open"] == 0 and k["close"] == 0:
+                continue
+            result.append({
+                "t": k["time"] * 1000,
+                "o": float(k["open"]),
+                "h": float(k["high"]),
+                "l": float(k["low"]),
+                "c": float(k["close"])
+            })
+        return result[-limit:]
     except Exception as e:
-        print(f"CoinGecko fetch error {symbol} {interval}: {e}")
+        print(f"CryptoCompare fetch error {symbol} {interval}: {e}")
         return []
 
 # ── FETCH TWELVE DATA (Gold) — with CoinGecko fallback ───────────────────────
@@ -67,7 +84,7 @@ def fetch_twelve(symbol, interval, outputsize=120):
         except Exception as e:
             print(f"Twelve Data fetch error {symbol} {interval}: {e}")
     # Fallback: CoinGecko for gold
-    print(f"Using CoinGecko fallback for {symbol} {interval}")
+    print(f"Using CryptoCompare fallback for {symbol} {interval}")
     return fetch_binance("XAUUSD", interval, outputsize)
 
 # ── TREND DETECTION ──────────────────────────────────────────────────────────
