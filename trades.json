@@ -17,6 +17,49 @@
     "netR": 0.0,
     "bestR": 0.0
   },
-  "lastUpdated": "2026-03-20T14:32:45.062653",
-  "levelAlerts": {}
+  "lastUpdated": "2026-03-20T15:21:20.928370",
+  "levelAlerts": {
+    "BTCUSDT_V_69403": "2026-03-20T15:21:20.928298"
+  },
+  "brokenLevels": {
+    "BTCUSDT_V_69184": {
+      "level": 69184.69,
+      "type": "V",
+      "direction": "LONG",
+      "brokeAt": "2026-03-20T15:21:20.928333",
+      "grade": "b",
+      "lv_1d_target": null
+    },
+    "BTCUSDT_V_68438": {
+      "level": 68438.57,
+      "type": "V",
+      "direction": "LONG",
+      "brokeAt": "2026-03-20T15:21:20.928346",
+      "grade": "b",
+      "lv_1d_target": null
+    },
+    "BTCUSDT_V_65974": {
+      "level": 65974.07,
+      "type": "V",
+      "direction": "LONG",
+      "brokeAt": "2026-03-20T15:21:20.928353",
+      "grade": "b",
+      "lv_1d_target": null
+    },
+    "BTCUSDT_V_65774": {
+      "level": 65774.35,
+      "type": "V",
+      "direction": "LONG",
+      "brokeAt": "2026-03-20T15:21:20.928360",
+      "grade": "a",
+      "lv_1d_target": {
+        "type": "V",
+        "price": 65974.07,
+        "freshness": "UNFRESH",
+        "hsl": true,
+        "dist": 5.285985085580461,
+        "wicks": 1
+      }
+    }
+  }
 }
