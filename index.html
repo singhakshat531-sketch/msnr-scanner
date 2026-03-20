@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- v6 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -599,9 +598,43 @@ function detectSetups(){
     });
   }
 
-  // Sort: RETEST > AT LEVEL > APPROACHING > WATCHING
-  const order={'RETEST':0,'AT LEVEL':1,'APPROACHING':2,'WATCHING':3};
-  allSetups.sort((a,b)=>(order[a.status]||3)-(order[b.status]||3)||b.score-a.score);
+  // Check 1H range break for each level
+  for(const s of allSetups){
+    s.rangeBreak = check1HRangeBreak(btcData.h1, s.rawLevel, s.bull);
+    if(s.rangeBreak) s.status = 'BREAKOUT';
+  }
+
+  // Sort: BREAKOUT > RETEST > AT LEVEL > APPROACHING > WATCHING
+  const order={'BREAKOUT':0,'RETEST':1,'AT LEVEL':2,'APPROACHING':3,'WATCHING':4};
+  allSetups.sort((a,b)=>(order[a.status]||4)-(order[b.status]||4)||b.score-a.score);
+}
+
+function check1HRangeBreak(c1h, levelPrice, bull){
+  if(!c1h||c1h.length<8) return null;
+  const scan=c1h.slice(-48);
+  for(let i=4;i<scan.length-1;i++){
+    let rs=i-1,counter=0;
+    while(rs>0){
+      const a=scan[rs],b=scan[rs-1];
+      if(bull){if(a.c>=b.c){counter++;if(counter>2)break;}}
+      else{if(a.c<=b.c){counter++;if(counter>2)break;}}
+      rs--;
+    }
+    const seg=scan.slice(rs,i+1);
+    if(seg.length<2)continue;
+    const rH=Math.max(...seg.map(x=>x.h));
+    const rL=Math.min(...seg.map(x=>x.l));
+    if(bull&&rL>levelPrice)continue;
+    if(!bull&&rH<levelPrice)continue;
+    const cf=scan[i];
+    const body=Math.abs(cf.c-cf.o),cr=cf.h-cf.l;
+    const br=cr>0?body/cr:0;
+    const broke=bull?(cf.c>levelPrice&&br>0.45):(cf.c<levelPrice&&br>0.45);
+    if(!broke)continue;
+    if(i<scan.length-7)continue;
+    return{br:br.toFixed(2),rH,rL,rangeCandles:seg.length};
+  }
+  return null;
 }
 
 function buildSetup(lv,crt,tr,tf,conf4h,pair){
@@ -876,11 +909,12 @@ function renderSetups(){
     return;
   }
   grid.innerHTML=allSetups.map(s=>{
+    const isBreakout=s.status==='BREAKOUT';
     const isRetest=s.status==='RETEST';
     const atLevel=s.status==='AT LEVEL';
     const approaching=s.status==='APPROACHING';
-    const sc=isRetest?'var(--green)':atLevel?'var(--green)':approaching?'var(--gold)':'var(--t2)';
-    const urgent=isRetest||atLevel;
+    const sc=isBreakout?'var(--green)':isRetest?'var(--green)':atLevel?'var(--green)':approaching?'var(--gold)':'var(--t2)';
+    const urgent=isBreakout||isRetest||atLevel;
     return `<div class="sc ${s.grade}" style="${urgent?'border-color:var(--green);box-shadow:0 0 16px rgba(0,255,204,0.1)':''}">
       <div class="sc-hdr">
         <div>
@@ -893,10 +927,13 @@ function renderSetups(){
         </div>
       </div>
 
+      ${s.status==='BREAKOUT'?`<div style="background:var(--green-bg);border-bottom:1px solid var(--green);padding:9px 14px;font-size:11px;color:var(--green);font-weight:700;letter-spacing:.06em">
+        ⚡ 1H RANGE BROKE BEYOND 4H LEVEL — ALERT FIRED
+      </div>`:''}
       ${isRetest?`<div style="background:var(--green-bg);border-bottom:1px solid var(--green);padding:9px 14px;font-size:11px;color:var(--green);font-weight:700;letter-spacing:.06em">
         🔥 RANGE BREAK + RETEST — HIGHEST QUALITY SETUP
       </div>`:''}
-      ${atLevel&&!isRetest?`<div style="background:var(--green-bg);border-bottom:1px solid var(--green2);padding:8px 14px;font-size:10px;color:var(--green);letter-spacing:.06em">
+      ${atLevel&&!isRetest&&s.status!=='BREAKOUT'?`<div style="background:var(--green-bg);border-bottom:1px solid var(--green2);padding:8px 14px;font-size:10px;color:var(--green);letter-spacing:.06em">
         ⚡ PRICE AT LEVEL — CHECK 1H CHART NOW
       </div>`:''}
 
@@ -908,6 +945,7 @@ function renderSetups(){
 
       <div class="sc-rows">
         <div class="sc-row"><span class="sc-rl">STATUS</span><span class="sc-rv" style="color:${sc};font-weight:700">${s.status} · ${s.distPct}% away</span></div>
+        ${s.rangeBreak?`<div class="sc-row"><span class="sc-rl">1H BREAK</span><span class="sc-rv g">YES — body ratio ${s.rangeBreak.br} · ${s.rangeBreak.rangeCandles} candles</span></div>`:''}
         ${s.broke?`<div class="sc-row"><span class="sc-rl">BROKE</span><span class="sc-rv g">YES — ${s.brokeDir} level → watching retest</span></div>`:''}
         <div class="sc-row"><span class="sc-rl">TYPE</span><span class="sc-rv gold">${s.levelType==='V'?'V-Level (Support)':'A-Level (Resist)'} · ${s.freshness.toUpperCase()}</span></div>
         <div class="sc-row"><span class="sc-rl">HSL</span><span class="sc-rv ${s.hsl?'g':''}">${s.hsl?'YES':'NO'}</span></div>
