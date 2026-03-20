@@ -513,13 +513,9 @@ function findCRT(c1h,lv,bias){
 
 function detectSetups(){
   allSetups=[];
-  // CORRECT HIERARCHY:
-  // 1D = bias only, 4H = entry levels, 1H = CRT trigger
-  const tr1d=getTrend(btcData.d1,30);
-  const tr4h=getTrend(btcData.h4,60);
+  const tr1d=getTrend(btcData.d1,20);
+  const tr4h=getTrend(btcData.h4,42);
   const bias=getBias(tr1d,tr4h);
-
-  console.log(`1D:${tr1d} 4H:${tr4h} Bias:${bias}`);
 
   // Update trend display
   const te=document.getElementById('btcTrend');
@@ -528,33 +524,70 @@ function detectSetups(){
     te.className='trend-tag '+(bias==='BULLISH'?'bull-tag':bias==='BEARISH'?'bear-tag':'neutral-tag');
   }
 
-  if(bias==='RANGING') return; // both ranging = no trade
+  if(bias==='RANGING') return;
 
-  const seen=new Set();
+  const cur=btcData.h1.length?btcData.h1.at(-1).c:btcData.h4.at(-1).c;
+  const NEAR_PCT=0.5;
 
-  // PRIMARY: scan 4H levels for CRT entry
   for(const lv of allLevels.h4){
     const bull=lv.type==='V';
     if(bull&&bias!=='BULLISH')continue;
     if(!bull&&bias!=='BEARISH')continue;
 
-    const key=`${lv.type}_${Math.round(lv.price)}`;
-    if(seen.has(key))continue;
+    const distPct=Math.abs(cur-lv.price)/lv.price*100;
 
-    // Find nearest 1D level as target
-    const targets=allLevels.d1.filter(l=>
+    // Find 1D target
+    const lv1d=allLevels.d1.filter(l=>
       l.type===lv.type&&
       ((bull&&l.price>lv.price)||(!bull&&l.price<lv.price))
-    );
-    const lv1d=targets.sort((a,b)=>Math.abs(a.price-lv.price)-Math.abs(b.price-lv.price))[0]||null;
+    ).sort((a,b)=>Math.abs(a.price-lv.price)-Math.abs(b.price-lv.price))[0]||null;
 
-    const crt=findCRT(btcData.h1,lv,bias);
-    if(crt){
-      const s=buildSetup(lv,crt,bias,'4H',lv1d,'BTCUSDT',tr1d,tr4h);
-      if(s){allSetups.push(s);seen.add(key);}
-    }
+    // Grade
+    let score=0;
+    if(lv.freshness==='fresh')score+=2;
+    if(lv.hsl)score++;
+    if(lv1d)score+=2;
+    if(distPct<0.3)score++;
+    const grade=score>=5?'aplus':score>=3?'a':'b';
+    const gradeLabel=grade==='aplus'?'A+':grade.toUpperCase();
+
+    // Entry estimates
+    const entry=lv.price;
+    const slEst=bull?entry*0.997:entry*1.003;
+    const riskEst=Math.abs(entry-slEst);
+    const tp1Est=bull?entry+riskEst*3:entry-riskEst*3;
+    const tp2Est=lv1d?lv1d.price:(bull?entry+riskEst*7:entry-riskEst*7);
+    const rr1=Math.abs(tp1Est-entry)/riskEst;
+    const rr2=Math.abs(tp2Est-entry)/riskEst;
+    const pf=p=>'$'+fmt(p,0);
+
+    const status = distPct<=NEAR_PCT ? 'AT LEVEL' :
+                   distPct<=2 ? 'APPROACHING' : 'WATCHING';
+
+    allSetups.push({
+      id:`BTCUSDT_${lv.type}_${Math.round(lv.price)}`,
+      pair:'BTCUSDT',
+      direction:bull?'LONG':'SHORT',
+      grade,gradeLabel,score,
+      status,distPct:distPct.toFixed(2),
+      entry:pf(entry),sl:pf(slEst),
+      tp1:pf(tp1Est),tp2:pf(tp2Est),
+      rr1:rr1.toFixed(1),rr2:rr2.toFixed(1),
+      level:pf(lv.price),levelType:lv.type,
+      freshness:lv.freshness,hsl:lv.hsl,
+      has1DTarget:!!lv1d,
+      target1D:lv1d?pf(lv1d.price):'—',
+      bias,tr1d,tr4h,
+      rawEntry:entry,rawLevel:lv.price,
+      rawSL:slEst,rawTP1:tp1Est,rawTP2:tp2Est,
+      rawRisk:riskEst,bull,
+      detectedAt:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})
+    });
   }
-  allSetups.sort((a,b)=>b.score-a.score);
+
+  // Sort: AT LEVEL first, then APPROACHING, then WATCHING
+  const order={'AT LEVEL':0,'APPROACHING':1,'WATCHING':2};
+  allSetups.sort((a,b)=>(order[a.status]||2)-(order[b.status]||2)||b.score-a.score);
 }
 
 function buildSetup(lv,crt,tr,tf,conf4h,pair){
@@ -822,43 +855,55 @@ function renderQuickStats(){
 function renderSetups(){
   const grid=document.getElementById('setupsGrid');
   if(!allSetups.length){
-    grid.innerHTML='<div class="empty">No MSNR + CRT setups detected.<br><span style="font-size:8px;color:var(--t3)">Requires trending market + fresh level + valid 1H CRT</span></div>';
+    grid.innerHTML=`<div class="empty">
+      No levels detected in bias direction.<br>
+      <span style="font-size:10px;color:var(--t2)">Check LEVELS tab to see all detected 4H levels.</span>
+    </div>`;
     return;
   }
   grid.innerHTML=allSetups.map(s=>{
-    const dc=s.direction==='LONG'?'var(--green)':'var(--red)';
-    const cur=btcData.d1.at(-1)?.c||0;
-    const dist=(Math.abs(cur-s.rawEntry)/s.rawEntry*100).toFixed(2);
-    return `<div class="sc ${s.grade}">
+    const atLevel=s.status==='AT LEVEL';
+    const approaching=s.status==='APPROACHING';
+    const sc=atLevel?'var(--green)':approaching?'var(--gold)':'var(--t2)';
+    return `<div class="sc ${s.grade}" style="${atLevel?'border-color:var(--green);box-shadow:0 0 16px rgba(0,255,204,0.08)':''}">
       <div class="sc-hdr">
-        <div><div class="sc-pair">${s.pair}</div><div class="sc-meta">${s.tf} · ${s.direction} · ${s.detectedAt}</div></div>
-        <span class="grade-chip ${s.grade}">${s.gradeLabel}</span>
+        <div>
+          <div class="sc-pair">${s.pair} · ${s.direction}</div>
+          <div class="sc-meta">4H MSNR · ${s.detectedAt}</div>
+        </div>
+        <div style="text-align:right">
+          <span class="grade-chip ${s.grade}">${s.gradeLabel}</span>
+          <div style="font-size:9px;font-weight:700;color:${sc};margin-top:4px">${s.status}</div>
+        </div>
       </div>
+      ${atLevel?`<div style="background:var(--green-bg);border-bottom:1px solid var(--green2);padding:8px 14px;font-size:10px;color:var(--green);letter-spacing:.06em">⚡ PRICE AT LEVEL — CHECK 1H CHART FOR CRT NOW</div>`:''}
       <div class="sc-lvls">
-        <div class="lvl-cell"><div class="lvl-lbl">ENTRY</div><div class="lvl-val e">${s.entry}</div></div>
-        <div class="lvl-cell"><div class="lvl-lbl">SL</div><div class="lvl-val s">${s.sl}</div></div>
-        <div class="lvl-cell"><div class="lvl-lbl">TP1 +${s.rr1}R</div><div class="lvl-val t">${s.tp1}</div></div>
+        <div class="lvl-cell"><div class="lvl-lbl">LEVEL</div><div class="lvl-val e">${s.entry}</div></div>
+        <div class="lvl-cell"><div class="lvl-lbl">EST SL</div><div class="lvl-val s">${s.sl}</div></div>
+        <div class="lvl-cell"><div class="lvl-lbl">EST TP1</div><div class="lvl-val t">${s.tp1}</div></div>
       </div>
       <div class="sc-rows">
-        <div class="sc-row"><span class="sc-rl">TREND</span><span class="sc-rv ${s.trend==='BULLISH'?'g':'r'}">${s.trend}</span></div>
-        <div class="sc-row"><span class="sc-rl">LEVEL</span><span class="sc-rv gold">${s.level} · ${s.freshness.toUpperCase()}</span></div>
-        <div class="sc-row"><span class="sc-rl">1D TARGET</span><span class="sc-rv gold">${s.has1DTarget?s.target1D:'—'}</span></div>
-        <div class="sc-row"><span class="sc-rl">BIAS</span><span class="sc-rv ${s.bias==='BULLISH'?'g':'r'}">${s.bias} (1D:${s.tr1d||'?'} 4H:${s.tr4h||'?'})</span></div>
+        <div class="sc-row"><span class="sc-rl">DISTANCE</span><span class="sc-rv" style="color:${sc}">${s.distPct}% · ${s.status}</span></div>
+        <div class="sc-row"><span class="sc-rl">TYPE</span><span class="sc-rv gold">${s.levelType==='V'?'V-Level (Support)':'A-Level (Resist)'} · ${s.freshness.toUpperCase()}</span></div>
         <div class="sc-row"><span class="sc-rl">HSL</span><span class="sc-rv ${s.hsl?'g':''}">${s.hsl?'YES':'NO'}</span></div>
-        <div class="sc-row"><span class="sc-rl">BODY RATIO</span><span class="sc-rv ${+s.br>0.65?'g':'gold'}">${s.br}</span></div>
-        <div class="sc-row"><span class="sc-rl">DIST TO ENTRY</span><span class="sc-rv ${+dist<0.5?'g':'gold'}">${dist}%</span></div>
+        <div class="sc-row"><span class="sc-rl">1D TARGET</span><span class="sc-rv gold">${s.target1D}</span></div>
+        <div class="sc-row"><span class="sc-rl">BIAS</span><span class="sc-rv ${s.bias==='BULLISH'?'g':'r'}">${s.bias} (1D:${s.tr1d} 4H:${s.tr4h})</span></div>
+        <div class="sc-row"><span class="sc-rl">EST TP2</span><span class="sc-rv g">+${s.rr2}R → ${s.tp2}</span></div>
       </div>
-      <div class="sc-rr"><span class="sc-rrl">TP2</span><span class="sc-rrv">+${s.rr2}R → ${s.tp2}</span></div>
-      <div class="sc-orders">
-        <div class="ord-lbl">3 LIMIT ORDERS — PLACE ALL · WALK AWAY</div>
-        <div class="ord"><div class="ord-n">1</div><div class="ord-d">Range breakout</div><div style="text-align:right"><div class="ord-p">${s.ord1}</div><div class="ord-sz">20%</div></div></div>
-        <div class="ord"><div class="ord-n">2</div><div class="ord-d">MSS open level</div><div style="text-align:right"><div class="ord-p">${s.ord2}</div><div class="ord-sz">35%</div></div></div>
-        <div class="ord best"><div class="ord-n">3</div><div class="ord-d">1D MSNR — best RR</div><div style="text-align:right"><div class="ord-p">${s.ord3}</div><div class="ord-sz" style="color:var(--green)">45%</div></div></div>
+      <div style="padding:10px 14px;background:${atLevel?'var(--green-bg)':'var(--s3)'};border-top:1px solid var(--border)">
+        <div style="font-size:9px;color:${atLevel?'var(--green)':'var(--t3)'};letter-spacing:.08em;margin-bottom:6px">${atLevel?'DO THIS NOW:':'WHEN PRICE ARRIVES:'}</div>
+        <div style="font-size:10px;color:var(--t1);line-height:1.9">
+          1. Open 1H chart on TradingView<br>
+          2. Find external range of candles into level<br>
+          3. Look for wick through level + close inside range<br>
+          4. Next candle must break range with strong body<br>
+          5. Only then place limit orders
+        </div>
       </div>
-      <div class="sc-foot"><span class="sc-tp3">TP3: ${s.tp3} (trail)</span></div>
     </div>`;
   }).join('');
 }
+
 
 function renderLevels(){
   const wrap=document.getElementById('levelsWrap');
