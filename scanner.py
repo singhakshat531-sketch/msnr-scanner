@@ -404,70 +404,44 @@ def format_alert_a(lv, cur_price, grade, bias, tr1w, tr1d, has_1d):
     bull = lv["type"] == "V"
     gl   = "A+" if grade=="aplus" else grade.upper()
     pf   = lambda p: f"${p:,.0f}"
-    dist = abs(cur_price-lv["price"])/lv["price"]*100
+    shape = "V-shape" if bull else "A-shape"
+    tf    = "1D+4H" if has_1d else "4H"
     return "\n".join([
-        f"🔔 PRICE AT KEY LEVEL — WATCH 1H",
+        f"🔔 AT KEY LEVEL — WATCH 1H",
         f"",
-        f"{'🟢 SUPPORT' if bull else '🔴 RESISTANCE'}  |  Grade: {gl}  |  BTCUSDT",
+        f"4H Level : {pf(lv['price'])}  ({shape} · {'Fresh' if lv['fresh'] else 'Used'} · {tf})",
+        f"Price    : {pf(cur_price)}  ({abs(cur_price-lv['price'])/lv['price']*100:.2f}% away)",
+        f"Bias     : {bias}  |  Grade: {gl}  |  BTCUSDT",
         f"",
-        f"Level:  {pf(lv['price'])}  ({'FRESH' if lv['fresh'] else 'USED'})",
-        f"Price:  {pf(cur_price)}  ({dist:.2f}% away)",
-        f"TF:     4H {'V-Level' if bull else 'A-Level'}{' + 1D confluence ✓' if has_1d else ''}",
-        f"HSL:    {'YES ✓' if lv['hsl'] else 'NO'}",
-        f"Bias:   {bias}  (1W: {tr1w}  ·  1D: {tr1d})",
-        f"",
-        f"→ Open 1H chart now",
-        f"→ Watch for sweep of this level",
-        f"→ Alert B fires on 1H MSS confirmation",
-        f"",
+        f"→ Open 1H, watch for sweep + MSS/BREAK",
         f"{now_ist()}",
     ])
 
 def format_alert_b(lv, mss, cur_price, grade, bias, tr1w, tr1d, has_1d):
-    bull       = mss["bull"]
-    signal     = mss.get("signal", "MSS")
-    gl         = "A+" if grade=="aplus" else grade.upper()
-    pf         = lambda p: f"${p:,.0f}"
-    swept_txt  = "Swept ✓" if mss["swept_level"] else "Touched"
-    n          = mss["range_candles"]
-    rdir       = "bearish" if bull else "bullish"
-    retest_lvl = pf(mss["range_high"]) if bull else pf(mss["range_low"])
-    wick_label = f"Wick low : {pf(mss['sweep_wick'])}" if bull else f"Wick high: {pf(mss['sweep_wick'])}"
+    bull   = mss["bull"]
+    signal = mss.get("signal", "MSS")
+    gl     = "A+" if grade=="aplus" else grade.upper()
+    pf     = lambda p: f"${p:,.0f}"
+    shape  = "V-shape" if bull else "A-shape"
+    tf     = "1D+4H" if has_1d else "4H"
+    n      = mss["range_candles"]
+    rclr   = "red" if bull else "green"
+    wick   = pf(mss["sweep_wick"])
+
     if signal == "MSS":
-        emoji  = "🚀 LONG — SWEEP+MSS" if bull else "💥 SHORT — SWEEP+MSS"
+        header = f"🚀 LONG — SWEEP+MSS" if bull else f"💥 SHORT — SWEEP+MSS"
     else:
-        emoji  = "⚡ LONG — BREAK" if bull else "⚡ SHORT — BREAK"
-    sig_line = "── MSS  [1H candle] ──────────" if signal == "MSS" else "── BREAK  [1H candle] ────────"
+        header = f"⚡ LONG — BREAK" if bull else f"⚡ SHORT — BREAK"
+
     return "\n".join([
-        f"{emoji} | Go to 5min",
+        f"{header}",
         f"",
-        f"Grade: {gl}{' | 1D+4H ✓' if has_1d else ''}  |  BTCUSDT",
+        f"4H Level  : {pf(lv['price'])}  ({shape} · {'Fresh' if lv['fresh'] else 'Used'} · {tf} · {mss['sweep_time']} IST)",
+        f"1H Sweep  : {mss['sweep_time']} IST  wick→{wick}  close→{pf(mss['sweep_close'])}",
+        f"Ext Range : {n}x {rclr}  |  {pf(mss['range_low'])}—{pf(mss['range_high'])}  |  {mss['range_open']}→{mss['range_close']} IST",
+        f"{signal}       : {mss['mss_open']} IST  close {pf(mss['mss_close'])}",
         f"",
-        f"── 4H LEVEL ──────────────────",
-        f"Level     : {pf(lv['price'])} ({'Fresh' if lv['fresh'] else 'Used'}{', HSL' if lv['hsl'] else ''})",
-        f"",
-        f"── SWEEP  [1H candle] ────────",
-        f"Time      : {mss['sweep_time']} IST",
-        f"{wick_label}",
-        f"Close     : {pf(mss['sweep_close'])}  ← closed back inside level ✓",
-        f"Status    : {swept_txt}",
-        f"",
-        f"── EXT RANGE  [1H candles] ───",
-        f"Candles   : {n} consecutive {rdir}",
-        f"From      : {mss['range_open']} IST",
-        f"To        : {mss['range_close']} IST",
-        f"Range     : {pf(mss['range_low'])} — {pf(mss['range_high'])}",
-        f"",
-        f"{sig_line}",
-        f"Time      : {mss['mss_open']} IST",
-        f"Close     : {pf(mss['mss_close'])}  ({mss['broke']})",
-        f"",
-        f"Now       : {pf(cur_price)}",
-        f"Bias      : {bias}  (1W {tr1w} · 1D {tr1d})",
-        f"",
-        f"→ 5min: watch retest of {retest_lvl}",
-        f"→ SL behind the sweep wick",
-        f"",
+        f"Bias: {bias}  |  Grade: {gl}  |  BTCUSDT",
         f"{now_ist()}",
     ])
 
