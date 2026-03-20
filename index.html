@@ -364,6 +364,68 @@ body::after {
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: var(--s1); }
 ::-webkit-scrollbar-thumb { background: var(--t4); }
+
+/* ── JOURNAL ── */
+.journal-stats { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-bottom:14px; }
+.jstat { padding:12px; background:var(--s2); border:1px solid var(--border); }
+.jstat-lbl { font-size:10px; letter-spacing:.1em; color:var(--t2); margin-bottom:4px; }
+.jstat-val { font-size:18px; font-weight:700; color:var(--white); }
+.add-trade-form { background:var(--s1); border:1px solid var(--border); padding:16px; margin-bottom:14px; }
+.form-title { font-size:11px; font-weight:700; color:var(--white); letter-spacing:.1em; margin-bottom:12px; }
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
+.form-group { display:flex; flex-direction:column; gap:4px; }
+.form-label { font-size:10px; color:var(--t2); letter-spacing:.08em; }
+.form-input {
+  background:var(--s2); border:1px solid var(--border2);
+  color:var(--t1); padding:8px 10px;
+  font-family:var(--font-mono); font-size:12px;
+  outline:none; transition:border-color .15s;
+}
+.form-input:focus { border-color:var(--green2); }
+.form-select {
+  background:var(--s2); border:1px solid var(--border2);
+  color:var(--t1); padding:8px 10px;
+  font-family:var(--font-mono); font-size:12px;
+  outline:none; cursor:pointer;
+}
+.form-select:focus { border-color:var(--green2); }
+.form-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:12px; }
+.form-full { grid-column:1/-1; }
+textarea.form-input { resize:vertical; min-height:60px; }
+.btn-add {
+  background:var(--green-dim); border:1px solid var(--green2);
+  color:var(--green); padding:10px 20px;
+  font-family:var(--font-mono); font-size:11px;
+  font-weight:700; letter-spacing:.1em;
+  cursor:pointer; transition:all .2s; width:100%;
+}
+.btn-add:hover { background:rgba(0,255,204,.2); }
+.btn-del {
+  background:none; border:none; color:var(--t3);
+  font-size:14px; cursor:pointer; padding:4px 8px;
+  transition:color .15s;
+}
+.btn-del:hover { color:var(--red); }
+.journal-table { overflow-x:auto; margin-bottom:14px; }
+.jtbl { width:100%; border-collapse:collapse; }
+.jtbl th { padding:10px 12px; font-size:10px; letter-spacing:.12em; color:var(--t2); text-align:left; border-bottom:1px solid var(--border); font-weight:400; white-space:nowrap; }
+.jtbl td { padding:10px 12px; font-size:11px; border-bottom:1px solid var(--border); vertical-align:middle; }
+.jtbl tr:last-child td { border-bottom:none; }
+.jtbl tr:hover td { background:var(--s2); }
+.result-pill { font-size:9px; font-weight:700; letter-spacing:.08em; padding:3px 9px; }
+.result-pill.win  { background:var(--green-dim); color:var(--green); border:1px solid rgba(0,255,204,.3); }
+.result-pill.loss { background:var(--red-dim);   color:var(--red);   border:1px solid rgba(255,51,102,.3); }
+.result-pill.be   { background:var(--s3);         color:var(--t2);   border:1px solid var(--border2); }
+.result-pill.open { background:var(--gold-dim);   color:var(--gold); border:1px solid rgba(255,215,0,.3); }
+.r-pos { color:var(--green); font-weight:700; }
+.r-neg { color:var(--red);   font-weight:700; }
+.notes-cell { max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--t2); font-size:10px; }
+.equity-mini { height:80px; margin-bottom:14px; }
+@media(max-width:640px) {
+  .journal-stats { grid-template-columns:1fr 1fr; }
+  .form-grid { grid-template-columns:1fr; }
+  .form-row  { grid-template-columns:1fr 1fr; }
+}
 </style>
 </head>
 <body>
@@ -391,6 +453,7 @@ body::after {
   <button class="nav-btn" onclick="showPage('alerts',this)">ALERTS <span class="nav-count" id="alertCount">0</span></button>
   <button class="nav-btn" onclick="showPage('simulator',this)">SIMULATOR</button>
   <button class="nav-btn" onclick="showPage('guide',this)">STRATEGY</button>
+  <button class="nav-btn" onclick="showPage('journal',this)">JOURNAL <span class="nav-count" id="journalCount">0</span></button>
 </div>
 
 <div class="main">
@@ -630,6 +693,128 @@ body::after {
       </div>
     </div>
   </div>
+</div>
+
+
+<!-- ══════════════ JOURNAL ══════════════ -->
+<div id="page-journal" class="page">
+
+  <div class="sl">TRADE JOURNAL</div>
+
+  <!-- Stats row -->
+  <div class="journal-stats">
+    <div class="jstat card green-top">
+      <div class="jstat-lbl">TOTAL TRADES</div>
+      <div class="jstat-val" id="jTotal">0</div>
+    </div>
+    <div class="jstat card">
+      <div class="jstat-lbl">WIN RATE</div>
+      <div class="jstat-val" id="jWR">—</div>
+    </div>
+    <div class="jstat card">
+      <div class="jstat-lbl">NET R</div>
+      <div class="jstat-val" id="jNetR">0.0R</div>
+    </div>
+    <div class="jstat card">
+      <div class="jstat-lbl">BEST TRADE</div>
+      <div class="jstat-val" id="jBest">—</div>
+    </div>
+    <div class="jstat card gold-top">
+      <div class="jstat-lbl">WORST TRADE</div>
+      <div class="jstat-val" id="jWorst">—</div>
+    </div>
+  </div>
+
+  <!-- Add trade form -->
+  <div class="add-trade-form">
+    <div class="form-title">+ LOG NEW TRADE</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">DATE (IST)</label>
+        <input class="form-input" id="jDate" type="datetime-local">
+      </div>
+      <div class="form-group">
+        <label class="form-label">DIRECTION</label>
+        <select class="form-select" id="jDir">
+          <option value="LONG">🟢 LONG</option>
+          <option value="SHORT">🔴 SHORT</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">4H LEVEL ($)</label>
+        <input class="form-input" id="jLevel" type="number" placeholder="69144">
+      </div>
+      <div class="form-group">
+        <label class="form-label">ENTRY ($)</label>
+        <input class="form-input" id="jEntry" type="number" placeholder="69900">
+      </div>
+      <div class="form-group">
+        <label class="form-label">SL ($)</label>
+        <input class="form-input" id="jSL" type="number" placeholder="68600">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">TP ($)</label>
+        <input class="form-input" id="jTP" type="number" placeholder="71500">
+      </div>
+      <div class="form-group">
+        <label class="form-label">EXIT ($)</label>
+        <input class="form-input" id="jExit" type="number" placeholder="71200">
+      </div>
+      <div class="form-group">
+        <label class="form-label">RESULT</label>
+        <select class="form-select" id="jResult">
+          <option value="open">⏳ Open</option>
+          <option value="win">✅ Win</option>
+          <option value="loss">❌ Loss</option>
+          <option value="be">➡️ BE</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">GRADE</label>
+        <select class="form-select" id="jGrade">
+          <option value="aplus">A+</option>
+          <option value="a">A</option>
+          <option value="b">B</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">SETUP TYPE</label>
+        <select class="form-select" id="jSetup">
+          <option value="MSNR+MSS">MSNR + 1H MSS</option>
+          <option value="MSNR_ONLY">MSNR Level Only</option>
+          <option value="OTHER">Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:12px">
+      <label class="form-label">NOTES</label>
+      <textarea class="form-input" id="jNotes" placeholder="What did you see? Was the sweep clean? How was the retest?"></textarea>
+    </div>
+    <button class="btn-add" onclick="addJournalTrade()">+ ADD TRADE</button>
+  </div>
+
+  <!-- Table -->
+  <div class="sl">ALL TRADES</div>
+  <div class="journal-table card">
+    <div id="journalTableWrap">
+      <div class="empty-state">
+        <div class="empty-icon">📓</div>
+        <div class="empty-txt">No trades logged yet.<br>Add your first trade above.</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align:center;margin-top:8px">
+    <button class="rbtn" onclick="exportJournal()" style="margin-right:8px">↓ EXPORT CSV</button>
+    <button class="rbtn" onclick="clearJournal()" style="color:var(--red);border-color:var(--red2)">✕ CLEAR ALL</button>
+  </div>
+
 </div>
 
 </div><!-- /main -->
@@ -1336,6 +1521,7 @@ function showPage(id, btn) {
   btn.classList.add('active');
   if (id === 'simulator') { renderSimulator(); renderEquityChart(); }
   if (id === 'levels')    { renderLevels(); }
+  if (id === 'journal')   { renderJournal(); initJournalDate(); }
 }
 
 function showNotif(msg) {
@@ -1345,10 +1531,164 @@ function showNotif(msg) {
   setTimeout(() => el.style.display = 'none', 3000);
 }
 
+
+// ═══════════════════════════════════════════════════════════════
+// JOURNAL — saves to localStorage, syncs to GitHub trades.json
+// ═══════════════════════════════════════════════════════════════
+const JOURNAL_KEY = 'msnr_journal_v1';
+
+function loadJournal() {
+  try { return JSON.parse(localStorage.getItem(JOURNAL_KEY)) || []; }
+  catch(e) { return []; }
+}
+function saveJournal(trades) {
+  localStorage.setItem(JOURNAL_KEY, JSON.stringify(trades));
+  document.getElementById('journalCount').textContent = trades.filter(t=>t.result==='open').length || trades.length;
+}
+
+function addJournalTrade() {
+  const v = (id) => document.getElementById(id).value.trim();
+  const n = (id) => parseFloat(document.getElementById(id).value) || 0;
+
+  if (!v('jDate') || !n('jEntry') || !n('jLevel')) {
+    showNotif('Fill in Date, 4H Level and Entry at minimum'); return;
+  }
+
+  const entry  = n('jEntry');
+  const sl     = n('jSL');
+  const tp     = n('jTP');
+  const exit_p = n('jExit');
+  const result = v('jResult');
+  const bull   = v('jDir') === 'LONG';
+
+  // Calculate R
+  const risk   = sl > 0 ? Math.abs(entry - sl) : 0;
+  let   rMulti = 0;
+  if (risk > 0 && exit_p > 0) {
+    rMulti = bull ? (exit_p - entry) / risk : (entry - exit_p) / risk;
+  }
+
+  const trade = {
+    id:      Date.now(),
+    date:    v('jDate'),
+    dir:     v('jDir'),
+    level:   n('jLevel'),
+    entry,
+    sl,
+    tp,
+    exit:    exit_p,
+    result,
+    grade:   v('jGrade'),
+    setup:   v('jSetup'),
+    notes:   v('jNotes'),
+    rMulti:  +rMulti.toFixed(2),
+  };
+
+  const trades = loadJournal();
+  trades.unshift(trade);
+  saveJournal(trades);
+  renderJournal();
+  showNotif('Trade logged ✓');
+
+  // Clear form
+  ['jDate','jEntry','jSL','jTP','jExit','jNotes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('jResult').value = 'open';
+}
+
+function deleteJournalTrade(id) {
+  const trades = loadJournal().filter(t => t.id !== id);
+  saveJournal(trades);
+  renderJournal();
+}
+
+function renderJournal() {
+  const trades = loadJournal();
+  document.getElementById('journalCount').textContent = trades.length;
+
+  // Stats
+  const closed = trades.filter(t => ['win','loss','be'].includes(t.result));
+  const wins   = closed.filter(t => t.result === 'win');
+  const wr     = closed.length ? ((wins.length/closed.length)*100).toFixed(0)+'%' : '—';
+  const netR   = closed.reduce((s,t) => s + (t.rMulti||0), 0);
+  const rVals  = closed.map(t=>t.rMulti||0);
+  const best   = rVals.length ? Math.max(...rVals) : null;
+  const worst  = rVals.length ? Math.min(...rVals) : null;
+
+  document.getElementById('jTotal').textContent  = trades.length;
+  document.getElementById('jWR').textContent     = wr;
+  document.getElementById('jNetR').textContent   = (netR>=0?'+':'')+netR.toFixed(1)+'R';
+  document.getElementById('jNetR').style.color   = netR>=0?'var(--green)':'var(--red)';
+  document.getElementById('jBest').textContent   = best!==null ? (best>=0?'+':'')+best.toFixed(1)+'R' : '—';
+  document.getElementById('jBest').style.color   = best>=0?'var(--green)':'var(--red)';
+  document.getElementById('jWorst').textContent  = worst!==null ? (worst>=0?'+':'')+worst.toFixed(1)+'R' : '—';
+  document.getElementById('jWorst').style.color  = worst>=0?'var(--green)':'var(--red)';
+
+  const wrap = document.getElementById('journalTableWrap');
+  if (!trades.length) {
+    wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">📓</div><div class="empty-txt">No trades logged yet.</div></div>';
+    return;
+  }
+
+  let html = `<table class="jtbl">
+    <thead><tr>
+      <th>DATE (IST)</th><th>DIR</th><th>LEVEL</th><th>ENTRY</th>
+      <th>SL</th><th>EXIT</th><th>R</th><th>RESULT</th><th>GRADE</th><th>NOTES</th><th></th>
+    </tr></thead><tbody>`;
+
+  for (const t of trades) {
+    const rc   = t.rMulti>=0?'r-pos':'r-neg';
+    const date = t.date ? t.date.replace('T',' ') : '—';
+    html += `<tr>
+      <td style="color:var(--t2);white-space:nowrap">${date}</td>
+      <td style="color:${t.dir==='LONG'?'var(--green)':'var(--red)'}; font-weight:700">${t.dir}</td>
+      <td style="color:var(--gold)">$${fmt(t.level,0)}</td>
+      <td>$${fmt(t.entry,0)}</td>
+      <td style="color:var(--red)">$${fmt(t.sl,0)}</td>
+      <td style="color:var(--white)">$${fmt(t.exit||0,0)||'—'}</td>
+      <td class="${rc}">${t.result!=='open'?(t.rMulti>=0?'+':'')+t.rMulti+'R':'—'}</td>
+      <td><span class="result-pill ${t.result}">${t.result.toUpperCase()}</span></td>
+      <td><span class="grade-chip ${t.grade}" style="font-size:9px;padding:2px 7px">${t.grade==='aplus'?'A+':t.grade.toUpperCase()}</span></td>
+      <td class="notes-cell" title="${t.notes||''}">${t.notes||'—'}</td>
+      <td><button class="btn-del" onclick="deleteJournalTrade(${t.id})">✕</button></td>
+    </tr>`;
+  }
+  wrap.innerHTML = html + '</tbody></table>';
+}
+
+function exportJournal() {
+  const trades = loadJournal();
+  if (!trades.length) { showNotif('No trades to export'); return; }
+  const headers = ['Date','Direction','Level','Entry','SL','TP','Exit','R','Result','Grade','Setup','Notes'];
+  const rows = trades.map(t => [
+    t.date, t.dir, t.level, t.entry, t.sl, t.tp, t.exit,
+    t.rMulti, t.result, t.grade, t.setup, (t.notes||'').replace(/,/g,' ')
+  ].join(','));
+  const csv = [headers.join(','), ...rows].join('\n');
+  const a   = document.createElement('a');
+  a.href    = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download= 'msnr_journal.csv';
+  a.click();
+}
+
+function clearJournal() {
+  if (!confirm('Delete ALL journal entries? This cannot be undone.')) return;
+  localStorage.removeItem(JOURNAL_KEY);
+  renderJournal();
+  showNotif('Journal cleared');
+}
+
+// Set default datetime to now IST when opening journal
+function initJournalDate() {
+  const now = new Date();
+  const ist = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
+  document.getElementById('jDate').value = ist.toISOString().slice(0,16);
+}
+
 // ═══════════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════════
 loadData();
+renderJournal();
 setInterval(loadData, 5 * 60 * 1000); // auto-refresh every 5 min
 </script>
 </body>
