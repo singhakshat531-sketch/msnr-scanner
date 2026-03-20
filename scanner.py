@@ -161,24 +161,15 @@ def get_trend(candles, lookback=30):
     bull = sum(1 for i in range(2, len(c)) if c[i] > c[i-1] > c[i-2])
     bear = sum(1 for i in range(2, len(c)) if c[i] < c[i-1] < c[i-2])
     
-    # Strong directional move (>3% change = trending)
-    if pct_change > 3:
+    # Need BOTH % change AND momentum to agree
+    if pct_change > 3 and bull > bear:
         return "BULLISH"
-    if pct_change < -3:
+    if pct_change < -3 and bear > bull:
         return "BEARISH"
-    
-    # Moderate move (1-3%) + momentum agreement
-    if pct_change > 1 and bull > bear:
+    if pct_change > 2 and bull > bear * 1.5:
         return "BULLISH"
-    if pct_change < -1 and bear > bull:
+    if pct_change < -2 and bear > bull * 1.5:
         return "BEARISH"
-    
-    # Pure momentum (flat price but directional candles)
-    if bull > bear + 4:
-        return "BULLISH"
-    if bear > bull + 4:
-        return "BEARISH"
-    
     return "RANGING"
 
 def get_bias(trend_1d, trend_4h):
@@ -279,11 +270,19 @@ def find_crt(c1h, level, bias):
         sw = c1h[i]
         cf = c1h[i+1]
 
-        # CRT-2: wick sweeps 4H level, CLOSE back inside range
+        # CRT-2: wick sweeps 4H level, CLOSE back INSIDE range
+        # CRITICAL: close must be inside range (above rL AND below rH)
+        # if close is outside range = breakout not sweep = SKIP
         if bull:
-            crt2 = sw["l"] <= level["price"] and sw["c"] > level["price"] and sw["c"] > rL
+            crt2 = (sw["l"] <= level["price"] and   # wick swept level
+                    sw["c"] > level["price"] and     # close above level
+                    sw["c"] > rL and                 # close inside range (above low)
+                    sw["c"] < rH)                    # close inside range (below high)
         else:
-            crt2 = sw["h"] >= level["price"] and sw["c"] < level["price"] and sw["c"] < rH
+            crt2 = (sw["h"] >= level["price"] and   # wick swept level
+                    sw["c"] < level["price"] and     # close below level
+                    sw["c"] < rH and                 # close inside range (below high)
+                    sw["c"] > rL)                    # close inside range (above low)
         if not crt2: continue
 
         # CRT-3: decisive body past entire range
