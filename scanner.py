@@ -142,46 +142,63 @@ def fetch_candles(symbol, interval, limit=150):
 # ── TREND ─────────────────────────────────────────────────────────────────────
 def get_trend(candles, lookback=30):
     """
-    Determine trend using recent price structure.
-    Checks HH+HL for bullish, LL+LH for bearish.
+    Determine trend using price structure.
+    1D: compare 30-day window
+    4H: compare recent 60-candle window (10 days)
+    Uses both directional move AND momentum.
     """
     if len(candles) < 10: return "UNKNOWN"
     c = [x["c"] for x in candles[-lookback:]]
     
-    # Simple trend: compare first third vs last third
-    third = len(c) // 3
-    avg_start = sum(c[:third]) / third
-    avg_end   = sum(c[-third:]) / third
+    # Compare first half vs second half
+    half = len(c) // 2
+    avg_start = sum(c[:half]) / half
+    avg_end   = sum(c[half:]) / half
     
-    # Also check recent momentum
+    pct_change = (avg_end - avg_start) / avg_start * 100
+    
+    # Momentum
     bull = sum(1 for i in range(2, len(c)) if c[i] > c[i-1] > c[i-2])
     bear = sum(1 for i in range(2, len(c)) if c[i] < c[i-1] < c[i-2])
     
-    # Strong trend = both price level AND momentum agree
-    if avg_end > avg_start * 1.02 and bull > bear:
+    # Strong directional move (>3% change = trending)
+    if pct_change > 3:
         return "BULLISH"
-    if avg_end < avg_start * 0.98 and bear > bull:
+    if pct_change < -3:
         return "BEARISH"
-    # Weak trend = just momentum
-    if bull > bear + 3:
+    
+    # Moderate move (1-3%) + momentum agreement
+    if pct_change > 1 and bull > bear:
         return "BULLISH"
-    if bear > bull + 3:
+    if pct_change < -1 and bear > bull:
         return "BEARISH"
+    
+    # Pure momentum (flat price but directional candles)
+    if bull > bear + 4:
+        return "BULLISH"
+    if bear > bull + 4:
+        return "BEARISH"
+    
     return "RANGING"
 
 def get_bias(trend_1d, trend_4h):
     """
     CORRECT STRATEGY LOGIC:
-    1D/1W = primary bias
-    4H = backup if 1D ranging
-    Both ranging = no trade
+    1D = primary bias (longer view)
+    4H = confirmation or backup
+    
+    Rules:
+    - 1D BULL + 4H anything = BULLISH (1D dominates)
+    - 1D BEAR + 4H anything = BEARISH (1D dominates)
+    - 1D RANGING + 4H BULL = BULLISH (4H takes over)
+    - 1D RANGING + 4H BEAR = BEARISH (4H takes over)
+    - 1D RANGING + 4H RANGING = RANGING (no trade)
     """
     if trend_1d == "BULLISH":
         return "BULLISH"
     elif trend_1d == "BEARISH":
         return "BEARISH"
     elif trend_1d == "RANGING":
-        # Use 4H trend as backup
         if trend_4h == "BULLISH":
             return "BULLISH"
         elif trend_4h == "BEARISH":
@@ -510,8 +527,8 @@ def main():
         print("Insufficient data"); return
 
     cur_price  = h1[-1]["c"]
-    trend_1d   = get_trend(d1, lookback=30)
-    trend_4h   = get_trend(h4, lookback=60)
+    trend_1d   = get_trend(d1, lookback=20)   # 20 daily candles = ~1 month
+    trend_4h   = get_trend(h4, lookback=42)   # 42 x 4H candles = ~1 week
     bias       = get_bias(trend_1d, trend_4h)
 
     print(f"\nBTC: ${cur_price:,.0f}")
