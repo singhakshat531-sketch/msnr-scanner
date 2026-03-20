@@ -535,7 +535,7 @@ def main():
                     mark_alert(state, "mssAlerts", key_b)
                     alerts_sent += 1
                     print(f"  → ALERT B: 1H MSS {'bullish' if mss['bull'] else 'bearish'} "
-                          f"| swing {mss['swing_candles']}c "
+                          f"| range {mss['range_candles']}c "
                           f"| broke {mss['broke']} @ ${mss['mss_close']:,.0f}")
                 else:
                     print(f"  → In zone, no 1H MSS yet")
