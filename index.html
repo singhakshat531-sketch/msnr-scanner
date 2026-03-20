@@ -416,12 +416,32 @@ async function cc(sym,iv,limit){
 }
 
 // ── TREND ─────────────────────────────────────────────────────────────────────
-function getTrend(c){
+function getTrend(c, lookback=30){
   if(c.length<10)return'UNKNOWN';
-  const cl=c.slice(-20).map(x=>x.c);
-  let b=0,br=0;
-  for(let i=2;i<cl.length;i++){if(cl[i]>cl[i-1]&&cl[i-1]>cl[i-2])b++;if(cl[i]<cl[i-1]&&cl[i-1]<cl[i-2])br++;}
-  if(b>br+2)return'BULLISH';if(br>b+2)return'BEARISH';return'RANGING';
+  const cl=c.slice(-lookback).map(x=>x.c);
+  const third=Math.floor(cl.length/3);
+  const avgStart=cl.slice(0,third).reduce((a,b)=>a+b,0)/third;
+  const avgEnd=cl.slice(-third).reduce((a,b)=>a+b,0)/third;
+  let bull=0,bear=0;
+  for(let i=2;i<cl.length;i++){
+    if(cl[i]>cl[i-1]&&cl[i-1]>cl[i-2])bull++;
+    if(cl[i]<cl[i-1]&&cl[i-1]<cl[i-2])bear++;
+  }
+  if(avgEnd>avgStart*1.02&&bull>bear)return'BULLISH';
+  if(avgEnd<avgStart*0.98&&bear>bull)return'BEARISH';
+  if(bull>bear+3)return'BULLISH';
+  if(bear>bull+3)return'BEARISH';
+  return'RANGING';
+}
+
+function getBias(trend1d, trend4h){
+  if(trend1d==='BULLISH')return'BULLISH';
+  if(trend1d==='BEARISH')return'BEARISH';
+  if(trend1d==='RANGING'){
+    if(trend4h==='BULLISH')return'BULLISH';
+    if(trend4h==='BEARISH')return'BEARISH';
+  }
+  return'RANGING';
 }
 
 // ── PRICES ────────────────────────────────────────────────────────────────────
@@ -463,17 +483,17 @@ function findLevels(candles,lb,maxD){
 }
 
 function detectLevels(){
-  allLevels.d1=findLevels(btcData.d1,2,12);
-  allLevels.h4=findLevels(btcData.h4,3,8);
-  allLevels.h1=findLevels(btcData.h1,3,5);
+  allLevels.d1=findLevels(btcData.d1,2,20);   // 1D = targets (wide)
+  allLevels.h4=findLevels(btcData.h4,2,15);   // 4H = entries (wider, lb=2)
+  allLevels.h1=findLevels(btcData.h1,3,8);    // 1H = reference
 }
 
 // ── CRT ───────────────────────────────────────────────────────────────────────
-function findCRT(c1h,lv,tr){
-  if(c1h.length<15||tr==='RANGING')return null;
+function findCRT(c1h,lv,bias){
+  if(c1h.length<15||bias==='RANGING')return null;
   const bull=lv.type==='V';
-  if(bull&&tr!=='BULLISH')return null;
-  if(!bull&&tr!=='BEARISH')return null;
+  if(bull&&bias!=='BULLISH')return null;
+  if(!bull&&bias!=='BEARISH')return null;
   for(let i=Math.max(5,c1h.length-48);i<c1h.length-1;i++){
     let rs=i-1;
     while(rs>1){const a=c1h[rs],b=c1h[rs-1];if(bull&&a.c>=b.c)break;if(!bull&&a.c<=b.c)break;rs--;}
@@ -493,27 +513,44 @@ function findCRT(c1h,lv,tr){
 
 function detectSetups(){
   allSetups=[];
-  const tr=getTrend(btcData.d1);
-  const seen=new Set();
-  // 1D
-  for(const lv of allLevels.d1){
-    const key=`${lv.type}_${Math.round(lv.price)}`;
-    if(seen.has(key))continue;
-    const conf4h=allLevels.h4.find(l=>l.type===lv.type&&Math.abs(l.price-lv.price)/lv.price*100<=1);
-    const crt=findCRT(btcData.h1,lv,tr);
-    if(crt){
-      const s=buildSetup(lv,crt,tr,'1D',conf4h,'BTCUSDT');
-      if(s){allSetups.push(s);seen.add(key);}
-    }
+  // CORRECT HIERARCHY:
+  // 1D = bias only, 4H = entry levels, 1H = CRT trigger
+  const tr1d=getTrend(btcData.d1,30);
+  const tr4h=getTrend(btcData.h4,60);
+  const bias=getBias(tr1d,tr4h);
+
+  console.log(`1D:${tr1d} 4H:${tr4h} Bias:${bias}`);
+
+  // Update trend display
+  const te=document.getElementById('btcTrend');
+  if(te){
+    te.textContent=bias;
+    te.className='trend-tag '+(bias==='BULLISH'?'bull-tag':bias==='BEARISH'?'bear-tag':'neutral-tag');
   }
-  // 4H
+
+  if(bias==='RANGING') return; // both ranging = no trade
+
+  const seen=new Set();
+
+  // PRIMARY: scan 4H levels for CRT entry
   for(const lv of allLevels.h4){
+    const bull=lv.type==='V';
+    if(bull&&bias!=='BULLISH')continue;
+    if(!bull&&bias!=='BEARISH')continue;
+
     const key=`${lv.type}_${Math.round(lv.price)}`;
     if(seen.has(key))continue;
-    if(allSetups.find(s=>Math.abs(s.rawLevel-lv.price)/lv.price<0.01))continue;
-    const crt=findCRT(btcData.h1,lv,tr);
+
+    // Find nearest 1D level as target
+    const targets=allLevels.d1.filter(l=>
+      l.type===lv.type&&
+      ((bull&&l.price>lv.price)||(!bull&&l.price<lv.price))
+    );
+    const lv1d=targets.sort((a,b)=>Math.abs(a.price-lv.price)-Math.abs(b.price-lv.price))[0]||null;
+
+    const crt=findCRT(btcData.h1,lv,bias);
     if(crt){
-      const s=buildSetup(lv,crt,tr,'4H',null,'BTCUSDT');
+      const s=buildSetup(lv,crt,bias,'4H',lv1d,'BTCUSDT',tr1d,tr4h);
       if(s){allSetups.push(s);seen.add(key);}
     }
   }
@@ -771,8 +808,8 @@ function renderQuickStats(){
   const wr=done.length?((wins.length/done.length)*100).toFixed(0):'—';
   const stats=[
     {l:'SETUPS TODAY',v:allSetups.length,c:'var(--white)'},
-    {l:'1D LEVELS',v:allLevels.d1.length,c:'var(--gold)'},
-    {l:'4H LEVELS',v:allLevels.h4.length,c:'var(--purple)'},
+    {l:'4H LEVELS',v:allLevels.h4.length,c:'var(--gold)'},
+    {l:'1D TARGETS',v:allLevels.d1.length,c:'var(--purple)'},
     {l:'BACKTEST WR',v:wr==='—'?'—':wr+'%',c:+wr>=50?'var(--green)':'var(--red)'},
     {l:'NET R',v:(net>=0?'+':'')+net.toFixed(1)+'R',c:net>=0?'var(--green)':'var(--red)'},
     {l:'SIM BALANCE',v:'$'+fmt(sim.balance,0),c:sim.balance>=SIM_START?'var(--green)':'var(--red)'},
@@ -805,7 +842,8 @@ function renderSetups(){
       <div class="sc-rows">
         <div class="sc-row"><span class="sc-rl">TREND</span><span class="sc-rv ${s.trend==='BULLISH'?'g':'r'}">${s.trend}</span></div>
         <div class="sc-row"><span class="sc-rl">LEVEL</span><span class="sc-rv gold">${s.level} · ${s.freshness.toUpperCase()}</span></div>
-        <div class="sc-row"><span class="sc-rl">4H CONF</span><span class="sc-rv ${s.confluence?'g':''}">${s.confluence?'YES '+s.confLevel:'NO'}</span></div>
+        <div class="sc-row"><span class="sc-rl">1D TARGET</span><span class="sc-rv gold">${s.has1DTarget?s.target1D:'—'}</span></div>
+        <div class="sc-row"><span class="sc-rl">BIAS</span><span class="sc-rv ${s.bias==='BULLISH'?'g':'r'}">${s.bias} (1D:${s.tr1d||'?'} 4H:${s.tr4h||'?'})</span></div>
         <div class="sc-row"><span class="sc-rl">HSL</span><span class="sc-rv ${s.hsl?'g':''}">${s.hsl?'YES':'NO'}</span></div>
         <div class="sc-row"><span class="sc-rl">BODY RATIO</span><span class="sc-rv ${+s.br>0.65?'g':'gold'}">${s.br}</span></div>
         <div class="sc-row"><span class="sc-rl">DIST TO ENTRY</span><span class="sc-rv ${+dist<0.5?'g':'gold'}">${dist}%</span></div>
