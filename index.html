@@ -888,39 +888,89 @@ function renderLevels(){
 
 function runBacktest(){
   btResults=[];
-  const tr=getTrend(btcData.d1);
-  const lvls=[...allLevels.d1.map(l=>({...l,tf:'1D'})),...allLevels.h4.map(l=>({...l,tf:'4H'}))];
+  const tr1d=getTrend(btcData.d1,20);
+  const tr4h=getTrend(btcData.h4,42);
+  const bias=getBias(tr1d,tr4h);
+
+  // Use 4H levels as entry (correct strategy)
+  const lvls=allLevels.h4.map(l=>({...l,tf:'4H'}));
+  if(!lvls.length)return;
+
+  const c=btcData.h1;
+  if(!c.length)return;
+
+  // Scan entire 1H history for CRT setups at 4H levels
   for(const lv of lvls){
     const bull=lv.type==='V';
-    if(bull&&tr!=='BULLISH')continue;
-    if(!bull&&tr!=='BEARISH')continue;
-    const c=btcData.h1;
-    for(let i=10;i<c.length-5;i++){
-      let rs=i-1;
-      while(rs>1){const a=c[rs],b=c[rs-1];if(bull&&a.c>=b.c)break;if(!bull&&a.c<=b.c)break;rs--;}
-      const seg=c.slice(rs,i+1);
-      const rH=Math.max(...seg.map(x=>x.h)),rL=Math.min(...seg.map(x=>x.l));
-      if((rH-rL)/c.at(-1).c<0.002)continue;
-      const sw=c[i],cf=i+1<c.length?c[i+1]:null;
-      if(!cf)continue;
-      const crt2=bull?(sw.l<=lv.price&&sw.c>lv.price&&sw.c>rL):(sw.h>=lv.price&&sw.c<lv.price&&sw.c<rH);
-      if(!crt2)continue;
-      const body=Math.abs(cf.c-cf.o),cr=cf.h-cf.l,br=cr>0?body/cr:0;
-      const crt3=bull?(cf.c>rH&&br>0.5):(cf.c<rL&&br>0.5);
-      if(!crt3)continue;
-      const entry=lv.price,sl=bull?sw.l*0.9992:sw.h*1.0008;
-      const risk=Math.abs(entry-sl);
-      const tp1=bull?entry+risk*3:entry-risk*3,tp2=bull?entry+risk*7:entry-risk*7;
-      let result='pending',pnl=0,rrA=0;
-      for(const fc of c.slice(i+2,i+35)){
-        if(bull){if(fc.l<=sl){result='loss';pnl=-1;break}if(fc.h>=tp2){result='win';pnl=5.5;rrA=7;break}if(fc.h>=tp1&&result!=='win'){result='win';pnl=2.5;rrA=3}}
-        else{if(fc.h>=sl){result='loss';pnl=-1;break}if(fc.l<=tp2){result='win';pnl=5.5;rrA=7;break}if(fc.l<=tp1&&result!=='win'){result='win';pnl=2.5;rrA=3}}
+    if(bull&&bias!=='BULLISH')continue;
+    if(!bull&&bias!=='BEARISH')continue;
+
+    // Scan all 1H candles
+    for(let i=15;i<c.length-2;i++){
+      // External range with counter candle allowance
+      let rs=i-1,counter=0;
+      while(rs>2){
+        const a=c[rs],b=c[rs-1];
+        if(bull){if(a.c>=b.c){counter++;if(counter>2)break;}}
+        else{if(a.c<=b.c){counter++;if(counter>2)break;}}
+        rs--;
       }
-      if(result==='pending'&&rrA>0)result='win';
-      btResults.push({tf:lv.tf,dir:bull?'LONG':'SHORT',entry:'$'+fmt(entry,0),sl:'$'+fmt(sl,0),tp1:'$'+fmt(tp1,0),tp2:'$'+fmt(tp2,0),result,pnl,rrA,time:new Date(sw.t)});
-      break;
+      const seg=c.slice(rs,i+1);
+      if(seg.length<2)continue;
+      const rH=Math.max(...seg.map(x=>x.h));
+      const rL=Math.min(...seg.map(x=>x.l));
+      if((rH-rL)/c.at(-1).c<0.001)continue;
+
+      const sw=c[i],cf=c[i+1];
+      let crt2=false;
+      if(bull) crt2=sw.l<=lv.price&&sw.c>lv.price&&sw.c>rL&&sw.c<rH;
+      else crt2=sw.h>=lv.price&&sw.c<lv.price&&sw.c<rH&&sw.c>rL;
+      if(!crt2)continue;
+
+      const body=Math.abs(cf.c-cf.o),cr=cf.h-cf.l,br=cr>0?body/cr:0;
+      const crt3=bull?(cf.c>rH&&br>0.45):(cf.c<rL&&br>0.45);
+      if(!crt3)continue;
+
+      const entry=lv.price;
+      const sl=bull?sw.l*0.9992:sw.h*1.0008;
+      const risk=Math.abs(entry-sl);
+      if(risk<=0)continue;
+      const tp1=bull?entry+risk*3:entry-risk*3;
+      const tp2=bull?entry+risk*7:entry-risk*7;
+      const rr1=Math.abs(tp1-entry)/risk;
+      if(rr1<2.5)continue;
+
+      // Simulate outcome
+      let result='open',pnl=0,rrA=0,tp1hit=false;
+      for(const fc of c.slice(i+2,i+50)){
+        if(bull){
+          if(fc.l<=sl){result='loss';pnl=-1;break}
+          if(!tp1hit&&fc.h>=tp1){pnl+=1.5;rrA=1.5;tp1hit=true;}
+          if(tp1hit&&fc.h>=tp2){pnl+=3.5;rrA+=3.5;result='win';break}
+          if(tp1hit&&fc.l<=entry){result='be';break}
+        }else{
+          if(fc.h>=sl){result='loss';pnl=-1;break}
+          if(!tp1hit&&fc.l<=tp1){pnl+=1.5;rrA=1.5;tp1hit=true;}
+          if(tp1hit&&fc.l<=tp2){pnl+=3.5;rrA+=3.5;result='win';break}
+          if(tp1hit&&fc.h>=entry){result='be';break}
+        }
+      }
+      if(result==='open')result=tp1hit?'be':'open';
+      if(result==='open')continue;
+
+      btResults.push({
+        tf:'4H',dir:bull?'LONG':'SHORT',
+        entry:'$'+fmt(entry,0),sl:'$'+fmt(sl,0),
+        tp1:'$'+fmt(tp1,0),tp2:'$'+fmt(tp2,0),
+        result,pnl:parseFloat(pnl.toFixed(1)),
+        rrA:parseFloat(rrA.toFixed(1)),
+        time:new Date(sw.t),
+        br:br.toFixed(2)
+      });
+      break; // one per level
     }
   }
+  console.log('Backtest found:',btResults.length,'setups');
 }
 
 function renderBacktest(){
