@@ -29,7 +29,12 @@ EXACT STRATEGY:
 """
 
 import json, urllib.request, urllib.parse, os, time, base64
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
+
+IST = timezone(timedelta(hours=5, minutes=30))
+
+def now_ist():
+    return datetime.now(IST).strftime('%d %b %Y  %I:%M %p IST')
 
 # ── CONFIG ────────────────────────────────────────────────────
 TELEGRAM_TOKEN   = os.environ.get("TELEGRAM_TOKEN", "")
@@ -220,123 +225,123 @@ def send_telegram(msg):
 # ── CORE: 1H MSS DETECTION ────────────────────────────────────
 def find_1h_mss(h1, level):
     """
-    Detects a 1H Market Structure Shift (MSS) at a 4H key level.
+    EXACT LOGIC (confirmed from chart 19 Mar):
 
-    For a BEARISH setup (A-level / resistance):
-      1. Find 1H candles that swept or touched the 4H level
-         (wick went above, or candle was at/near level)
-      2. Those candles form a swing HIGH — a consecutive group
-         that moved up into the level
-      3. swing_low = lowest LOW of those swing candles
-      4. MSS fires when: a subsequent 1H candle CLOSE < swing_low
-         (body close below swing low = MSS, not just a wick)
+    BULLISH setup (V-level / support):
+      1. Price sweeps or touches the 4H level (wick below or within 1%)
+      2. After the sweep, look for the most recent group of consecutive
+         BEARISH 1H candles (close < open) — these form the external range
+         Can be 1 candle or many, but ALL must be bearish (same direction)
+      3. external range HIGH = highest high of those consecutive bearish candles
+      4. MSS = next 1H candle BODY CLOSES ABOVE that range high
+         (close > range high — body, not wick)
 
-    For a BULLISH setup (V-level / support):
-      1. Find 1H candles that swept or touched the 4H level
-         (wick went below, or candle was at/near level)
-      2. Those candles form a swing LOW
-      3. swing_high = highest HIGH of those swing candles
-      4. MSS fires when: a subsequent 1H candle CLOSE > swing_high
-
-    Returns dict with setup details, or None.
+    BEARISH setup (A-level / resistance):
+      1. Price sweeps or touches the 4H level (wick above or within 1%)
+      2. After the sweep, look for consecutive BULLISH 1H candles
+      3. external range LOW = lowest low of those consecutive bullish candles
+      4. MSS = next 1H candle BODY CLOSES BELOW that range low
     """
     if len(h1) < 4: return None
 
-    bull = level["type"] == "V"   # V = support = bullish setup
+    bull = level["type"] == "V"
     lp   = level["price"]
     scan = h1[-SWING_LOOKBACK:]
     n    = len(scan)
 
-    # ── Step 1: find candles that interacted with the level ────
-    # "touched level" = wick reached within 1% of level, OR price
-    # crossed the level (swept it)
-    TOUCH_PCT = 1.0
+    # Step 1: find the sweep candle — wick went through the level
+    # Priority 1: genuine wick sweep (low below level for bull, high above for bear)
+    # Priority 2: close proximity touch (within 1.5%)
+    # Must have at least 2 candles after it to form range + MSS
+    TOUCH_PCT = 1.5
+    last_touch_idx = None
 
-    touched_idx = []
-    for i, c in enumerate(scan):
-        if bull:
-            # For support: wick went down to/below level
-            touched = (c["l"] <= lp * (1 + TOUCH_PCT/100))
+    for i in range(n - 3, -1, -1):
+        c = scan[i]
+        if bull and c["l"] < lp:
+            last_touch_idx = i; break
+        elif not bull and c["h"] > lp:
+            last_touch_idx = i; break
+
+    if last_touch_idx is None:
+        for i in range(n - 3, -1, -1):
+            c = scan[i]
+            if bull and c["l"] <= lp * (1 + TOUCH_PCT / 100):
+                last_touch_idx = i; break
+            elif not bull and c["h"] >= lp * (1 - TOUCH_PCT / 100):
+                last_touch_idx = i; break
+
+    if last_touch_idx is None: return None
+
+    swept = scan[last_touch_idx]["l"] < lp if bull else scan[last_touch_idx]["h"] > lp
+
+    # Step 2: scan ALL candles after the touch for the MOST RECENT
+    # group of consecutive same-direction candles.
+    # For bull setup: consecutive BEARISH candles (close < open)
+    # For bear setup: consecutive BULLISH candles (close > open)
+    # They can appear anywhere after the sweep — not necessarily right after.
+    # We want the LAST such group before current candle, because that is
+    # the most recent swing/external range price formed.
+
+    best_range_start = None
+    best_range_end   = None
+    i = last_touch_idx + 1
+
+    while i < n - 1:
+        c = scan[i]
+        is_dir = (c["c"] < c["o"]) if bull else (c["c"] > c["o"])
+
+        if is_dir:
+            # Start of a consecutive group
+            grp_start = i
+            grp_end   = i
+            j = i + 1
+            while j < n - 1:
+                cj = scan[j]
+                if (cj["c"] < cj["o"]) if bull else (cj["c"] > cj["o"]):
+                    grp_end = j
+                    j += 1
+                else:
+                    break
+            # This group is a valid external range candidate
+            # Keep updating — we want the MOST RECENT one
+            best_range_start = grp_start
+            best_range_end   = grp_end
+            i = grp_end + 1
         else:
-            # For resistance: wick went up to/above level
-            touched = (c["h"] >= lp * (1 - TOUCH_PCT/100))
-        if touched:
-            touched_idx.append(i)
+            i += 1
 
-    if not touched_idx: return None
+    if best_range_start is None: return None
 
-    # ── Step 2: find the most recent swing formed at the level ─
-    # Take the last touched candle and expand to include
-    # all consecutive candles in that swing (working backwards)
-    last_touch = touched_idx[-1]
+    ext_range  = scan[best_range_start: best_range_end + 1]
+    range_high = max(c["h"] for c in ext_range)
+    range_low  = min(c["l"] for c in ext_range)
 
-    # Swing = the group of candles that moved into the level
-    # For resistance (bearish): consecutive candles with rising closes
-    # For support (bullish): consecutive candles with falling closes
-    # Also allow single-candle swings (the sweep candle itself)
-
-    swing_end   = last_touch
-    swing_start = last_touch
-
-    # Walk backwards to find start of swing
-    for i in range(last_touch - 1, max(0, last_touch - 15), -1):
-        c_cur  = scan[i]
-        c_next = scan[i+1]
+    # Step 3: MSS = body CLOSE beyond the range extreme
+    # Must happen AFTER the range ends
+    for i in range(best_range_end + 1, n):
+        mss_c = scan[i]
         if bull:
-            # For support swing: candles should have been declining
-            # (or at minimum not strongly rallying away)
-            if c_cur["h"] < scan[swing_end]["h"] * 0.985:
-                break  # too far away, swing starts here
-        else:
-            # For resistance swing: candles should have been rising
-            if c_cur["l"] > scan[swing_end]["l"] * 1.015:
-                break
-        swing_start = i
-
-    swing = scan[swing_start: swing_end + 1]
-    if not swing: return None
-
-    # The key levels of the swing
-    swing_high = max(c["h"] for c in swing)
-    swing_low  = min(c["l"] for c in swing)
-
-    # ── Step 3: look for MSS candle AFTER the swing ────────────
-    # MSS = body CLOSE beyond the swing extreme (away from level)
-    for i in range(swing_end + 1, n):
-        mss_candle = scan[i]
-
-        if bull:
-            # Bullish MSS: close ABOVE swing high
-            # (price swept support, formed swing low, now breaks up)
-            if mss_candle["c"] > swing_high:
-                swept = any(c["l"] < lp for c in swing)
+            if mss_c["c"] > range_high:
                 return {
                     "bull":          True,
-                    "swing_high":    swing_high,
-                    "swing_low":     swing_low,
-                    "swing_candles": len(swing),
-                    "mss_close":     mss_candle["c"],
-                    "mss_open":      mss_candle["o"],
+                    "range_high":    range_high,
+                    "range_low":     range_low,
+                    "range_candles": len(ext_range),
+                    "mss_close":     mss_c["c"],
                     "swept_level":   swept,
-                    "broke":         "UP",
-                    # MSS direction: close above swing HIGH = bullish
-                    "signal": "LONG — 1H MSS bullish. Go 5min for retest entry.",
+                    "broke":         "ABOVE range high",
                 }
         else:
-            # Bearish MSS: close BELOW swing low
-            # (price swept resistance, formed swing high, now breaks down)
-            if mss_candle["c"] < swing_low:
-                swept = any(c["h"] > lp for c in swing)
+            if mss_c["c"] < range_low:
                 return {
                     "bull":          False,
-                    "swing_high":    swing_high,
-                    "swing_low":     swing_low,
-                    "swing_candles": len(swing),
-                    "mss_close":     mss_candle["c"],
-                    "mss_open":      mss_candle["o"],
+                    "range_high":    range_high,
+                    "range_low":     range_low,
+                    "range_candles": len(ext_range),
+                    "mss_close":     mss_c["c"],
                     "swept_level":   swept,
-                    "broke":         "DOWN",
-                    "signal": "SHORT — 1H MSS bearish. Go 5min for retest entry.",
+                    "broke":         "BELOW range low",
                 }
 
     return None
@@ -363,36 +368,36 @@ def format_alert_a(lv, cur_price, grade, bias, tr1w, tr1d, has_1d):
         f"→ Watch for sweep of this level",
         f"→ Alert B fires on 1H MSS confirmation",
         f"",
-        f"{datetime.utcnow().strftime('%d %b %Y  %H:%M UTC')}",
+        f"{now_ist()}",
     ])
 
 def format_alert_b(lv, mss, cur_price, grade, bias, tr1w, tr1d, has_1d):
-    bull = mss["bull"]
-    gl   = "A+" if grade=="aplus" else grade.upper()
-    pf   = lambda p: f"${p:,.0f}"
-    swept_txt = "Swept level ✓" if mss["swept_level"] else "Touched level"
+    bull      = mss["bull"]
+    gl        = "A+" if grade=="aplus" else grade.upper()
+    pf        = lambda p: f"${p:,.0f}"
+    swept_txt = "Swept ✓" if mss["swept_level"] else "Touched"
+    n         = mss["range_candles"]
+    rdir      = "bearish" if bull else "bullish"
+    retest_lvl= pf(mss["range_high"]) if bull else pf(mss["range_low"])
     return "\n".join([
-        f"{'🚀' if bull else '💥'} 1H MSS CONFIRMED — GO TO 5MIN",
+        f"{'🚀 LONG' if bull else '💥 SHORT'} — 1H MSS | Go to 5min",
         f"",
-        f"{'🟢 LONG' if bull else '🔴 SHORT'}  |  Grade: {gl}  |  BTCUSDT",
+        f"Grade: {gl}{' | 1D+4H ✓' if has_1d else ''}  |  BTCUSDT",
         f"",
-        f"4H Level:     {pf(lv['price'])}  ({'FRESH' if lv['fresh'] else 'USED'})",
-        f"Level type:   {'V-Level (Support)' if lv['type']=='V' else 'A-Level (Resistance)'}{' + 1D ✓' if has_1d else ''}",
+        f"4H Level  : {pf(lv['price'])} ({'Fresh' if lv['fresh'] else 'Used'}{', HSL' if lv['hsl'] else ''})",
+        f"Swept     : {swept_txt}",
         f"",
-        f"Swing:        {pf(mss['swing_low'])} — {pf(mss['swing_high'])}",
-        f"Swing size:   {mss['swing_candles']} × 1H candle(s)",
-        f"Level swept:  {swept_txt}",
+        f"Ext Range : {n} consecutive {rdir} 1H candle{'s' if n>1 else ''}",
+        f"Range     : {pf(mss['range_low'])} — {pf(mss['range_high'])}",
+        f"MSS close : {pf(mss['mss_close'])} ({mss['broke']})",
+        f"Now       : {pf(cur_price)}",
         f"",
-        f"MSS candle:   closed {mss['broke']} @ {pf(mss['mss_close'])}",
-        f"  {'↑ Body closed ABOVE swing high' if bull else '↓ Body closed BELOW swing low'}",
-        f"Current:      {pf(cur_price)}",
-        f"Bias:         {bias}  (1W: {tr1w}  ·  1D: {tr1d})",
+        f"Bias  : {bias}  (1W {tr1w} · 1D {tr1d})",
         f"",
-        f"→ {mss['signal']}",
-        f"→ SL above/below the sweep wick",
-        f"→ Target next 4H/1D level",
+        f"→ 5min: watch retest of {retest_lvl}",
+        f"→ SL behind the sweep wick",
         f"",
-        f"{datetime.utcnow().strftime('%d %b %Y  %H:%M UTC')}",
+        f"{now_ist()}",
     ])
 
 
