@@ -249,79 +249,55 @@ def find_1h_mss(h1, level):
     scan = h1[-SWING_LOOKBACK:]
     n    = len(scan)
 
-    # Step 1: find the sweep candle — wick went through the level
-    # Priority 1: genuine wick sweep (low below level for bull, high above for bear)
-    # Priority 2: close proximity touch (within 1.5%)
-    # Must have at least 2 candles after it to form range + MSS
+    # Step 1: find the LAST valid sweep before MSS
+    # Valid = wick went through the level AND closed back inside
+    # Always use the LAST sweep — if price swept, consolidated, swept again,
+    # the LAST sweep is always the reference point for the external range.
     TOUCH_PCT = 1.5
     last_touch_idx = None
 
     for i in range(n - 3, -1, -1):
         c = scan[i]
-        if bull and c["l"] < lp:
+        if bull and c["l"] < lp and c["c"] > lp:    # wick below, closed above
             last_touch_idx = i; break
-        elif not bull and c["h"] > lp:
+        elif not bull and c["h"] > lp and c["c"] < lp:  # wick above, closed below
             last_touch_idx = i; break
 
+    # Fallback: touch within 1.5% that closed back inside
     if last_touch_idx is None:
         for i in range(n - 3, -1, -1):
             c = scan[i]
-            if bull and c["l"] <= lp * (1 + TOUCH_PCT / 100):
+            if bull and c["l"] <= lp * (1 + TOUCH_PCT / 100) and c["c"] > lp:
                 last_touch_idx = i; break
-            elif not bull and c["h"] >= lp * (1 - TOUCH_PCT / 100):
+            elif not bull and c["h"] >= lp * (1 - TOUCH_PCT / 100) and c["c"] < lp:
                 last_touch_idx = i; break
 
     if last_touch_idx is None: return None
 
-    # ── FIX 1: sweep candle must CLOSE BACK INSIDE the level ──────
-    # A real sweep = wick breaks the level BUT candle closes back on the other side.
-    # If the close is beyond the level, that's a breakout — not a sweep. Skip it.
-    sweep_c = scan[last_touch_idx]
-    if bull:
-        # Bullish sweep: wick went below support, close must be ABOVE it
-        if sweep_c["c"] < lp:
-            return None   # candle closed below support = breakdown, not a sweep
-    else:
-        # Bearish sweep: wick went above resistance, close must be BELOW it
-        if sweep_c["c"] > lp:
-            return None   # candle closed above resistance = breakout, not a sweep
-
     swept = scan[last_touch_idx]["l"] < lp if bull else scan[last_touch_idx]["h"] > lp
 
-    # Step 2: scan ALL candles after the touch for the MOST RECENT
-    # group of consecutive same-direction candles.
-    # For bull setup: consecutive BEARISH candles (close < open)
-    # For bear setup: consecutive BULLISH candles (close > open)
-    # They can appear anywhere after the sweep — not necessarily right after.
-    # We want the LAST such group before current candle, because that is
-    # the most recent swing/external range price formed.
-
+    # Step 2: find the MOST RECENT group of consecutive same-direction candles
+    # after the last sweep. No window limit — consolidation can happen between
+    # sweep and range (e.g. swept, consolidated, swept again, THEN range formed).
+    # We scan everything after the sweep and keep the LAST group = freshest range.
     best_range_start = None
     best_range_end   = None
     i = last_touch_idx + 1
 
-    # ── FIX 2: only look for external range within 10 candles of sweep ──
-    # The range must form close to the sweep, not much later.
-    range_search_end = min(last_touch_idx + 11, n - 1)
-
-    while i < range_search_end:
+    while i < n - 1:
         c = scan[i]
         is_dir = (c["c"] < c["o"]) if bull else (c["c"] > c["o"])
-
         if is_dir:
-            # Start of a consecutive group
             grp_start = i
             grp_end   = i
             j = i + 1
-            while j < range_search_end:
+            while j < n - 1:
                 cj = scan[j]
                 if (cj["c"] < cj["o"]) if bull else (cj["c"] > cj["o"]):
                     grp_end = j
                     j += 1
                 else:
                     break
-            # This group is a valid external range candidate
-            # Keep updating — we want the MOST RECENT one
             best_range_start = grp_start
             best_range_end   = grp_end
             i = grp_end + 1
