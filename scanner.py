@@ -228,6 +228,131 @@ def send_telegram(msg):
     except Exception as e:
         print(f"Telegram error: {e}")
 
+def find_range_break(c1h, level, bias):
+    """
+    Detect 1H external range break at 4H level.
+
+    Logic:
+    1. Find consecutive 1H candles moving INTO the level
+       (declining candles for V-level, rising for A-level)
+    2. Those candles define the external range
+    3. Check if the MOST RECENT 1H candle:
+       = closes BEYOND the 4H level (breakout)
+       = has a strong body (ratio > 0.45)
+    4. If yes = alert fires
+    """
+    if len(c1h) < 8: return None
+    bull = level["type"] == "V"
+
+    # Look at last 48 1H candles
+    scan = c1h[-48:]
+
+    for i in range(4, len(scan) - 1):
+        # Find start of consecutive range INTO the level
+        rs = i - 1
+        counter = 0
+        while rs > 0:
+            a, b = scan[rs], scan[rs-1]
+            if bull:
+                # Declining candles into V-level
+                if a["c"] >= b["c"]:
+                    counter += 1
+                    if counter > 2: break
+            else:
+                # Rising candles into A-level
+                if a["c"] <= b["c"]:
+                    counter += 1
+                    if counter > 2: break
+            rs -= 1
+
+        seg = scan[rs:i+1]
+        if len(seg) < 2: continue
+
+        rH = max(x["h"] for x in seg)
+        rL = min(x["l"] for x in seg)
+
+        # Range must reach the level
+        if bull  and rL > level["price"]: continue  # range didn't touch level
+        if not bull and rH < level["price"]: continue
+
+        # Check breakout candle (most recent in scan)
+        cf = scan[i]
+        body = abs(cf["c"] - cf["o"])
+        cr   = cf["h"] - cf["l"]
+        br   = body / cr if cr > 0 else 0
+
+        # Breakout: close BEYOND level with strong body
+        if bull:
+            broke = cf["c"] > level["price"] and br > 0.45
+        else:
+            broke = cf["c"] < level["price"] and br > 0.45
+
+        if not broke: continue
+
+        # Must be recent (within last 6 candles)
+        if i < len(scan) - 7: continue
+
+        sl = rL * 0.9992 if bull else rH * 1.0008
+        risk = abs(level["price"] - sl)
+        if risk <= 0: continue
+
+        tp1 = level["price"] + risk*3 if bull else level["price"] - risk*3
+        tp2 = level["price"] + risk*7 if bull else level["price"] - risk*7
+        rr1 = abs(tp1 - level["price"]) / risk
+        if rr1 < 2.5: continue
+
+        return {
+            "br":     round(br, 2),
+            "rH":     rH,
+            "rL":     rL,
+            "sl":     sl,
+            "tp1":    tp1,
+            "tp2":    tp2,
+            "risk":   risk,
+            "rr1":    round(rr1, 1),
+            "rr2":    round(abs(tp2-level["price"])/risk, 1),
+            "cf":     cf,
+            "rangeCandles": len(seg),
+        }
+
+    return None
+
+
+def format_breakout_alert(lv, cur_price, bias, grade, tr1d, tr4h, lv_1d_target, setup):
+    """Format alert for 1H range break at 4H level."""
+    bull = lv["type"] == "V"
+    grade_label = "A+" if grade == "aplus" else grade.upper()
+    pf = lambda p: f"${p:,.0f}"
+    entry = lv["price"]
+    tp2 = lv_1d_target["price"] if lv_1d_target else setup["tp2"]
+
+    return "\n".join([
+        f"⚡ MSNR + RANGE BREAK ALERT",
+        f"",
+        f"{'LONG' if bull else 'SHORT'}  |  Grade: {grade_label}  |  BTCUSDT",
+        f"",
+        f"4H Level:   {pf(entry)}  ({lv['freshness']})",
+        f"Price now:  {pf(cur_price)}",
+        f"Body ratio: {setup['br']} (strong breakout)",
+        f"Range size: {setup['rangeCandles']} candles",
+        f"",
+        f"Entry:  {pf(entry)}",
+        f"SL:     {pf(setup['sl'])}",
+        f"TP1:    {pf(setup['tp1'])}  (+{setup['rr1']}R)",
+        f"TP2:    {pf(tp2)}",
+        f"",
+        f"HSL:  {'YES' if lv['hsl'] else 'NO'}",
+        f"Bias: {bias}  (1D:{tr1d} 4H:{tr4h})",
+        f"",
+        f"1H candles formed range into 4H level",
+        f"Last 1H candle broke and closed beyond level",
+        f"→ Place limit orders at {pf(entry)}",
+        f"",
+        f"{datetime.utcnow().strftime('%d %b %Y  %H:%M UTC')}",
+        f"singhakshat531-sketch.github.io/msnr-scanner",
+    ])
+
+
 def format_retest_alert(lv, cur_price, bias, grade, tr1d, tr4h, lv_1d_target, bl):
     """Alert for when price retests a broken level — highest quality setup."""
     bull = lv["type"] == "V"
@@ -427,17 +552,23 @@ def main():
               f"{l['freshness']} | HSL:{l['hsl']} | "
               f"dist:{l['dist']:.2f}% {near}")
 
-    # ── RANGE BREAK + RETEST DETECTION ──────────────────────────────────────
+    # ── 1H RANGE BREAK AT 4H LEVEL ───────────────────────────────────────────
+    # Alert when:
+    # 1. Consecutive 1H candles form a range INTO the 4H level
+    # 2. A 1H candle CLOSES beyond the 4H level (breakout)
+    # 3. Body of that candle is strong (ratio > 0.45)
     alerts_sent = 0
-    broken_levels = state.get("brokenLevels", {})
 
-    if bias != "RANGING":
+    if bias != "RANGING" and h1:
         for lv in lvl_4h:
             bull = lv["type"] == "V"
             if bull  and bias != "BULLISH": continue
             if not bull and bias != "BEARISH": continue
 
             key = f"BTCUSDT_{lv['type']}_{int(lv['price'])}"
+            if already_alerted(state, key):
+                print(f"  {lv['type']}-level ${lv['price']:,.0f} — alerted recently")
+                continue
 
             # Find 1D target
             lv_1d_target = next((
@@ -449,65 +580,25 @@ def main():
 
             grade, score = grade_level(lv, lv_1d_target)
 
-            # ── SCENARIO 1: RANGE BREAK ──────────────────────────────────
-            # Price has broken above/below the 4H level
-            # Record it so we can watch for retest
-            if bull:
-                # V-level: watch for break above (price closes above level)
-                broke_above = h4 and h4[-1]["c"] > lv["price"] * 1.005
+            # Scan last 48 1H candles for range break at this level
+            setup = find_range_break(h1, lv, bias)
+
+            if setup:
+                msg = format_breakout_alert(
+                    lv, cur_price, bias, grade,
+                    tr1d, tr4h, lv_1d_target, setup
+                )
+                send_telegram(msg)
+                mark_alerted(state, key)
+                alerts_sent += 1
+                print(f"\n  ✓ BREAKOUT ALERT: {lv['type']}-level "
+                      f"${lv['price']:,.0f} {grade.upper()} "
+                      f"| body ratio: {setup['br']:.2f}")
             else:
-                # A-level: watch for break below (price closes below level)
-                broke_above = h4 and h4[-1]["c"] < lv["price"] * 0.995
-
-            if broke_above and key not in broken_levels:
-                broken_levels[key] = {
-                    "level": lv["price"],
-                    "type": lv["type"],
-                    "direction": "LONG" if bull else "SHORT",
-                    "brokeAt": datetime.utcnow().isoformat(),
-                    "grade": grade,
-                    "lv_1d_target": lv_1d_target
-                }
-                print(f"  Range break recorded: {lv['type']}-level ${lv['price']:,.0f}")
-
-            # ── SCENARIO 2: RETEST OF BROKEN LEVEL ───────────────────────
-            # Price has come back to test the broken level
-            if key in broken_levels:
-                bl = broken_levels[key]
-                is_retest = is_near_level(cur_price, bl["level"], pct=0.5)
-
-                if is_retest:
-                    if not already_alerted(state, key + "_retest"):
-                        msg = format_retest_alert(
-                            lv, cur_price, bias, grade,
-                            tr1d, tr4h, lv_1d_target, bl
-                        )
-                        send_telegram(msg)
-                        mark_alerted(state, key + "_retest")
-                        alerts_sent += 1
-                        print(f"\n  ✓ RETEST ALERT: {lv['type']}-level "
-                              f"${lv['price']:,.0f} {grade.upper()}")
-
-            # ── SCENARIO 3: PROXIMITY ALERT (backup) ─────────────────────
-            # Price approaching level for the first time
-            elif is_near_level(cur_price, lv["price"]):
-                if not already_alerted(state, key):
-                    msg = format_alert(lv, cur_price, bias, grade, tr1d, tr4h, lv_1d_target)
-                    send_telegram(msg)
-                    mark_alerted(state, key)
-                    alerts_sent += 1
-                    print(f"\n  ✓ PROXIMITY ALERT: {lv['type']}-level "
-                          f"${lv['price']:,.0f} {grade.upper()}")
-                else:
-                    print(f"  {lv['type']}-level ${lv['price']:,.0f} — alerted recently")
-            else:
-                print(f"  {lv['type']}-level ${lv['price']:,.0f} "
-                      f"— watching (dist:{lv['dist']:.2f}%)")
-
-    state["brokenLevels"] = broken_levels
+                print(f"  {lv['type']}-level ${lv['price']:,.0f} — no breakout yet")
 
     if alerts_sent == 0:
-        print("\nNo alerts this run")
+        print("\nNo breakout alerts this run")
 
     # Update simulator
     print("\nUpdating simulator...")
