@@ -17,7 +17,7 @@
     "netR": 0.0,
     "bestR": 0.0
   },
-  "lastUpdated": "2026-03-20T15:23:13.010497",
+  "lastUpdated": "2026-03-20T15:30:47.249159",
   "levelAlerts": {
     "BTCUSDT_V_69403": "2026-03-20T15:21:20.928298"
   },
@@ -60,6 +60,14 @@
         "dist": 5.285985085580461,
         "wicks": 1
       }
+    },
+    "BTCUSDT_V_69403": {
+      "level": 69403.95,
+      "type": "V",
+      "direction": "LONG",
+      "brokeAt": "2026-03-20T15:30:47.249123",
+      "grade": "b",
+      "lv_1d_target": null
     }
   }
 }
