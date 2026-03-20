@@ -252,48 +252,57 @@ def find_crt(c1h, level, bias):
     if not bull and bias != "BEARISH": return None
 
     # Scan last 48 1H candles (2 days)
-    for i in range(max(5, len(c1h) - 48), len(c1h) - 1):
+    for i in range(max(5, len(c1h) - 72), len(c1h) - 1):
         # Define external range
+        # Allow up to 2 counter candles (real markets are messy)
         rs = i - 1
-        while rs > 1:
+        counter = 0
+        while rs > 2:
             a, b = c1h[rs], c1h[rs-1]
-            if bull     and a["c"] >= b["c"]: break
-            if not bull and a["c"] <= b["c"]: break
+            if bull:
+                if a["c"] >= b["c"]:
+                    counter += 1
+                    if counter > 2: break
+            else:
+                if a["c"] <= b["c"]:
+                    counter += 1
+                    if counter > 2: break
             rs -= 1
         seg = c1h[rs:i+1]
+        if len(seg) < 2: continue
         rH  = max(x["h"] for x in seg)
         rL  = min(x["l"] for x in seg)
 
-        # Range must be meaningful
-        if (rH - rL) / c1h[-1]["c"] < 0.002: continue
+        # Range must be meaningful (0.1% of price, was 0.2%)
+        if (rH - rL) / c1h[-1]["c"] < 0.001: continue
 
         sw = c1h[i]
         cf = c1h[i+1]
 
         # CRT-2: wick sweeps 4H level, CLOSE back INSIDE range
-        # CRITICAL: close must be inside range (above rL AND below rH)
-        # if close is outside range = breakout not sweep = SKIP
+        # close must be inside range AND back above/below the level
         if bull:
             crt2 = (sw["l"] <= level["price"] and   # wick swept level
                     sw["c"] > level["price"] and     # close above level
-                    sw["c"] > rL and                 # close inside range (above low)
-                    sw["c"] < rH)                    # close inside range (below high)
+                    sw["c"] > rL and                 # close inside range
+                    sw["c"] < rH)                    # close inside range
         else:
-            crt2 = (sw["h"] >= level["price"] and   # wick swept level
-                    sw["c"] < level["price"] and     # close below level
-                    sw["c"] < rH and                 # close inside range (below high)
-                    sw["c"] > rL)                    # close inside range (above low)
+            crt2 = (sw["h"] >= level["price"] and
+                    sw["c"] < level["price"] and
+                    sw["c"] < rH and
+                    sw["c"] > rL)
         if not crt2: continue
 
-        # CRT-3: decisive body past entire range
+        # CRT-3: decisive body closes beyond entire range
+        # Body ratio 0.45 (was 0.5) — slightly looser for real market
         body = abs(cf["c"] - cf["o"])
         cr   = cf["h"] - cf["l"]
         br   = body / cr if cr > 0 else 0
 
         if bull:
-            crt3 = cf["c"] > rH and br > 0.5
+            crt3 = cf["c"] > rH and br > 0.45
         else:
-            crt3 = cf["c"] < rL and br > 0.5
+            crt3 = cf["c"] < rL and br > 0.45
         if not crt3: continue
 
         return {"sw": sw, "cf": cf, "br": br, "rH": rH, "rL": rL}
