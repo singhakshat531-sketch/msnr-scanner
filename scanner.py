@@ -483,4 +483,42 @@ def main():
                             tr1d, tr4h, lv_1d_target, bl
                         )
                         send_telegram(msg)
-           
+                        mark_alerted(state, key + "_retest")
+                        alerts_sent += 1
+                        print(f"\n  ✓ RETEST ALERT: {lv['type']}-level "
+                              f"${lv['price']:,.0f} {grade.upper()}")
+
+            # ── SCENARIO 3: PROXIMITY ALERT (backup) ─────────────────────
+            # Price approaching level for the first time
+            elif is_near_level(cur_price, lv["price"]):
+                if not already_alerted(state, key):
+                    msg = format_alert(lv, cur_price, bias, grade, tr1d, tr4h, lv_1d_target)
+                    send_telegram(msg)
+                    mark_alerted(state, key)
+                    alerts_sent += 1
+                    print(f"\n  ✓ PROXIMITY ALERT: {lv['type']}-level "
+                          f"${lv['price']:,.0f} {grade.upper()}")
+                else:
+                    print(f"  {lv['type']}-level ${lv['price']:,.0f} — alerted recently")
+            else:
+                print(f"  {lv['type']}-level ${lv['price']:,.0f} "
+                      f"— watching (dist:{lv['dist']:.2f}%)")
+
+    state["brokenLevels"] = broken_levels
+
+    if alerts_sent == 0:
+        print("\nNo alerts this run")
+
+    # Update simulator
+    print("\nUpdating simulator...")
+    update_simulator(state, cur_price)
+    print(f"  Balance: ${state['balance']:.2f}")
+
+    # Save
+    print("\nSaving to GitHub...")
+    save_state(state, sha)
+
+    print("=== Scan complete ===")
+
+if __name__ == "__main__":
+    main()
