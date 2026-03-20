@@ -594,6 +594,25 @@ def main():
                 print(f"\n  ✓ BREAKOUT ALERT: {lv['type']}-level "
                       f"${lv['price']:,.0f} {grade.upper()} "
                       f"| body ratio: {setup['br']:.2f}")
+                # Tag as breakout for simulator
+                setup_data = {
+                    "id": key,
+                    "pair": "BTCUSDT",
+                    "direction": "LONG" if bull else "SHORT",
+                    "grade": grade,
+                    "gradeLabel": "A+" if grade=="aplus" else grade.upper(),
+                    "bull": bull,
+                    "setupType": "BREAKOUT",
+                    "rawEntry": lv["price"],
+                    "rawSL": setup["sl"],
+                    "rawTP1": setup["tp1"],
+                    "rawTP2": setup["tp2"],
+                    "rawRisk": setup["risk"],
+                    "rr1": setup["rr1"],
+                    "rr2": setup["rr2"],
+                    "detectedAt": datetime.utcnow().isoformat(),
+                }
+                update_simulator(state, cur_price, [setup_data])
             else:
                 print(f"  {lv['type']}-level ${lv['price']:,.0f} — no breakout yet")
 
