@@ -780,7 +780,19 @@ function updateSimulator(){
 function saveSim(){ /* Data saved by scanner.py to GitHub */ }
 
 function resetSim(){
-  showNotif('Reset done by scanner.py — data syncs every 15 min from GitHub');
+  if(!confirm('Reset simulator? Clears all paper trades and returns to $1,000.'))return;
+  sim={
+    balance:SIM_START,
+    activeTrades:[],
+    history:[],
+    equityCurve:[{t:new Date().toISOString(),v:SIM_START}],
+    stats:{totalTrades:0,wins:0,losses:0,be:0,netR:0,bestR:0},
+    lastUpdated:null
+  };
+  saveSim();
+  renderSimulator(btcData.h1.at(-1)?.c||0);
+  renderEquityChart();
+  showNotif('Simulator reset to $1,000');
 }
 
 function renderSimulator(curPrice){
@@ -956,14 +968,19 @@ function renderSetups(){
 
       <div style="padding:10px 14px;background:${urgent?'var(--green-bg)':'var(--s3)'};border-top:1px solid var(--border)">
         <div style="font-size:9px;color:${urgent?'var(--green)':'var(--t3)'};letter-spacing:.08em;margin-bottom:6px">
-          ${isRetest?'RETEST SETUP — DO THIS NOW:':atLevel?'AT LEVEL — CHECK NOW:':'WHEN PRICE ARRIVES:'}
+          ${isBreakout?'BREAKOUT — LOG THIS TRADE:':isRetest?'RETEST — LOG THIS TRADE:':atLevel?'AT LEVEL — CHECK 1H NOW:':'WHEN PRICE ARRIVES:'}
         </div>
         <div style="font-size:10px;color:var(--t1);line-height:1.9">
-          ${isRetest?
-            '1. Open 1H chart on TradingView<br>2. Level was broken — now retesting<br>3. Look for confirmation candle at level<br>4. Enter on confirmation · SL below/above level':
-            '1. Open 1H chart on TradingView<br>2. Watch for range break above/below level<br>3. Wait for retest of broken level<br>4. Enter on confirmation candle only'
-          }
+          ${isBreakout?'1H range broke beyond 4H level — confirm on chart then log':
+            isRetest?'Level retested after break — confirm candle then log':
+            '1. Watch for 1H range into level<br>2. Wait for close beyond level<br>3. Log when confirmed'}
         </div>
+        ${urgent?`<button onclick="manualTrade('${s.id}',${s.rawEntry},${s.rawSL},${s.rawTP1},${s.rawTP2},'${s.direction}','${s.grade}')"
+          style="margin-top:8px;width:100%;background:var(--green);border:none;color:#000;
+          padding:9px;font-family:var(--font);font-size:11px;font-weight:700;
+          cursor:pointer;letter-spacing:.08em">
+          + LOG TRADE TO SIMULATOR
+        </button>`:''}
       </div>
     </div>`;
   }).join('');
@@ -1206,4 +1223,27 @@ function fmt(n,d){return Number(n).toLocaleString('en-US',{minimumFractionDigits
 function showNotif(msg){const el=document.getElementById('notif');el.textContent=msg;el.style.display='block';setTimeout(()=>el.style.display='none',3000)}
 </script>
 </body>
-</html>
+</html>function manualTrade(id, entry, sl, tp1, tp2, direction, grade) {
+  if(sim.activeTrades.find(t=>t.id===id)){showNotif('Already in simulator');return;}
+  if(sim.history.find(t=>t.id===id)){showNotif('Already closed');return;}
+  const bull=direction==='LONG';
+  const riskPct={aplus:3,a:2,b:1}[grade]||1;
+  const rawRisk=Math.abs(entry-sl);
+  const riskAmt=sim.balance*(riskPct/100);
+  sim.activeTrades.push({
+    id,pair:'BTCUSDT',direction,grade,
+    gradeLabel:grade==='aplus'?'A+':grade.toUpperCase(),
+    bull,phase:'entry',remainPct:100,
+    rawEntry:entry,rawSL:sl,rawTP1:tp1,rawTP2:tp2,rawRisk,
+    entryBalance:sim.balance,
+    riskAmt:parseFloat(riskAmt.toFixed(2)),riskPct,
+    enteredAt:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})
+  });
+  sim.equityCurve.push({t:new Date().toISOString(),v:sim.balance});
+  saveSim();
+  renderSimulator(btcData.h1.at(-1)?.c||0);
+  renderEquityChart();
+  showNotif('Trade logged to simulator');
+}
+
+
