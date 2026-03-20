@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>MSNR+CRT Scanner — Elite Observer</title>
-<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
 :root {
@@ -29,8 +29,8 @@
   --t2: #8888aa;
   --t3: #444460;
   --t4: #2a2a42;
-  --font-mono: 'Space Mono', monospace;
-  --font-head: 'Syne', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-head: 'JetBrains Mono', monospace;
   --radius: 2px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -1192,15 +1192,15 @@ function renderChart() {
         tooltip: {
           backgroundColor: 'rgba(5,5,7,.97)',
           borderColor: 'rgba(0,255,204,.3)', borderWidth: 1,
-          titleFont: { family: 'Space Mono', size: 8 },
-          bodyFont:  { family: 'Space Mono', size: 9 },
+          titleFont: { family: 'JetBrains Mono', size: 8 },
+          bodyFont:  { family: 'JetBrains Mono', size: 9 },
           titleColor: 'rgba(136,136,170,.8)', bodyColor: '#f0f0f8',
           callbacks: { label: ctx => ' $' + fmt(ctx.parsed.y, 0) }
         }
       },
       scales: {
-        x: { grid: { color: 'rgba(26,26,40,.8)' }, ticks: { color: 'rgba(68,68,96,.9)', font: { family: 'Space Mono', size: 7 }, maxTicksLimit: 8 } },
-        y: { grid: { color: 'rgba(26,26,40,.8)' }, ticks: { color: 'rgba(68,68,96,.9)', font: { family: 'Space Mono', size: 7 }, callback: v => '$' + fmt(v, 0) } }
+        x: { grid: { color: 'rgba(26,26,40,.8)' }, ticks: { color: 'rgba(68,68,96,.9)', font: { family: 'JetBrains Mono', size: 7 }, maxTicksLimit: 8 } },
+        y: { grid: { color: 'rgba(26,26,40,.8)' }, ticks: { color: 'rgba(68,68,96,.9)', font: { family: 'JetBrains Mono', size: 7 }, callback: v => '$' + fmt(v, 0) } }
       }
     },
     plugins: [{
@@ -1219,7 +1219,7 @@ function renderChart() {
           if (lv.freshness !== 'FRESH') ctx.setLineDash([4, 4]);
           ctx.stroke(); ctx.setLineDash([]);
           ctx.fillStyle = isV ? 'rgba(0,255,204,.85)' : 'rgba(255,51,102,.85)';
-          ctx.font = '8px Space Mono';
+          ctx.font = '8px JetBrains Mono';
           ctx.fillText(`${lv.type} $${fmt(lv.price, 0)}`, left + 4, yPos - 3);
           ctx.restore();
         });
@@ -1251,7 +1251,7 @@ function renderEquityChart() {
       responsive: true, maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
-        tooltip: { backgroundColor: 'rgba(5,5,7,.97)', borderColor: 'rgba(0,255,204,.3)', borderWidth: 1, bodyFont: { family: 'Space Mono', size: 9 }, callbacks: { label: ctx => '$' + fmt(ctx.parsed.y, 2) } }
+        tooltip: { backgroundColor: 'rgba(5,5,7,.97)', borderColor: 'rgba(0,255,204,.3)', borderWidth: 1, bodyFont: { family: 'JetBrains Mono', size: 9 }, callbacks: { label: ctx => '$' + fmt(ctx.parsed.y, 2) } }
       },
       scales: { x: { display: false }, y: { grid: { color: 'rgba(26,26,40,.8)' }, ticks: { color: 'rgba(68,68,96,.9)', font: { family: 'Space Mono', size: 7 }, callback: v => '$' + fmt(v, 0) } } }
     }
