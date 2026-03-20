@@ -165,29 +165,56 @@ def get_bias(tr1w, tr1d):
 
 # ── KEY LEVELS ────────────────────────────────────────────────
 def find_key_levels(candles, lb=2, max_dist_pct=20.0):
-    if len(candles) < lb*2+2: return []
-    closes = [c["c"] for c in candles]
-    cur    = closes[-1]
+    """
+    V-level: bearish candle confirmed by next bullish candle
+             → level price = bearish candle's CLOSE
+    A-level: bullish candle confirmed by next bearish candle
+             → level price = bullish candle's CLOSE
+    """
+    if len(candles) < 4: return []
+    cur    = candles[-1]["c"]
     levels = []
-    for i in range(lb, len(closes)-lb):
-        is_a = all(closes[i]>closes[i-j] and closes[i]>closes[i+j] for j in range(1,lb+1))
-        is_v = all(closes[i]<closes[i-j] and closes[i]<closes[i+j] for j in range(1,lb+1))
-        if not is_a and not is_v: continue
-        price = closes[i]
-        dist  = abs(cur-price)/cur*100
+
+    for i in range(len(candles) - 2):
+        c0 = candles[i]
+        c1 = candles[i + 1]
+
+        is_bearish = c0["c"] < c0["o"]
+        is_bullish = c0["c"] > c0["o"]
+        conf_bull  = c1["c"] > c1["o"]
+        conf_bear  = c1["c"] < c1["o"]
+
+        if is_bearish and conf_bull:
+            price = c0["c"]; t = "V"
+        elif is_bullish and conf_bear:
+            price = c0["c"]; t = "A"
+        else:
+            continue
+
+        dist = abs(cur - price) / cur * 100
         if dist > max_dist_pct: continue
-        t = "A" if is_a else "V"
+
         wicks, dead = 0, False
-        for fc in candles[i+1:]:
-            if t=="A":
-                if fc["c"]>price: dead=True; break
-                if fc["h"]>=price: wicks+=1
+        for fc in candles[i + 2:]:
+            if t == "A":
+                if fc["c"] > price: dead = True; break
+                if fc["h"] >= price: wicks += 1
             else:
-                if fc["c"]<price: dead=True; break
-                if fc["l"]<=price: wicks+=1
+                if fc["c"] < price: dead = True; break
+                if fc["l"] <= price: wicks += 1
         if dead: continue
-        hsl = sum(1 for pc in closes[:i] if abs(pc-price)/price<0.005)>=2
-        levels.append({"type":t,"price":price,"fresh":wicks==0,"hsl":hsl,"dist":dist,"wicks":wicks})
+
+        hsl = sum(1 for c in candles[:i] if abs(c["c"] - price) / price < 0.005) >= 2
+
+        levels.append({
+            "type":  t,
+            "price": price,
+            "fresh": wicks == 0,
+            "hsl":   hsl,
+            "dist":  dist,
+            "wicks": wicks,
+        })
+
     return sorted(levels, key=lambda x: x["dist"])[:10]
 
 def grade_level(lv, has_1d):
@@ -317,41 +344,52 @@ def find_1h_mss(h1, level):
 
     sweep_candle = scan[last_touch_idx]
 
-    # Step 3: MSS = body CLOSE beyond the range extreme
-    # Must happen AFTER the range ends
+    # Step 3: scan candles after range for MSS or BREAK
+    # MSS   = range extreme swept (wick, closes back inside) THEN body breaks
+    # BREAK = body breaks range extreme directly, no sweep first
+    range_swept = False
+
     for i in range(best_range_end + 1, n):
         mss_c = scan[i]
         if bull:
+            # Track range low sweep
+            if mss_c["l"] < range_low and mss_c["c"] > range_low:
+                range_swept = True
             if mss_c["c"] > range_high:
+                signal = "MSS" if range_swept else "BREAK"
                 return {
                     "bull":          True,
+                    "signal":        signal,
                     "range_high":    range_high,
                     "range_low":     range_low,
                     "range_candles": len(ext_range),
                     "mss_close":     mss_c["c"],
                     "swept_level":   swept,
                     "broke":         "ABOVE range high",
-                    # timestamps so alert shows exact candles
                     "sweep_time":    ts(sweep_candle["t"]),
-                    "sweep_wick":    sweep_candle["l"],   # wick low that swept support
+                    "sweep_wick":    sweep_candle["l"],
                     "sweep_close":   sweep_candle["c"],
                     "range_open":    ts(ext_range[0]["t"]),
                     "range_close":   ts(ext_range[-1]["t"]),
                     "mss_open":      ts(mss_c["t"]),
                 }
         else:
+            # Track range high sweep
+            if mss_c["h"] > range_high and mss_c["c"] < range_high:
+                range_swept = True
             if mss_c["c"] < range_low:
+                signal = "MSS" if range_swept else "BREAK"
                 return {
                     "bull":          False,
+                    "signal":        signal,
                     "range_high":    range_high,
                     "range_low":     range_low,
                     "range_candles": len(ext_range),
                     "mss_close":     mss_c["c"],
                     "swept_level":   swept,
                     "broke":         "BELOW range low",
-                    # timestamps so alert shows exact candles
                     "sweep_time":    ts(sweep_candle["t"]),
-                    "sweep_wick":    sweep_candle["h"],   # wick high that swept resistance
+                    "sweep_wick":    sweep_candle["h"],
                     "sweep_close":   sweep_candle["c"],
                     "range_open":    ts(ext_range[0]["t"]),
                     "range_close":   ts(ext_range[-1]["t"]),
@@ -387,6 +425,7 @@ def format_alert_a(lv, cur_price, grade, bias, tr1w, tr1d, has_1d):
 
 def format_alert_b(lv, mss, cur_price, grade, bias, tr1w, tr1d, has_1d):
     bull       = mss["bull"]
+    signal     = mss.get("signal", "MSS")
     gl         = "A+" if grade=="aplus" else grade.upper()
     pf         = lambda p: f"${p:,.0f}"
     swept_txt  = "Swept ✓" if mss["swept_level"] else "Touched"
@@ -394,8 +433,13 @@ def format_alert_b(lv, mss, cur_price, grade, bias, tr1w, tr1d, has_1d):
     rdir       = "bearish" if bull else "bullish"
     retest_lvl = pf(mss["range_high"]) if bull else pf(mss["range_low"])
     wick_label = f"Wick low : {pf(mss['sweep_wick'])}" if bull else f"Wick high: {pf(mss['sweep_wick'])}"
+    if signal == "MSS":
+        emoji  = "🚀 LONG — SWEEP+MSS" if bull else "💥 SHORT — SWEEP+MSS"
+    else:
+        emoji  = "⚡ LONG — BREAK" if bull else "⚡ SHORT — BREAK"
+    sig_line = "── MSS  [1H candle] ──────────" if signal == "MSS" else "── BREAK  [1H candle] ────────"
     return "\n".join([
-        f"{'🚀 LONG' if bull else '💥 SHORT'} — 1H MSS | Go to 5min",
+        f"{emoji} | Go to 5min",
         f"",
         f"Grade: {gl}{' | 1D+4H ✓' if has_1d else ''}  |  BTCUSDT",
         f"",
@@ -414,7 +458,7 @@ def format_alert_b(lv, mss, cur_price, grade, bias, tr1w, tr1d, has_1d):
         f"To        : {mss['range_close']} IST",
         f"Range     : {pf(mss['range_low'])} — {pf(mss['range_high'])}",
         f"",
-        f"── MSS  [1H candle] ──────────",
+        f"{sig_line}",
         f"Time      : {mss['mss_open']} IST",
         f"Close     : {pf(mss['mss_close'])}  ({mss['broke']})",
         f"",
