@@ -273,6 +273,19 @@ def find_1h_mss(h1, level):
 
     if last_touch_idx is None: return None
 
+    # ── FIX 1: sweep candle must CLOSE BACK INSIDE the level ──────
+    # A real sweep = wick breaks the level BUT candle closes back on the other side.
+    # If the close is beyond the level, that's a breakout — not a sweep. Skip it.
+    sweep_c = scan[last_touch_idx]
+    if bull:
+        # Bullish sweep: wick went below support, close must be ABOVE it
+        if sweep_c["c"] < lp:
+            return None   # candle closed below support = breakdown, not a sweep
+    else:
+        # Bearish sweep: wick went above resistance, close must be BELOW it
+        if sweep_c["c"] > lp:
+            return None   # candle closed above resistance = breakout, not a sweep
+
     swept = scan[last_touch_idx]["l"] < lp if bull else scan[last_touch_idx]["h"] > lp
 
     # Step 2: scan ALL candles after the touch for the MOST RECENT
@@ -287,7 +300,11 @@ def find_1h_mss(h1, level):
     best_range_end   = None
     i = last_touch_idx + 1
 
-    while i < n - 1:
+    # ── FIX 2: only look for external range within 10 candles of sweep ──
+    # The range must form close to the sweep, not much later.
+    range_search_end = min(last_touch_idx + 11, n - 1)
+
+    while i < range_search_end:
         c = scan[i]
         is_dir = (c["c"] < c["o"]) if bull else (c["c"] > c["o"])
 
@@ -296,7 +313,7 @@ def find_1h_mss(h1, level):
             grp_start = i
             grp_end   = i
             j = i + 1
-            while j < n - 1:
+            while j < range_search_end:
                 cj = scan[j]
                 if (cj["c"] < cj["o"]) if bull else (cj["c"] > cj["o"]):
                     grp_end = j
