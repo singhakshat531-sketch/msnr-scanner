@@ -334,6 +334,13 @@ def find_1h_mss(h1, level):
     range_high = max(c["h"] for c in ext_range)
     range_low  = min(c["l"] for c in ext_range)
 
+    # Helper: unix-ms timestamp → short IST string for display
+    def ts(unix_ms):
+        dt = datetime.fromtimestamp(unix_ms / 1000, IST)
+        return dt.strftime('%d %b  %I:%M %p')
+
+    sweep_candle = scan[last_touch_idx]
+
     # Step 3: MSS = body CLOSE beyond the range extreme
     # Must happen AFTER the range ends
     for i in range(best_range_end + 1, n):
@@ -348,6 +355,13 @@ def find_1h_mss(h1, level):
                     "mss_close":     mss_c["c"],
                     "swept_level":   swept,
                     "broke":         "ABOVE range high",
+                    # timestamps so alert shows exact candles
+                    "sweep_time":    ts(sweep_candle["t"]),
+                    "sweep_wick":    sweep_candle["l"],   # wick low that swept support
+                    "sweep_close":   sweep_candle["c"],
+                    "range_open":    ts(ext_range[0]["t"]),
+                    "range_close":   ts(ext_range[-1]["t"]),
+                    "mss_open":      ts(mss_c["t"]),
                 }
         else:
             if mss_c["c"] < range_low:
@@ -359,6 +373,13 @@ def find_1h_mss(h1, level):
                     "mss_close":     mss_c["c"],
                     "swept_level":   swept,
                     "broke":         "BELOW range low",
+                    # timestamps so alert shows exact candles
+                    "sweep_time":    ts(sweep_candle["t"]),
+                    "sweep_wick":    sweep_candle["h"],   # wick high that swept resistance
+                    "sweep_close":   sweep_candle["c"],
+                    "range_open":    ts(ext_range[0]["t"]),
+                    "range_close":   ts(ext_range[-1]["t"]),
+                    "mss_open":      ts(mss_c["t"]),
                 }
 
     return None
@@ -389,27 +410,40 @@ def format_alert_a(lv, cur_price, grade, bias, tr1w, tr1d, has_1d):
     ])
 
 def format_alert_b(lv, mss, cur_price, grade, bias, tr1w, tr1d, has_1d):
-    bull      = mss["bull"]
-    gl        = "A+" if grade=="aplus" else grade.upper()
-    pf        = lambda p: f"${p:,.0f}"
-    swept_txt = "Swept ✓" if mss["swept_level"] else "Touched"
-    n         = mss["range_candles"]
-    rdir      = "bearish" if bull else "bullish"
-    retest_lvl= pf(mss["range_high"]) if bull else pf(mss["range_low"])
+    bull       = mss["bull"]
+    gl         = "A+" if grade=="aplus" else grade.upper()
+    pf         = lambda p: f"${p:,.0f}"
+    swept_txt  = "Swept ✓" if mss["swept_level"] else "Touched"
+    n          = mss["range_candles"]
+    rdir       = "bearish" if bull else "bullish"
+    retest_lvl = pf(mss["range_high"]) if bull else pf(mss["range_low"])
+    wick_label = f"Wick low : {pf(mss['sweep_wick'])}" if bull else f"Wick high: {pf(mss['sweep_wick'])}"
     return "\n".join([
         f"{'🚀 LONG' if bull else '💥 SHORT'} — 1H MSS | Go to 5min",
         f"",
         f"Grade: {gl}{' | 1D+4H ✓' if has_1d else ''}  |  BTCUSDT",
         f"",
-        f"4H Level  : {pf(lv['price'])} ({'Fresh' if lv['fresh'] else 'Used'}{', HSL' if lv['hsl'] else ''})",
-        f"Swept     : {swept_txt}",
+        f"── 4H LEVEL ──────────────────",
+        f"Level     : {pf(lv['price'])} ({'Fresh' if lv['fresh'] else 'Used'}{', HSL' if lv['hsl'] else ''})",
         f"",
-        f"Ext Range : {n} consecutive {rdir} 1H candle{'s' if n>1 else ''}",
+        f"── SWEEP  [1H candle] ────────",
+        f"Time      : {mss['sweep_time']} IST",
+        f"{wick_label}",
+        f"Close     : {pf(mss['sweep_close'])}  ← closed back inside level ✓",
+        f"Status    : {swept_txt}",
+        f"",
+        f"── EXT RANGE  [1H candles] ───",
+        f"Candles   : {n} consecutive {rdir}",
+        f"From      : {mss['range_open']} IST",
+        f"To        : {mss['range_close']} IST",
         f"Range     : {pf(mss['range_low'])} — {pf(mss['range_high'])}",
-        f"MSS close : {pf(mss['mss_close'])} ({mss['broke']})",
-        f"Now       : {pf(cur_price)}",
         f"",
-        f"Bias  : {bias}  (1W {tr1w} · 1D {tr1d})",
+        f"── MSS  [1H candle] ──────────",
+        f"Time      : {mss['mss_open']} IST",
+        f"Close     : {pf(mss['mss_close'])}  ({mss['broke']})",
+        f"",
+        f"Now       : {pf(cur_price)}",
+        f"Bias      : {bias}  (1W {tr1w} · 1D {tr1d})",
         f"",
         f"→ 5min: watch retest of {retest_lvl}",
         f"→ SL behind the sweep wick",
