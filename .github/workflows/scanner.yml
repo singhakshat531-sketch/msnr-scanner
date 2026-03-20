@@ -1,15 +1,17 @@
-name: MSNR CRT Scanner
+name: MSNR+CRT Scanner
 
 on:
   schedule:
-    - cron: '*/15 * * * *'
-  workflow_dispatch:
+    - cron: '0 * * * *'   # every hour — GitHub free tier, runs forever
+  workflow_dispatch:        # manual trigger button in GitHub UI
 
 jobs:
   scan:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Set up Python
@@ -17,24 +19,9 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Run MSNR CRT Scanner
+      - name: Run MSNR+CRT Scanner
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: python scanner.py
-
-      - name: Save alert state
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: alert-state
-          path: last_alerts.json
-          if-no-files-found: ignore
-          retention-days: 1
-
-      - name: Restore alert state
-        uses: actions/download-artifact@v4
-        continue-on-error: true
-        with:
-          name: alert-state
