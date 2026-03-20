@@ -79,7 +79,7 @@ def github_write(filename, content, sha=None):
         return True
     url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{filename}"
     body = {
-        "message": f"scanner {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}",
+        "message": f"scanner {datetime.now(timezone.utc).replace(tzinfo=None).strftime('%Y-%m-%d %H:%M UTC')}",
         "content": base64.b64encode(json.dumps(content, indent=2).encode()).decode(),
         "branch": "main"
     }
@@ -101,9 +101,9 @@ def load_state():
     if data is None:
         data = {
             "balance": SIM_START, "activeTrades": [], "history": [],
-            "equityCurve": [{"t": datetime.utcnow().isoformat(), "v": SIM_START}],
+            "equityCurve": [{"t": datetime.now(timezone.utc).replace(tzinfo=None).isoformat(), "v": SIM_START}],
             "stats": {"totalTrades":0,"wins":0,"losses":0,"be":0,"netR":0.0,"bestR":0.0},
-            "lastUpdated": datetime.utcnow().isoformat(),
+            "lastUpdated": datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),
             "levelAlerts": {}, "mssAlerts": {}
         }
     data.setdefault("levelAlerts", {})
@@ -111,7 +111,7 @@ def load_state():
     return data, sha
 
 def save_state(data, sha):
-    data["lastUpdated"] = datetime.utcnow().isoformat()
+    data["lastUpdated"] = datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
     return github_write(DATA_FILE, data, sha)
 
 # ── FETCH ─────────────────────────────────────────────────────
@@ -203,11 +203,11 @@ def was_alerted(state, bucket, key, hours):
     ts = state.get(bucket,{}).get(key)
     if not ts: return False
     try:
-        return (datetime.utcnow()-datetime.fromisoformat(ts)).total_seconds() < hours*3600
+        return (datetime.now(timezone.utc).replace(tzinfo=None)-datetime.fromisoformat(ts)).total_seconds() < hours*3600
     except: return False
 
 def mark_alert(state, bucket, key):
-    state[bucket][key] = datetime.utcnow().isoformat()
+    state[bucket][key] = datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
 
 # ── TELEGRAM ──────────────────────────────────────────────────
 def send_telegram(msg):
@@ -417,30 +417,30 @@ def update_simulator(state, cur_price):
                 state["balance"]-=riskAmt; state["stats"]["losses"]+=1; state["stats"]["totalTrades"]+=1
                 state["stats"]["netR"]=round(state["stats"]["netR"]-1,2)
                 state["history"].insert(0,{**t,"result":"loss","pnl":round(-riskAmt,2),"pnlR":-1.0,
-                    "closePrice":round(cur_price,2),"closedAt":datetime.utcnow().isoformat()})
-                state["equityCurve"].append({"t":datetime.utcnow().isoformat(),"v":round(state["balance"],2)}); continue
+                    "closePrice":round(cur_price,2),"closedAt":datetime.now(timezone.utc).replace(tzinfo=None).isoformat()})
+                state["equityCurve"].append({"t":datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),"v":round(state["balance"],2)}); continue
             if (bull and cur_price>=tp1) or (not bull and cur_price<=tp1):
                 profit=posSize*abs(tp1-entry)*0.5; state["balance"]+=profit
                 t["phase"]="tp1"; t["rawSL"]=entry
                 state["stats"]["netR"]=round(state["stats"]["netR"]+1.5,2)
                 state["history"].insert(0,{**t,"result":"tp1","pnl":round(profit,2),"pnlR":1.5,
-                    "closePrice":round(cur_price,2),"closedAt":datetime.utcnow().isoformat()})
-                state["equityCurve"].append({"t":datetime.utcnow().isoformat(),"v":round(state["balance"],2)})
+                    "closePrice":round(cur_price,2),"closedAt":datetime.now(timezone.utc).replace(tzinfo=None).isoformat()})
+                state["equityCurve"].append({"t":datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),"v":round(state["balance"],2)})
                 still.append(t); continue
         elif phase=="tp1":
             if (bull and cur_price<=entry) or (not bull and cur_price>=entry):
                 state["stats"]["be"]+=1; state["stats"]["totalTrades"]+=1
                 state["history"].insert(0,{**t,"result":"be","pnl":0.0,"pnlR":0.0,
-                    "closePrice":round(cur_price,2),"closedAt":datetime.utcnow().isoformat()})
-                state["equityCurve"].append({"t":datetime.utcnow().isoformat(),"v":round(state["balance"],2)}); continue
+                    "closePrice":round(cur_price,2),"closedAt":datetime.now(timezone.utc).replace(tzinfo=None).isoformat()})
+                state["equityCurve"].append({"t":datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),"v":round(state["balance"],2)}); continue
             if (bull and cur_price>=tp2) or (not bull and cur_price<=tp2):
                 profit=posSize*abs(tp2-entry)*0.5; netR=round(1.5+abs(tp2-entry)/risk*0.5,1)
                 state["balance"]+=profit; state["stats"]["wins"]+=1; state["stats"]["totalTrades"]+=1
                 state["stats"]["netR"]=round(state["stats"]["netR"]+netR,2)
                 state["stats"]["bestR"]=max(state["stats"]["bestR"],netR)
                 state["history"].insert(0,{**t,"result":"win","pnl":round(profit,2),"pnlR":netR,
-                    "closePrice":round(cur_price,2),"closedAt":datetime.utcnow().isoformat()})
-                state["equityCurve"].append({"t":datetime.utcnow().isoformat(),"v":round(state["balance"],2)}); continue
+                    "closePrice":round(cur_price,2),"closedAt":datetime.now(timezone.utc).replace(tzinfo=None).isoformat()})
+                state["equityCurve"].append({"t":datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),"v":round(state["balance"],2)}); continue
         still.append(t)
     state["activeTrades"]=still
     state["history"]=state["history"][:100]
@@ -449,7 +449,7 @@ def update_simulator(state, cur_price):
 
 # ── MAIN ──────────────────────────────────────────────────────
 def main():
-    print(f"\n=== MSNR Scanner v9  {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')} ===\n")
+    print(f"\n=== MSNR Scanner v9  {datetime.now(timezone.utc).replace(tzinfo=None).strftime('%Y-%m-%d %H:%M UTC')} ===\n")
     state, sha = load_state()
     print(f"Balance: ${state['balance']:.2f} | Active trades: {len(state['activeTrades'])}")
 
