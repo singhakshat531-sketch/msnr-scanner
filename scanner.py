@@ -621,10 +621,13 @@ def main():
 
         # ── ALERT B: 1H MSS at this level ─────────────────────
         if dist <= ZONE_PCT:
-            key_b = lv_key + "_MSS"
-            if not was_alerted(state, "mssAlerts", key_b, SPAM_HOURS_B):
-                mss = find_1h_mss(h1, lv)
-                if mss:
+            # Find MSS first to get its timestamp for the unique key
+            mss = find_1h_mss(h1, lv)
+            if mss:
+                # Key includes MSS candle time — so each unique MSS fires exactly once, forever
+                mss_ts_str = str(mss.get("mss_open",""))
+                key_b = lv_key + "_MSS_" + mss_ts_str.replace(" ","_").replace(":","")
+                if not was_alerted(state, "mssAlerts", key_b, 999999):  # never expire
                     msg = format_alert_b(lv, mss, cur_price, grade, bias, tr1w, tr1d, has_1d)
                     send_telegram(msg)
                     mark_alert(state, "mssAlerts", key_b)
@@ -648,7 +651,9 @@ def main():
                           f"| range {mss['range_candles']}c "
                           f"| broke {mss['broke']} @ ${mss['mss_close']:,.0f}")
                 else:
-                    print(f"  → In zone, no 1H MSS yet")
+                    print(f"  → MSS already alerted")
+            else:
+                print(f"  → In zone, no 1H MSS yet")
 
     print(f"\n{'No alerts this run' if alerts_sent==0 else str(alerts_sent)+' alert(s) sent'}")
     update_simulator(state, cur_price)
