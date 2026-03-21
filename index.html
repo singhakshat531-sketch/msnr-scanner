@@ -1042,145 +1042,136 @@ function renderDash() {
   const h1 = btcData.h1, h4 = btcData.h4, d1 = btcData.d1;
   if (!h1.length && !h4.length) return;
 
-  const cur   = h1.at(-1)?.c || h4.at(-1)?.c || 0;
+  const cur   = remoteState?.currentPrice || h1.at(-1)?.c || h4.at(-1)?.c || 0;
   const prev  = h1.at(-2)?.c || cur;
   const chg   = (cur - prev) / prev * 100;
-  const tr1d  = getTrend(d1, 20);
-  const tr4h  = getTrend(h4, 42);
-  const bias  = getBias(tr1d, tr4h);
+  const tr1d  = remoteState?.currentTrend?.d1 || getTrend(d1, 20);
+  const tr1w  = remoteState?.currentTrend?.w1 || 'UNKNOWN';
+  const bias  = remoteState?.currentBias  || getBias(tr1d, getTrend(h4, 42));
+  const scanTime = remoteState?.scanTime || '';
 
-  // Stat cards
   const dashPrice = document.getElementById('dashPrice');
   dashPrice.textContent = '$' + fmt(cur, 0);
   dashPrice.className   = 'stat-val ' + (chg >= 0 ? 'green' : 'red');
-  document.getElementById('dashChg').textContent = (chg >= 0 ? '+' : '') + chg.toFixed(2) + '%';
-  document.getElementById('dashTr1d').textContent = tr1d;
-  document.getElementById('dashTr1d').style.color = tr1d === 'BULLISH' ? 'var(--green)' : tr1d === 'BEARISH' ? 'var(--red)' : 'var(--t2)';
-  document.getElementById('dashTr4h').textContent = '4H: ' + tr4h;
-  document.getElementById('dashBias').textContent  = bias;
-  document.getElementById('dashBias').style.color  = bias === 'BULLISH' ? 'var(--green)' : bias === 'BEARISH' ? 'var(--red)' : 'var(--t2)';
-  document.getElementById('dashLevels').textContent = allLevels.h4.length + ' 4H levels found';
-
-  // Price cards
-  const h4cur  = h4.at(-1)?.c || 0;
-  const h4prev = h4.at(-2)?.c || h4cur;
-  const h4chg  = (h4cur - h4prev) / h4prev * 100;
+  document.getElementById('dashChg').textContent    = (chg >= 0 ? '+' : '') + chg.toFixed(2) + '%';
+  document.getElementById('dashTr1d').textContent   = '1W:' + tr1w + ' · 1D:' + tr1d;
+  document.getElementById('dashTr1d').style.color   = bias === 'BULLISH' ? 'var(--green)' : bias === 'BEARISH' ? 'var(--red)' : 'var(--t2)';
+  document.getElementById('dashTr4h').textContent   = 'Bias: ' + bias;
+  document.getElementById('dashBias').textContent   = bias;
+  document.getElementById('dashBias').style.color   = bias === 'BULLISH' ? 'var(--green)' : bias === 'BEARISH' ? 'var(--red)' : 'var(--t2)';
+  document.getElementById('dashLevels').textContent = (remoteState?.currentLevels?.length || allLevels.h4.length) + ' 4H levels active';
 
   document.getElementById('pc1hPrice').textContent = '$' + fmt(cur, 0);
   document.getElementById('pc1hChg').textContent   = (chg >= 0 ? '+' : '') + chg.toFixed(2) + '%';
   document.getElementById('pc1hChg').className     = 'pc-chg ' + (chg >= 0 ? 'up' : 'dn');
-
   const b1hEl = document.getElementById('pc1hBias');
-  b1hEl.textContent  = bias;
-  b1hEl.className    = 'bias-tag ' + (bias === 'BULLISH' ? 'bull-tag' : bias === 'BEARISH' ? 'bear-tag' : 'neut-tag');
+  b1hEl.textContent = bias;
+  b1hEl.className   = 'bias-tag ' + (bias === 'BULLISH' ? 'bull-tag' : bias === 'BEARISH' ? 'bear-tag' : 'neut-tag');
 
+  const h4cur  = h4.at(-1)?.c || cur;
+  const h4prev = h4.at(-2)?.c || h4cur;
+  const h4chg  = (h4cur - h4prev) / h4prev * 100;
   document.getElementById('pc4hPrice').textContent = '$' + fmt(h4cur, 0);
   document.getElementById('pc4hChg').textContent   = (h4chg >= 0 ? '+' : '') + h4chg.toFixed(2) + '%';
   document.getElementById('pc4hChg').className     = 'pc-chg ' + (h4chg >= 0 ? 'up' : 'dn');
-
   const b4hEl = document.getElementById('pc4hBias');
-  b4hEl.textContent  = tr4h;
-  b4hEl.className    = 'bias-tag ' + (tr4h === 'BULLISH' ? 'bull-tag' : tr4h === 'BEARISH' ? 'bear-tag' : 'neut-tag');
+  b4hEl.textContent = tr1d;
+  b4hEl.className   = 'bias-tag ' + (tr1d === 'BULLISH' ? 'bull-tag' : tr1d === 'BEARISH' ? 'bear-tag' : 'neut-tag');
 
-  document.getElementById('updTime').textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  document.getElementById('updTime').textContent = scanTime || new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
 }
 
 function renderLevels() {
-  const cur = btcData.h1.at(-1)?.c || btcData.h4.at(-1)?.c || 0;
-  const bias = getBias(getTrend(btcData.d1, 20), getTrend(btcData.h4, 42));
+  const cur  = remoteState?.currentPrice || btcData.h1.at(-1)?.c || btcData.h4.at(-1)?.c || 0;
 
-  function buildList(levels, el, countEl) {
-    countEl.textContent = levels.length + ' levels';
-    if (!levels.length) {
-      el.innerHTML = '<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-txt">No levels found</div></div>';
-      return;
-    }
+  // Use scanner levels from trades.json if available
+  const levels = remoteState?.currentLevels || allLevels.h4.map(lv => ({
+    type: lv.type, price: lv.price, fresh: lv.freshness === 'FRESH',
+    hsl: lv.hsl, has1d: false, grade: 'B',
+    dist: Math.abs(cur - lv.price) / lv.price * 100
+  }));
+
+  const el      = document.getElementById('lvl4hList');
+  const countEl = document.getElementById('lvl4hCount');
+  countEl.textContent = levels.length + ' levels';
+
+  if (!levels.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-txt">No levels found</div></div>';
+  } else {
+    const gc = {'A+':'var(--green)','A':'var(--gold)','B':'var(--t2)'};
     el.innerHTML = levels.map(lv => {
-      const hasCRT = detectedCRTs.find(c => c.level === lv.price);
-      const isNear = lv.dist < 0.5;
-      const rowCls = hasCRT ? 'level-row crt' : isNear ? (lv.type === 'V' ? 'level-row near-v' : 'level-row near-a') : 'level-row';
-      return `<div class="${rowCls}">
-        <span class="lv-type ${lv.type.toLowerCase()}">${lv.type}</span>
-        <span class="lv-price">$${fmt(lv.price, 0)}</span>
-        <div class="lv-tags">
-          <span class="tag ${lv.freshness === 'FRESH' ? 'fresh' : 'unfresh'}">${lv.freshness}</span>
-          ${lv.hsl ? '<span class="tag hsl">HSL</span>' : ''}
-          ${hasCRT ? '<span class="tag crt-tag">⚡ CRT</span>' : ''}
-          ${isNear ? '<span class="tag near">NEAR</span>' : ''}
-        </div>
-        <span class="lv-dist">${lv.dist.toFixed(2)}%</span>
-      </div>`;
+      const bull = lv.type === 'V';
+      const tag1d = lv.has1d ? '<span class="tag hsl">1D+4H</span>' : '<span class="tag">4H</span>';
+      const tagFresh = lv.fresh ? '<span class="tag fresh">FRESH</span>' : '<span class="tag unfresh">USED</span>';
+      const tagHsl   = lv.hsl  ? '<span class="tag hsl">HSL</span>' : '';
+      return '<div class="level-row ' + (lv.dist < 2 ? (bull ? 'near-v' : 'near-a') : '') + '">'
+        + '<span class="lv-type ' + lv.type.toLowerCase() + '">' + lv.type + '</span>'
+        + '<span class="lv-price">$' + fmt(lv.price, 0) + '</span>'
+        + '<div class="lv-tags">' + tagFresh + tagHsl + tag1d
+        + '<span class="grade-chip" style="color:' + (gc[lv.grade]||'var(--t2)') + '">' + lv.grade + '</span></div>'
+        + '<span class="lv-dist">' + lv.dist.toFixed(2) + '%</span>'
+        + '</div>';
     }).join('');
   }
 
-  buildList(allLevels.h4, document.getElementById('lvl4hList'), document.getElementById('lvl4hCount'));
+  // Also show 1D levels
   buildList(allLevels.d1, document.getElementById('lvl1dList'), document.getElementById('lvl1dCount'));
+
+  function buildList(levels2, el2, countEl2) {
+    if (!el2 || !countEl2) return;
+    countEl2.textContent = levels2.length + ' levels';
+    if (!levels2.length) {
+      el2.innerHTML = '<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-txt">No levels</div></div>';
+      return;
+    }
+    el2.innerHTML = levels2.map(lv => {
+      return '<div class="level-row">'
+        + '<span class="lv-type ' + lv.type.toLowerCase() + '">' + lv.type + '</span>'
+        + '<span class="lv-price">$' + fmt(lv.price, 0) + '</span>'
+        + '<div class="lv-tags"><span class="tag ' + (lv.freshness==='FRESH'?'fresh':'unfresh') + '">' + (lv.freshness||'USED') + '</span></div>'
+        + '<span class="lv-dist">' + lv.dist.toFixed(2) + '%</span>'
+        + '</div>';
+    }).join('');
+  }
 }
 
 function renderAlerts() {
-  const el = document.getElementById('alertsList');
+  const el  = document.getElementById('alertsList');
   const cnt = document.getElementById('alertCount');
 
-  const allAlerts = [...detectedCRTs];
-
-  // Also pull from remote state if available
-  if (remoteState?.history?.length) {
-    const remoteAlerts = remoteState.history.filter(h => h.setupType === 'MSNR_CRT' || h.result === 'tp1');
-    // Already merged below
-  }
-
+  // Use lastAlert from scanner if available
+  const lastAlert = remoteState?.lastAlert;
+  const allAlerts = lastAlert ? [lastAlert] : [];
   cnt.textContent = allAlerts.length;
 
   if (!allAlerts.length) {
-    el.innerHTML = `<div class="card empty-state">
-      <div class="empty-icon">⚡</div>
-      <div class="empty-txt">No CRT setups confirmed yet.<br>The scanner checks hourly via GitHub Actions.<br><br>
-      <strong style="color:var(--t1)">Alert fires when:</strong><br>
-      4H MSNR level → 1H Accumulation → 1H Sweep → 1H Break</div></div>`;
+    el.innerHTML = '<div class="card empty-state"><div class="empty-icon">⚡</div>'
+      + '<div class="empty-txt">No MSS alerts yet.<br>Scanner checks every hour via GitHub Actions.<br><br>'
+      + '<strong style="color:var(--t1)">Alert fires when:</strong><br>'
+      + '4H Key Level → 1H Sweep → 1H MSS confirmed</div></div>';
     return;
   }
 
   el.innerHTML = allAlerts.map(a => {
-    const bull = a.bull;
-    const grade = a.grade || 'b';
-    const gradeLabel = grade === 'aplus' ? 'A+' : grade.toUpperCase();
-    return `<div class="card alert-card ${bull ? 'green-top' : 'red-top'}">
-      <div class="alert-badge ${bull ? 'long' : 'short'}">${bull ? '▲ LONG' : '▼ SHORT'}</div>
-      <span class="grade-chip ${grade}" style="margin-left:6px">${gradeLabel}</span>
-      <div style="margin-top:8px">
-        <div class="alert-pair">BTCUSDT</div>
-        <div class="alert-price">4H Level: $${fmt(a.level, 0)} · ${a.freshness || 'FRESH'}</div>
-      </div>
-      <div class="crt-phases">
-        <div class="phase-box">
-          <div class="phase-lbl">PHASE A · ACCUM</div>
-          <div class="phase-val a">${a.crt?.phase_a_candles || '—'}c range</div>
-          <div style="font-size:12px;color:var(--t3);margin-top:2px">$${fmt(a.crt?.phase_a_rL,0)}–$${fmt(a.crt?.phase_a_rH,0)}</div>
-        </div>
-        <div class="phase-box">
-          <div class="phase-lbl">PHASE B · SWEEP</div>
-          <div class="phase-val b">${bull ? '↓ Below' : '↑ Above'} level</div>
-          <div style="font-size:12px;color:var(--t3);margin-top:2px">Close: $${fmt(a.crt?.sweep_close,0)}</div>
-        </div>
-        <div class="phase-box">
-          <div class="phase-lbl">PHASE C · BREAK</div>
-          <div class="phase-val c">Range broken</div>
-          <div style="font-size:12px;color:var(--t3);margin-top:2px">Body: ${((a.crt?.dist_br||0)*100).toFixed(0)}%</div>
-        </div>
-      </div>
-      <div class="alert-levels">
-        <div class="al-box"><div class="al-lbl">ENTRY</div><div class="al-val" style="color:var(--gold)">$${fmt(a.crt?.entry,0)}</div></div>
-        <div class="al-box"><div class="al-lbl">SL</div><div class="al-val" style="color:var(--red)">$${fmt(a.crt?.sl,0)}</div></div>
-        <div class="al-box"><div class="al-lbl">TP1</div><div class="al-val" style="color:var(--green)">$${fmt(a.crt?.tp1,0)}</div></div>
-        <div class="al-box"><div class="al-lbl">TP2</div><div class="al-val" style="color:var(--green)">$${fmt(a.crt?.tp2,0)}</div></div>
-      </div>
-      <div class="alert-footer">
-        <div class="alert-time">${a.time || new Date().toLocaleTimeString()}</div>
-        <div style="font-size:12px;color:var(--t3)">RR: 1:${a.crt?.rr1||'—'} / 1:${a.crt?.rr2||'—'}</div>
-      </div>
-    </div>`;
+    const bull = a.direction === 'LONG';
+    const gc   = {'A+':'var(--green)','A':'var(--gold)','B':'var(--t2)'};
+    return '<div class="card alert-card ' + (bull ? 'green-top' : 'red-top') + '">'
+      + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">'
+      + '<div class="alert-badge ' + (bull?'long':'short') + '">' + (bull?'▲ LONG':'▼ SHORT') + '</div>'
+      + '<span class="grade-chip" style="color:' + (gc[a.grade]||'var(--t2)') + '">' + a.grade + '</span>'
+      + (a.has1d ? '<span class="tag hsl">1D+4H ✓</span>' : '<span class="tag">4H only</span>')
+      + '</div>'
+      + '<div style="margin-bottom:8px;font-size:13px">'
+      + '<div>4H Level : <strong>$' + fmt(a.level, 0) + '</strong></div>'
+      + '<div style="color:var(--t2)">Sweep     : ' + (a.sweepTime||'—') + ' IST</div>'
+      + '<div style="color:var(--t2)">MSS       : ' + (a.mssTime||'—') + ' IST</div>'
+      + '<div>Close     : <strong style="color:' + (bull?'var(--green)':'var(--red)') + '">$' + fmt(a.mssClose,0) + '</strong></div>'
+      + '</div>'
+      + '<div style="color:var(--t3);font-size:11px">Bias: ' + a.bias + ' · Alerted: ' + a.time + '</div>'
+      + '</div>';
   }).join('');
 }
+
 
 function renderSimulator() {
   updateSimTrades();
