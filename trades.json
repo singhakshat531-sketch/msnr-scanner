@@ -62,7 +62,7 @@
     "netR": 0.0,
     "bestR": 0.0
   },
-  "lastUpdated": "2026-03-21T21:04:46.100567",
+  "lastUpdated": "2026-03-21T21:50:16.945241",
   "levelAlerts": {
     "BTCUSDT_V_69403": "2026-03-20T15:21:20.928298",
     "BTC_V_69403_AT": "2026-03-20T17:43:15.903486",
@@ -127,22 +127,22 @@
   },
   "currentLevels": [
     {
-      "type": "A",
-      "price": 70852.3,
-      "fresh": false,
-      "hsl": true,
-      "has1d": false,
-      "grade": "B",
-      "dist": 0.62
-    },
-    {
       "type": "V",
       "price": 69851.02,
       "fresh": false,
       "hsl": true,
       "has1d": false,
       "grade": "B",
-      "dist": 0.8
+      "dist": 0.69
+    },
+    {
+      "type": "A",
+      "price": 70852.3,
+      "fresh": false,
+      "hsl": true,
+      "has1d": false,
+      "grade": "B",
+      "dist": 0.74
     },
     {
       "type": "V",
@@ -151,7 +151,7 @@
       "hsl": true,
       "has1d": false,
       "grade": "B",
-      "dist": 1.45
+      "dist": 1.33
     },
     {
       "type": "V",
@@ -160,7 +160,7 @@
       "hsl": true,
       "has1d": false,
       "grade": "B",
-      "dist": 1.77
+      "dist": 1.65
     },
     {
       "type": "V",
@@ -169,7 +169,7 @@
       "hsl": true,
       "has1d": true,
       "grade": "A+",
-      "dist": 6.73
+      "dist": 6.6
     },
     {
       "type": "A",
@@ -178,7 +178,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 5.97
+      "dist": 6.08
     },
     {
       "type": "V",
@@ -187,7 +187,7 @@
       "hsl": true,
       "has1d": true,
       "grade": "A",
-      "dist": 7.05
+      "dist": 6.93
     },
     {
       "type": "V",
@@ -196,16 +196,16 @@
       "hsl": true,
       "has1d": true,
       "grade": "A+",
-      "dist": 10.31
+      "dist": 10.18
     }
   ],
-  "currentPrice": 70411.12,
+  "currentPrice": 70329.55,
   "currentBias": "BULLISH",
   "currentTrend": {
     "w1": "BEARISH",
     "d1": "BULLISH"
   },
-  "scanTime": "22 Mar 2026  02:34 AM IST",
+  "scanTime": "22 Mar 2026  03:20 AM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "LONG",
