@@ -303,100 +303,78 @@ def find_1h_mss(h1, level):
 
     swept = scan[last_touch_idx]["l"] < lp if bull else scan[last_touch_idx]["h"] > lp
 
-    # Step 2: find the MOST RECENT group of consecutive same-direction candles
-    # after the last sweep. No window limit — consolidation can happen between
-    # sweep and range (e.g. swept, consolidated, swept again, THEN range formed).
-    # We scan everything after the sweep and keep the LAST group = freshest range.
-    best_range_start = None
-    best_range_end   = None
-    i = last_touch_idx + 1
+    # Step 2 + 3: scan every candle after the sweep
+    # External range = ALL candles between sweep and MSS/BREAK candle
+    # rH = highest high, rL = lowest low of those candles
+    # MSS   = rL swept (wick below, closed back above) before body closes above rH
+    # BREAK = body closes above rH directly without sweeping rL first
 
-    while i < n - 1:
-        c = scan[i]
-        is_dir = (c["c"] < c["o"]) if bull else (c["c"] > c["o"])
-        if is_dir:
-            grp_start = i
-            grp_end   = i
-            j = i + 1
-            while j < n - 1:
-                cj = scan[j]
-                if (cj["c"] < cj["o"]) if bull else (cj["c"] > cj["o"]):
-                    grp_end = j
-                    j += 1
-                else:
-                    break
-            best_range_start = grp_start
-            best_range_end   = grp_end
-            i = grp_end + 1
-        else:
-            i += 1
-
-    if best_range_start is None: return None
-
-    ext_range  = scan[best_range_start: best_range_end + 1]
-    range_high = max(c["h"] for c in ext_range)
-    range_low  = min(c["l"] for c in ext_range)
-
-    # Helper: unix-ms timestamp → short IST string for display
+    # Helper: unix-ms → short IST string
     def ts(unix_ms):
         dt = datetime.fromtimestamp(unix_ms / 1000, IST)
         return dt.strftime('%d %b  %I:%M %p')
 
     sweep_candle = scan[last_touch_idx]
+    rH           = 0
+    rL           = float("inf")
+    range_swept  = False
 
-    # Step 3: scan candles after range for MSS or BREAK
-    # MSS   = range extreme swept (wick, closes back inside) THEN body breaks
-    # BREAK = body breaks range extreme directly, no sweep first
-    range_swept = False
-
-    for i in range(best_range_end + 1, n):
+    for i in range(last_touch_idx + 1, n):
         mss_c = scan[i]
+
         if bull:
-            # Track range low sweep
-            if mss_c["l"] < range_low and mss_c["c"] > range_low:
+            rH = max(rH, mss_c["h"])
+            rL = min(rL, mss_c["l"])
+            if mss_c["l"] < rL and mss_c["c"] > rL:
                 range_swept = True
-            if mss_c["c"] > range_high:
+            if mss_c["c"] > rH:
+                pre = scan[last_touch_idx + 1:i]
+                if not pre: return None
                 signal = "MSS" if range_swept else "BREAK"
                 return {
                     "bull":          True,
                     "signal":        signal,
-                    "range_high":    range_high,
-                    "range_low":     range_low,
-                    "range_candles": len(ext_range),
+                    "range_high":    max(c["h"] for c in pre),
+                    "range_low":     min(c["l"] for c in pre),
+                    "range_candles": len(pre),
                     "mss_close":     mss_c["c"],
                     "swept_level":   swept,
                     "broke":         "ABOVE range high",
                     "sweep_time":    ts(sweep_candle["t"]),
                     "sweep_wick":    sweep_candle["l"],
                     "sweep_close":   sweep_candle["c"],
-                    "range_open":    ts(ext_range[0]["t"]),
-                    "range_close":   ts(ext_range[-1]["t"]),
+                    "range_open":    ts(pre[0]["t"]),
+                    "range_close":   ts(pre[-1]["t"]),
                     "mss_open":      ts(mss_c["t"]),
                 }
         else:
-            # Track range high sweep
-            if mss_c["h"] > range_high and mss_c["c"] < range_high:
+            rH = max(rH, mss_c["h"])
+            rL = min(rL, mss_c["l"])
+            if mss_c["h"] > rH and mss_c["c"] < rH:
                 range_swept = True
-            if mss_c["c"] < range_low:
+            if mss_c["c"] < rL:
+                pre = scan[last_touch_idx + 1:i]
+                if not pre: return None
                 signal = "MSS" if range_swept else "BREAK"
                 return {
                     "bull":          False,
                     "signal":        signal,
-                    "range_high":    range_high,
-                    "range_low":     range_low,
-                    "range_candles": len(ext_range),
+                    "range_high":    max(c["h"] for c in pre),
+                    "range_low":     min(c["l"] for c in pre),
+                    "range_candles": len(pre),
                     "mss_close":     mss_c["c"],
                     "swept_level":   swept,
                     "broke":         "BELOW range low",
                     "sweep_time":    ts(sweep_candle["t"]),
                     "sweep_wick":    sweep_candle["h"],
                     "sweep_close":   sweep_candle["c"],
-                    "range_open":    ts(ext_range[0]["t"]),
-                    "range_close":   ts(ext_range[-1]["t"]),
+                    "range_open":    ts(pre[0]["t"]),
+                    "range_close":   ts(pre[-1]["t"]),
                     "mss_open":      ts(mss_c["t"]),
                 }
 
     return None
+
 
 
 # ── ALERT FORMATTERS ──────────────────────────────────────────
