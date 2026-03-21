@@ -1,185 +1,84 @@
 #!/usr/bin/env python3
 """
-MSNR Scanner v9 — MSNR + 1H MSS Alerts
-──────────────────────────────────────────────────────────────
-EXACT STRATEGY:
+MSNR + MSS Backtest — Last 30 Days
+────────────────────────────────────
+Replays historical data and logs every setup detected.
+For each alert it prints:
+  - Date/time in IST
+  - 4H level that was swept
+  - External range (consecutive candles)
+  - MSS candle close price
 
-  BIAS:     1W + 1D trend → direction
-  LEVELS:   4H key levels (primary). 1D nearby = A+ grade.
-
-  ALERT A — "Price at level"
-    Price comes within 0.5% of a 4H key level.
-    → Your cue to open 1H and watch.
-
-  ALERT B — "1H MSS confirmed"
-    After price reaches the 4H level:
-    1. On 1H, price sweeps the level (wick beyond, close back inside)
-       OR simply consolidates near it forming a swing
-    2. Those 1H candles form a swing high (bearish) or swing low (bullish)
-       — can be 1 candle or many consecutive candles
-    3. A 1H candle BODY CLOSES beyond the swing low (bearish MSS)
-       or swing high (bullish MSS)
-    → MSS confirmed. Alert fires. You go to 5min for entry.
-
-  MSS rule (strict):
-    - Bearish MSS: candle CLOSE < swing low of the consecutive candles
-    - Bullish MSS: candle CLOSE > swing high of the consecutive candles
-    - WICK does not count. BODY CLOSE only.
-──────────────────────────────────────────────────────────────
+You can then open TradingView at that exact time and verify.
+────────────────────────────────────
 """
 
-import json, urllib.request, urllib.parse, os, time, base64
+import urllib.request, json, time
 from datetime import datetime, timezone, timedelta
 
-IST = timezone(timedelta(hours=5, minutes=30))
+IST       = timezone(timedelta(hours=5, minutes=30))
+TOUCH_PCT = 1.5
+ZONE_PCT  = 3.0
+SWING_LOOKBACK = 200
 
-def now_ist():
-    return datetime.now(IST).strftime('%d %b %Y  %I:%M %p IST')
+def now_ist(ts):
+    return datetime.fromtimestamp(ts, IST).strftime('%d %b %Y  %I:%M %p IST')
 
-# ── CONFIG ────────────────────────────────────────────────────
-TELEGRAM_TOKEN   = os.environ.get("TELEGRAM_TOKEN", "")
-TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "1247283950")
-GITHUB_PAT       = os.environ.get("PAT_TOKEN", "")
-GITHUB_REPO      = "singhakshat531-sketch/msnr-scanner"
-DATA_FILE        = "trades.json"
-
-NEAR_PCT         = 0.5   # Alert A: price within 0.5% of 4H level
-ZONE_PCT         = 2.0   # scan for MSS when price within 2% of level
-SPAM_HOURS_A     = 4     # re-alert cooldown for Alert A
-SPAM_HOURS_B     = 2     # re-alert cooldown for Alert B (MSS)
-SWING_LOOKBACK   = 30    # 1H candles to look back for swing formation
-SIM_START        = 1000.0
-RISK_PCT         = {"aplus": 3.0, "a": 2.0, "b": 1.0}
-
-# ── GITHUB ────────────────────────────────────────────────────
-def github_read(filename):
-    if not GITHUB_PAT:
-        try:
-            with open(filename) as f: return json.load(f), None
-        except: return None, None
-    url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{filename}"
-    req = urllib.request.Request(url, headers={
-        "Authorization": f"token {GITHUB_PAT}",
-        "Accept": "application/vnd.github.v3+json",
-        "User-Agent": "MSNR-Scanner/9.0"
-    })
-    try:
-        with urllib.request.urlopen(req, timeout=15) as r:
-            d = json.loads(r.read())
-        return json.loads(base64.b64decode(d["content"]).decode()), d["sha"]
-    except urllib.error.HTTPError as e:
-        if e.code == 404: return None, None
-        print(f"  GitHub read error: {e}"); return None, None
-    except Exception as e:
-        print(f"  GitHub read error: {e}"); return None, None
-
-def github_write(filename, content, sha=None):
-    if not GITHUB_PAT:
-        with open(filename, "w") as f: json.dump(content, f, indent=2)
-        return True
-    url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{filename}"
-    body = {
-        "message": f"scanner {datetime.now(timezone.utc).replace(tzinfo=None).strftime('%Y-%m-%d %H:%M UTC')}",
-        "content": base64.b64encode(json.dumps(content, indent=2).encode()).decode(),
-        "branch": "main"
-    }
-    if sha: body["sha"] = sha
-    req = urllib.request.Request(url, data=json.dumps(body).encode(), headers={
-        "Authorization": f"token {GITHUB_PAT}",
-        "Accept": "application/vnd.github.v3+json",
-        "Content-Type": "application/json",
-        "User-Agent": "MSNR-Scanner/9.0"
-    }, method="PUT")
-    try:
-        with urllib.request.urlopen(req, timeout=15) as r: json.loads(r.read())
-        print(f"  GitHub write OK"); return True
-    except Exception as e:
-        print(f"  GitHub write error: {e}"); return False
-
-def load_state():
-    data, sha = github_read(DATA_FILE)
-    if data is None:
-        data = {
-            "balance": SIM_START, "activeTrades": [], "history": [],
-            "equityCurve": [{"t": datetime.now(timezone.utc).replace(tzinfo=None).isoformat(), "v": SIM_START}],
-            "stats": {"totalTrades":0,"wins":0,"losses":0,"be":0,"netR":0.0,"bestR":0.0},
-            "lastUpdated": datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),
-            "levelAlerts": {}, "mssAlerts": {}
-        }
-    data.setdefault("levelAlerts", {})
-    data.setdefault("mssAlerts", {})
-    return data, sha
-
-def save_state(data, sha):
-    data["lastUpdated"] = datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
-    return github_write(DATA_FILE, data, sha)
-
-# ── FETCH ─────────────────────────────────────────────────────
-def fetch_candles(symbol, interval, limit=200):
+def fetch(interval, limit):
     endpoint  = "histoday" if interval in ("1d","1w") else "histohour"
-    aggregate = {"1w":7,"1d":1,"4h":4,"1h":1}.get(interval, 1)
+    aggregate = {"1w":7,"1d":1,"4h":4,"1h":1}[interval]
     url = (f"https://min-api.cryptocompare.com/data/v2/{endpoint}"
-           f"?fsym={symbol}&tsym=USD&limit={limit}&aggregate={aggregate}")
-    try:
-        req = urllib.request.Request(url, headers={"User-Agent":"MSNR-Scanner/9.0"})
-        with urllib.request.urlopen(req, timeout=20) as r:
-            data = json.loads(r.read())
-        if data.get("Response") != "Success":
-            print(f"  Error {symbol} {interval}: {data.get('Message','?')}"); return []
-        result = [
-            {"t":k["time"]*1000,"o":float(k["open"]),"h":float(k["high"]),
-             "l":float(k["low"]),"c":float(k["close"])}
-            for k in data["Data"]["Data"]
-            if not (k["open"]==0 and k["close"]==0)
-        ]
-        print(f"  {symbol} {interval}: {len(result)} candles")
-        return result
-    except Exception as e:
-        print(f"  Fetch error {symbol} {interval}: {e}"); return []
+           f"?fsym=BTC&tsym=USD&limit={limit}&aggregate={aggregate}")
+    req = urllib.request.Request(url, headers={"User-Agent":"MSNR-Backtest/1.0"})
+    with urllib.request.urlopen(req, timeout=20) as r:
+        data = json.loads(r.read())
+    return [
+        {"t": k["time"], "o": float(k["open"]), "h": float(k["high"]),
+         "l": float(k["low"]), "c": float(k["close"])}
+        for k in data["Data"]["Data"]
+        if not (k["open"]==0 and k["close"]==0)
+    ]
 
-# ── TREND & BIAS ──────────────────────────────────────────────
-def get_trend(candles, lookback=20):
-    if len(candles) < lookback: return "UNKNOWN"
-    c = [x["c"] for x in candles[-lookback:]]
+def get_trend(candles, lb=20):
+    if len(candles) < lb: return "UNKNOWN"
+    c = [x["c"] for x in candles[-lb:]]
     half = len(c)//2
-    avg_s = sum(c[:half])/half
-    avg_e = sum(c[half:])/half
-    pct   = (avg_e - avg_s)/avg_s*100
-    bull  = sum(1 for i in range(2,len(c)) if c[i]>c[i-1]>c[i-2])
-    bear  = sum(1 for i in range(2,len(c)) if c[i]<c[i-1]<c[i-2])
-    if pct>3  and bull>bear:        return "BULLISH"
-    if pct<-3 and bear>bull:        return "BEARISH"
-    if pct>2  and bull>bear*1.5:    return "BULLISH"
-    if pct<-2 and bear>bull*1.5:    return "BEARISH"
+    pct  = (sum(c[half:])/half - sum(c[:half])/half) / (sum(c[:half])/half) * 100
+    bull = sum(1 for i in range(2,len(c)) if c[i]>c[i-1]>c[i-2])
+    bear = sum(1 for i in range(2,len(c)) if c[i]<c[i-1]<c[i-2])
+    if pct>3  and bull>bear:       return "BULLISH"
+    if pct<-3 and bear>bull:       return "BEARISH"
+    if pct>2  and bull>bear*1.5:   return "BULLISH"
+    if pct<-2 and bear>bull*1.5:   return "BEARISH"
     return "RANGING"
 
 def get_bias(tr1w, tr1d):
     if tr1w=="BULLISH" and tr1d in ("BULLISH","RANGING"): return "BULLISH"
     if tr1w=="BEARISH" and tr1d in ("BEARISH","RANGING"): return "BEARISH"
-    if tr1w=="RANGING":
-        if tr1d=="BULLISH": return "BULLISH"
-        if tr1d=="BEARISH": return "BEARISH"
     if tr1d=="BULLISH": return "BULLISH"
     if tr1d=="BEARISH": return "BEARISH"
     return "RANGING"
 
-# ── KEY LEVELS ────────────────────────────────────────────────
-def find_key_levels(candles, max_dist_pct=20.0):
+def find_levels(candles, max_dist=15.0):
     """
-    V-level: bear candle at swing low + bull confirmation
-             level price = bear candle close
-             level time  = bull candle open
+    V-level (swing low):
+      - candle[i] is bear AND its LOW is lower than 2 candles on each side
+      - candle[i+1] is bull (confirmation)
+      - level price = bear candle CLOSE
+      - level time  = bull candle open (confirmation candle open)
 
-    A-level: bull candle at swing high + bear confirmation
-             level price = bull candle close
-             level time  = bear candle open
+    A-level (swing high):
+      - candle[i] is bull AND its HIGH is higher than 2 candles on each side
+      - candle[i+1] is bear (confirmation)
+      - level price = bull candle CLOSE
+      - level time  = bear candle open (confirmation candle open)
 
     Only extreme swing points — not every bear/bull flip.
     """
     if len(candles) < 6: return []
     cur    = candles[-1]["c"]
     levels = []
-    LB = 2
+    LB = 2  # how many candles each side must be higher/lower
 
     for i in range(LB, len(candles) - LB - 1):
         c0 = candles[i]
@@ -190,15 +89,20 @@ def find_key_levels(candles, max_dist_pct=20.0):
         bull1 = c1["c"] > c1["o"]
         bear1 = c1["c"] < c1["o"]
 
+        # V-level: bear candle at swing low + bull confirmation
         if bear0 and bull1:
+            # swing low = c0 low is lower than LB candles on each side
             is_swing_low = all(
                 c0["l"] < candles[i - j]["l"] and c0["l"] < candles[i + 1 + j]["l"]
                 for j in range(1, LB + 1)
                 if i + 1 + j < len(candles)
             )
             if not is_swing_low: continue
-            price = c0["c"]; t = "V"; level_time = c1["t"]
+            price = c0["c"]
+            t     = "V"
+            level_time = c1["t"]
 
+        # A-level: bull candle at swing high + bear confirmation
         elif bull0 and bear1:
             is_swing_high = all(
                 c0["h"] > candles[i - j]["h"] and c0["h"] > candles[i + 1 + j]["h"]
@@ -206,14 +110,17 @@ def find_key_levels(candles, max_dist_pct=20.0):
                 if i + 1 + j < len(candles)
             )
             if not is_swing_high: continue
-            price = c0["c"]; t = "A"; level_time = c1["t"]
+            price = c0["c"]
+            t     = "A"
+            level_time = c1["t"]
 
         else:
             continue
 
         dist = abs(cur - price) / cur * 100
-        if dist > max_dist_pct: continue
+        if dist > max_dist: continue
 
+        # Fresh = no close beyond level since formed
         wicks, dead = 0, False
         for fc in candles[i + 2:]:
             if t == "A":
@@ -232,39 +139,31 @@ def find_key_levels(candles, max_dist_pct=20.0):
             "fresh": wicks == 0,
             "hsl":   hsl,
             "dist":  dist,
-            "wicks": wicks,
+            "ts":    level_time,
         })
 
     return sorted(levels, key=lambda x: x["dist"])[:10]
 
 
-def grade_level(lv, has_1d):
-    score = 0
-    if lv["fresh"]: score += 2
-    if lv["hsl"]:   score += 1
-    if has_1d:      score += 2
-    if lv["dist"] < 0.5: score += 1
-    return "aplus" if score >= 5 else "a" if score >= 3 else "b"
-
-
-def find_1h_mss(h1, level):
+def find_mss(h1_window, level):
     """
     LONG (V-level):
-      1. 1H wick goes BELOW level, closes ABOVE = sweep
-      2. Track all candles after sweep: rH = highest high, rL = lowest low
-      3. MSS ONLY: range low swept (wick below rL, close above rL)
-                   AND body closes ABOVE rH
+      1. Find 1H sweep: wick below 4H level, close above it
+      2. External range starts from sweep candle
+         - range_low  = sweep candle low (deepest point)
+         - range_high = highest high of all candles since sweep
+      3. Re-sweep rule: if any candle CLOSES below sweep candle low
+         → that becomes the new sweep candle, reset range
+      4. MSS = candle BODY closes ABOVE range high → alert
 
     SHORT (A-level): mirror, flipped.
     """
-    if len(h1) < 4: return None
-
     bull = level["type"] == "V"
     lp   = level["price"]
-    scan = h1[-SWING_LOOKBACK:]
+    scan = h1_window[-SWING_LOOKBACK:]
     n    = len(scan)
 
-    # Step 1: last valid sweep
+    # Find first valid sweep (searching backwards to get most recent)
     last_touch_idx = None
     for i in range(n - 3, -1, -1):
         c = scan[i]
@@ -275,209 +174,203 @@ def find_1h_mss(h1, level):
 
     if last_touch_idx is None: return None
 
-    sweep_candle = scan[last_touch_idx]
-
-    def ts(unix_ms):
-        dt = datetime.fromtimestamp(unix_ms / 1000, IST)
-        return dt.strftime("%d %b  %I:%M %p")
-
-    # Step 2+3: replay forward from sweep
-    # range_low  = sweep candle low
-    # range_high = highest high since sweep
-    # Re-sweep: if candle closes below sweep low → reset if valid sweep, else invalidate
-    # MSS: body closes above range high → alert
-
+    # Now replay forward from that sweep, allowing re-sweeps to reset
     sweep_idx = last_touch_idx
     sweep_c   = scan[sweep_idx]
-    rH        = sweep_c["h"]
-    rL        = sweep_c["l"]
+    rH        = sweep_c["h"]   # range high starts at sweep candle high
+    rL        = sweep_c["l"]   # range low = sweep candle low (the deepest point)
 
     for i in range(sweep_idx + 1, n):
         mc = scan[i]
 
         if bull:
+            # Re-sweep: candle closes BELOW sweep low → reset
             if mc["c"] < rL:
+                # Only reset if this candle also swept the 4H level
                 if mc["l"] < lp and mc["c"] > lp:
-                    sweep_idx = i; sweep_c = mc
-                    rH = mc["h"]; rL = mc["l"]
+                    sweep_idx = i
+                    sweep_c   = mc
+                    rH        = mc["h"]
+                    rL        = mc["l"]
                 else:
+                    # Closed below range low but not a valid sweep → invalidate
                     return None
+
+            # Update range high
             rH = max(rH, mc["h"])
+
+            # MSS: body closes ABOVE range high (check before updating rH)
             if mc["c"] > rH and i > sweep_idx + 1:
                 ext = scan[sweep_idx:i]
                 return {
                     "bull":          True,
                     "signal":        "MSS",
-                    "range_high":    max(c["h"] for c in ext),
-                    "range_low":     min(c["l"] for c in ext),
-                    "range_candles": len(ext),
-                    "mss_close":     mc["c"],
-                    "swept_level":   True,
-                    "broke":         "ABOVE range high",
-                    "sweep_time":    ts(sweep_c["t"]),
-                    "sweep_wick":    sweep_c["l"],
+                    "swept":         True,
+                    "sweep_ts":      sweep_c["t"],
+                    "sweep_low":     sweep_c["l"],
                     "sweep_close":   sweep_c["c"],
-                    "range_open":    ts(ext[0]["t"]),
-                    "range_close":   ts(ext[-1]["t"]),
-                    "mss_open":      ts(mc["t"]),
+                    "range_candles": len(ext),
+                    "range_open_ts": ext[0]["t"],
+                    "range_close_ts":ext[-1]["t"],
+                    "rH":            max(c["h"] for c in ext),
+                    "rL":            min(c["l"] for c in ext),
+                    "mss_ts":        mc["t"],
+                    "mss_close":     mc["c"],
                 }
+
         else:
+            # Re-sweep: candle closes ABOVE sweep high → reset
             if mc["c"] > rH:
                 if mc["h"] > lp and mc["c"] < lp:
-                    sweep_idx = i; sweep_c = mc
-                    rH = mc["h"]; rL = mc["l"]
+                    sweep_idx = i
+                    sweep_c   = mc
+                    rH        = mc["h"]
+                    rL        = mc["l"]
                 else:
                     return None
+
             rL = min(rL, mc["l"])
+
+            # MSS: body closes BELOW range low
             if mc["c"] < rL and i > sweep_idx + 1:
                 ext = scan[sweep_idx:i]
                 return {
                     "bull":          False,
                     "signal":        "MSS",
-                    "range_high":    max(c["h"] for c in ext),
-                    "range_low":     min(c["l"] for c in ext),
-                    "range_candles": len(ext),
-                    "mss_close":     mc["c"],
-                    "swept_level":   True,
-                    "broke":         "BELOW range low",
-                    "sweep_time":    ts(sweep_c["t"]),
-                    "sweep_wick":    sweep_c["h"],
+                    "swept":         True,
+                    "sweep_ts":      sweep_c["t"],
+                    "sweep_high":    sweep_c["h"],
                     "sweep_close":   sweep_c["c"],
-                    "range_open":    ts(ext[0]["t"]),
-                    "range_close":   ts(ext[-1]["t"]),
-                    "mss_open":      ts(mc["t"]),
+                    "range_candles": len(ext),
+                    "range_open_ts": ext[0]["t"],
+                    "range_close_ts":ext[-1]["t"],
+                    "rH":            max(c["h"] for c in ext),
+                    "rL":            min(c["l"] for c in ext),
+                    "mss_ts":        mc["t"],
+                    "mss_close":     mc["c"],
                 }
 
     return None
 
-# ── ALERT FORMATTERS ──────────────────────────────────────────
-def format_alert_a(lv, cur_price, grade, bias, tr1w, tr1d, has_1d):
-    bull = lv["type"] == "V"
-    gl   = "A+" if grade=="aplus" else grade.upper()
-    pf   = lambda p: f"${p:,.0f}"
-    shape = "V-shape" if bull else "A-shape"
-    tf    = "1D+4H" if has_1d else "4H"
-    return "\n".join([
-        f"🔔 AT KEY LEVEL — WATCH 1H",
-        f"",
-        f"4H Level : {pf(lv['price'])}  ({shape} · {'Fresh' if lv['fresh'] else 'Used'} · {tf})",
-        f"Price    : {pf(cur_price)}  ({abs(cur_price-lv['price'])/lv['price']*100:.2f}% away)",
-        f"Bias     : {bias}  |  Grade: {gl}  |  BTCUSDT",
-        f"",
-        f"→ Open 1H, watch for sweep + MSS/BREAK",
-        f"{now_ist()}",
-    ])
-
-def format_alert_b(lv, mss, cur_price, grade, bias, tr1w, tr1d, has_1d):
-    bull   = mss["bull"]
-    signal = mss.get("signal", "MSS")
-    gl     = "A+" if grade=="aplus" else grade.upper()
-    pf     = lambda p: f"${p:,.0f}"
-    shape  = "V-shape" if bull else "A-shape"
-    tf     = "1D+4H" if has_1d else "4H"
-    n      = mss["range_candles"]
-    rclr   = "red" if bull else "green"
-    wick   = pf(mss["sweep_wick"])
-
-    if signal == "MSS":
-        header = f"🚀 LONG — SWEEP+MSS" if bull else f"💥 SHORT — SWEEP+MSS"
-    else:
-        header = f"⚡ LONG — BREAK" if bull else f"⚡ SHORT — BREAK"
-
-    return "\n".join([
-        f"{header}",
-        f"",
-        f"4H Level  : {pf(lv['price'])}  ({shape} · {'Fresh' if lv['fresh'] else 'Used'} · {tf} · {mss['sweep_time']} IST)",
-        f"1H Sweep  : {mss['sweep_time']} IST  wick→{wick}  close→{pf(mss['sweep_close'])}",
-        f"Ext Range : {n}x {rclr}  |  {pf(mss['range_low'])}—{pf(mss['range_high'])}  |  {mss['range_open']}→{mss['range_close']} IST",
-        f"{signal}       : {mss['mss_open']} IST  close {pf(mss['mss_close'])}",
-        f"",
-        f"Bias: {bias}  |  Grade: {gl}  |  BTCUSDT",
-        f"{now_ist()}",
-    ])
-
-
-# ── SIMULATOR ─────────────────────────────────────────────────
-def update_simulator(state, cur_price):
-    still = []
-    for t in state["activeTrades"]:
-        bull    = t.get("bull", t["direction"]=="LONG")
-        entry, sl, tp1, tp2 = t["rawEntry"], t["rawSL"], t["rawTP1"], t["rawTP2"]
-        risk    = t.get("rawRisk", abs(entry-sl))
-        if risk<=0: still.append(t); continue
-        riskAmt = t.get("entryBalance",SIM_START)*(RISK_PCT.get(t["grade"],1.0)/100)
-        posSize = riskAmt/risk
-        phase   = t.get("phase","entry")
-        if phase=="entry":
-            if (bull and cur_price<=sl) or (not bull and cur_price>=sl):
-                state["balance"]-=riskAmt; state["stats"]["losses"]+=1; state["stats"]["totalTrades"]+=1
-                state["stats"]["netR"]=round(state["stats"]["netR"]-1,2)
-                state["history"].insert(0,{**t,"result":"loss","pnl":round(-riskAmt,2),"pnlR":-1.0,
-                    "closePrice":round(cur_price,2),"closedAt":datetime.now(timezone.utc).replace(tzinfo=None).isoformat()})
-                state["equityCurve"].append({"t":datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),"v":round(state["balance"],2)}); continue
-            if (bull and cur_price>=tp1) or (not bull and cur_price<=tp1):
-                profit=posSize*abs(tp1-entry)*0.5; state["balance"]+=profit
-                t["phase"]="tp1"; t["rawSL"]=entry
-                state["stats"]["netR"]=round(state["stats"]["netR"]+1.5,2)
-                state["history"].insert(0,{**t,"result":"tp1","pnl":round(profit,2),"pnlR":1.5,
-                    "closePrice":round(cur_price,2),"closedAt":datetime.now(timezone.utc).replace(tzinfo=None).isoformat()})
-                state["equityCurve"].append({"t":datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),"v":round(state["balance"],2)})
-                still.append(t); continue
-        elif phase=="tp1":
-            if (bull and cur_price<=entry) or (not bull and cur_price>=entry):
-                state["stats"]["be"]+=1; state["stats"]["totalTrades"]+=1
-                state["history"].insert(0,{**t,"result":"be","pnl":0.0,"pnlR":0.0,
-                    "closePrice":round(cur_price,2),"closedAt":datetime.now(timezone.utc).replace(tzinfo=None).isoformat()})
-                state["equityCurve"].append({"t":datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),"v":round(state["balance"],2)}); continue
-            if (bull and cur_price>=tp2) or (not bull and cur_price<=tp2):
-                profit=posSize*abs(tp2-entry)*0.5; netR=round(1.5+abs(tp2-entry)/risk*0.5,1)
-                state["balance"]+=profit; state["stats"]["wins"]+=1; state["stats"]["totalTrades"]+=1
-                state["stats"]["netR"]=round(state["stats"]["netR"]+netR,2)
-                state["stats"]["bestR"]=max(state["stats"]["bestR"],netR)
-                state["history"].insert(0,{**t,"result":"win","pnl":round(profit,2),"pnlR":netR,
-                    "closePrice":round(cur_price,2),"closedAt":datetime.now(timezone.utc).replace(tzinfo=None).isoformat()})
-                state["equityCurve"].append({"t":datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),"v":round(state["balance"],2)}); continue
-        still.append(t)
-    state["activeTrades"]=still
-    state["history"]=state["history"][:100]
-    state["equityCurve"]=state["equityCurve"][-200:]
-
-
 # ── MAIN ──────────────────────────────────────────────────────
-def main():
-    print(f"\n=== MSNR Scanner v9  {datetime.now(timezone.utc).replace(tzinfo=None).strftime('%Y-%m-%d %H:%M UTC')} ===\n")
-    state, sha = load_state()
-    print(f"Balance: ${state['balance']:.2f} | Active trades: {len(state['activeTrades'])}")
+print("Fetching 30 days of data...")
+w1  = fetch("1w", 52);  time.sleep(0.5)
+d1  = fetch("1d", 90);  time.sleep(0.5)
+h4  = fetch("4h", 300); time.sleep(0.5)
+h1  = fetch("1h", 720)  # 30 days of 1H candles
+start_str = now_ist(h1[0]["t"])
+end_str   = now_ist(h1[-1]["t"])
+print(f"Got {len(h1)} 1H candles — from {start_str} to {end_str}\n")
 
-    print("\nFetching candles...")
-    w1 = fetch_candles("BTC","1w",52);  time.sleep(1)
-    d1 = fetch_candles("BTC","1d",90);  time.sleep(1)
-    h4 = fetch_candles("BTC","4h",200); time.sleep(1)
-    h1 = fetch_candles("BTC","1h",100)
+alerts = []
+seen   = set()
 
-    if not (d1 and h4 and h1):
-        print("Insufficient data — aborting"); return
+STEP = 1
+for idx in range(100, len(h1), STEP):
+    h1_window = h1[:idx+1]
+    cur       = h1_window[-1]
 
-    cur_price = h1[-1]["c"]
-    tr1w = get_trend(w1, 12) if w1 else "UNKNOWN"
-    tr1d = get_trend(d1, 20)
+    d1_now = [c for c in d1 if c["t"] <= cur["t"]]
+    w1_now = [c for c in w1 if c["t"] <= cur["t"]]
+    h4_now = [c for c in h4 if c["t"] <= cur["t"]]
+
+    if len(d1_now)<20 or len(h4_now)<10: continue
+
+    tr1w = get_trend(w1_now, 12)
+    tr1d = get_trend(d1_now, 20)
     bias = get_bias(tr1w, tr1d)
+    if bias == "RANGING": continue
 
-    print(f"\nBTC: ${cur_price:,.0f} | 1W:{tr1w} | 1D:{tr1d} | Bias:{bias}")
+    lvls_4h = find_levels(h4_now, max_dist=15.0)
+    lvls_1d = find_levels(d1_now, max_dist=20.0)
 
-    if bias == "RANGING":
-        print("Bias RANGING — no directional setups this run")
-        save_state(state, sha); return
+    # Debug: print levels found on last candle only
+    if idx == len(h1) - 1:
+        print(f"\nDEBUG — final candle: BTC=${cur['c']:,.0f}  bias={bias}")
+        print(f"4H levels found: {len(lvls_4h)}")
+        for lv in lvls_4h:
+            print(f"  {lv['type']} ${lv['price']:,.0f}  dist={lv['dist']:.2f}%  fresh={lv['fresh']}")
+        print(f"1D levels found: {len(lvls_1d)}")
 
-    lvl_4h = find_key_levels(h4, lb=2, max_dist_pct=15.0)
-    lvl_1d = find_key_levels(d1, lb=2, max_dist_pct=20.0)
-    print(f"4H levels: {len(lvl_4h)} | 1D levels: {len(lvl_1d)}")
-
-    alerts_sent = 0
-
-    for lv in lvl_4h:
+    for lv in lvls_4h:
         bull = lv["type"] == "V"
         if bull  and bias != "BULLISH": continue
         if not bull and bias != "BEARISH": continue
 
-        has_1
+        dist = abs(cur["c"] - lv["price"]) / lv["price"] * 100
+        if dist > ZONE_PCT: continue
+
+        mss = find_mss(h1_window, lv)
+        if not mss:
+            if idx > len(h1) - 5:  # only last 4 candles
+                print(f"  no MSS for {lv['type']} ${lv['price']:,.0f} dist={dist:.2f}%")
+            continue
+
+        key = str(int(lv["price"])) + "_" + str(mss["mss_ts"])
+        if key in seen: continue
+        seen.add(key)
+
+        # 1D confluence — 1D level within 1% of this 4H level?
+        has_1d = any(
+            l["type"] == lv["type"] and abs(l["price"] - lv["price"]) / lv["price"] * 100 < 1.0
+            for l in lvls_1d
+        )
+
+        if lv["fresh"] and has_1d:  grade = "A+"
+        elif lv["fresh"] or has_1d: grade = "A"
+        else:                        grade = "B"
+
+        alerts.append({
+            "bias":   bias,
+            "tr1w":   tr1w,
+            "tr1d":   tr1d,
+            "level":  lv,
+            "has_1d": has_1d,
+            "grade":  grade,
+            "mss":    mss,
+            "cur":    cur["c"],
+        })
+
+
+# ── HTML REPORT ───────────────────────────────────────────────
+
+# ── PRINT RESULTS ─────────────────────────────────────────────
+print("")
+print("=" * 55)
+print("  MSNR BACKTEST — Last 30 Days  |  " + str(len(alerts)) + " setups")
+print("=" * 55)
+
+for i, a in enumerate(alerts, 1):
+    lv   = a["level"]
+    mss  = a["mss"]
+    bull = mss["bull"]
+    wick = mss.get("sweep_low", 0) if bull else mss.get("sweep_high", 0)
+    shape = "V-shape" if bull else "A-shape"
+    tf    = "1D+4H" if a["has_1d"] else "4H"
+    signal = mss.get("signal", "MSS")
+
+    if signal == "MSS":
+        header = "LONG  — SWEEP+MSS" if bull else "SHORT — SWEEP+MSS"
+    else:
+        header = "LONG  — BREAK    " if bull else "SHORT — BREAK    "
+
+    print("")
+    print("-" * 55)
+    print("  #" + str(i) + "  " + header + "  |  Grade: " + a["grade"])
+    print("")
+    print("  4H Level  : $" + f"{lv['price']:,.0f}" + "  (" + shape + " · " + ("Fresh" if lv["fresh"] else "Used") + " · " + tf + ")")
+    print("  Formed    : " + now_ist(lv["ts"]))
+    print("")
+    print("  Sweep     : " + now_ist(mss["sweep_ts"]))
+    print("              wick $" + f"{wick:,.0f}" + "  close $" + f"{mss['sweep_close']:,.0f}")
+    print("")
+    print("  Ext Range : " + str(mss["range_candles"]) + " candles  |  $" + f"{mss['rL']:,.0f}" + " — $" + f"{mss['rH']:,.0f}")
+    print("              " + now_ist(mss["range_open_ts"]) + "  to  " + now_ist(mss["range_close_ts"]))
+    print("")
+    print("  " + signal + "       : " + now_ist(mss["mss_ts"]))
+    print("              close $" + f"{mss['mss_close']:,.0f}")
+    print("")
+    print("  Bias: " + a["bias"] + "  (1W:" + a["tr1w"] + " 1D:" + a["tr1d"] + ")")
+
+print("")
+print("=" * 55)
