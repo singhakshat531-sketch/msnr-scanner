@@ -17,7 +17,7 @@
     "netR": 0.0,
     "bestR": 0.0
   },
-  "lastUpdated": "2026-03-21T18:32:40.312372",
+  "lastUpdated": "2026-03-21T18:58:04.912710",
   "levelAlerts": {
     "BTCUSDT_V_69403": "2026-03-20T15:21:20.928298",
     "BTC_V_69403_AT": "2026-03-20T17:43:15.903486",
@@ -77,5 +77,86 @@
     "BTC_V_69403_MSS": "2026-03-21T17:22:45.096558",
     "BTC_V_69184_MSS": "2026-03-21T18:32:40.312261",
     "BTC_V_69851_MSS": "2026-03-21T17:22:44.483424"
-  }
+  },
+  "currentLevels": [
+    {
+      "type": "A",
+      "price": 70852.3,
+      "fresh": false,
+      "hsl": true,
+      "has1d": false,
+      "grade": "B",
+      "dist": 0.63
+    },
+    {
+      "type": "V",
+      "price": 69851.02,
+      "fresh": false,
+      "hsl": true,
+      "has1d": false,
+      "grade": "B",
+      "dist": 0.79
+    },
+    {
+      "type": "V",
+      "price": 69403.95,
+      "fresh": false,
+      "hsl": true,
+      "has1d": false,
+      "grade": "B",
+      "dist": 1.44
+    },
+    {
+      "type": "V",
+      "price": 69184.69,
+      "fresh": false,
+      "hsl": true,
+      "has1d": false,
+      "grade": "B",
+      "dist": 1.76
+    },
+    {
+      "type": "V",
+      "price": 65974.07,
+      "fresh": true,
+      "hsl": true,
+      "has1d": true,
+      "grade": "A+",
+      "dist": 6.72
+    },
+    {
+      "type": "A",
+      "price": 74884.52,
+      "fresh": false,
+      "hsl": false,
+      "has1d": true,
+      "grade": "B",
+      "dist": 5.98
+    },
+    {
+      "type": "V",
+      "price": 65774.35,
+      "fresh": false,
+      "hsl": true,
+      "has1d": true,
+      "grade": "A",
+      "dist": 7.04
+    },
+    {
+      "type": "V",
+      "price": 63829.19,
+      "fresh": true,
+      "hsl": true,
+      "has1d": true,
+      "grade": "A+",
+      "dist": 10.3
+    }
+  ],
+  "currentPrice": 70405.72,
+  "currentBias": "BULLISH",
+  "currentTrend": {
+    "w1": "BEARISH",
+    "d1": "BULLISH"
+  },
+  "scanTime": "22 Mar 2026  12:28 AM IST"
 }
