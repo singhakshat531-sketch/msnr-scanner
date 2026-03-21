@@ -430,49 +430,133 @@ def format_alert_b(lv, mss, cur_price, grade, bias, tr1w, tr1d, has_1d):
 
 
 # ── SIMULATOR ─────────────────────────────────────────────────
+def auto_enter_trade(state, mss, lv, grade, bias, cur_price, h4_levels):
+    """
+    Auto enter trade on MSS confirmation:
+    - Entry  = MSS candle close price
+    - SL     = sweep candle low (LONG) / high (SHORT) with 0.1% buffer
+    - TPs    = all 4H levels beyond entry in trade direction, sorted nearest first
+    """
+    bull    = mss["bull"]
+    entry   = round(mss["mss_close"], 2)
+    sl_raw  = mss.get("sweep_wick", mss.get("sweep_low", mss.get("sweep_high", entry)))
+    buffer  = entry * 0.001  # 0.1% buffer on SL
+
+    if bull:
+        sl  = round(sl_raw * (1 - 0.001), 2)  # slightly below sweep low
+        tps = sorted(
+            [lv["price"] for lv in h4_levels if lv["price"] > entry and lv["type"] == "A"],
+        )
+    else:
+        sl  = round(sl_raw * (1 + 0.001), 2)  # slightly above sweep high
+        tps = sorted(
+            [lv["price"] for lv in h4_levels if lv["price"] < entry and lv["type"] == "V"],
+            reverse=True
+        )
+
+    if not tps: return  # no target levels found
+    risk = abs(entry - sl)
+    if risk <= 0: return
+
+    trade_id = f"auto_{int(datetime.now(timezone.utc).timestamp())}"
+    # avoid duplicate entries for same MSS
+    if any(t.get("id") == trade_id or
+           (t.get("rawEntry") == entry and t.get("bull") == bull)
+           for t in state["activeTrades"]):
+        return
+
+    gl = "A+" if grade == "aplus" else grade.upper()
+    trade = {
+        "id":           trade_id,
+        "bull":         bull,
+        "direction":    "LONG" if bull else "SHORT",
+        "grade":        gl,
+        "level":        round(lv["price"], 2),
+        "rawEntry":     entry,
+        "rawSL":        sl,
+        "rawRisk":      round(risk, 2),
+        "tpLevels":     [round(t, 2) for t in tps],   # all TP levels
+        "tpIndex":      0,                              # which TP we're targeting
+        "rawTP1":       round(tps[0], 2),
+        "rawTP2":       round(tps[1], 2) if len(tps) > 1 else round(tps[0], 2),
+        "phase":        "entry",
+        "entryBalance": round(state["balance"], 2),
+        "enteredAt":    datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),
+        "bias":         bias,
+        "auto":         True,
+    }
+    state["activeTrades"].append(trade)
+    print(f"  → AUTO TRADE: {'LONG' if bull else 'SHORT'} entry ${entry:,.0f} sl ${sl:,.0f} tp1 ${tps[0]:,.0f} ({len(tps)} levels)")
+
+
 def update_simulator(state, cur_price):
     still = []
     for t in state["activeTrades"]:
-        bull    = t.get("bull", t["direction"]=="LONG")
-        entry, sl, tp1, tp2 = t["rawEntry"], t["rawSL"], t["rawTP1"], t["rawTP2"]
-        risk    = t.get("rawRisk", abs(entry-sl))
-        if risk<=0: still.append(t); continue
-        riskAmt = t.get("entryBalance",SIM_START)*(RISK_PCT.get(t["grade"],1.0)/100)
-        posSize = riskAmt/risk
-        phase   = t.get("phase","entry")
-        if phase=="entry":
-            if (bull and cur_price<=sl) or (not bull and cur_price>=sl):
-                state["balance"]-=riskAmt; state["stats"]["losses"]+=1; state["stats"]["totalTrades"]+=1
-                state["stats"]["netR"]=round(state["stats"]["netR"]-1,2)
-                state["history"].insert(0,{**t,"result":"loss","pnl":round(-riskAmt,2),"pnlR":-1.0,
-                    "closePrice":round(cur_price,2),"closedAt":datetime.now(timezone.utc).replace(tzinfo=None).isoformat()})
-                state["equityCurve"].append({"t":datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),"v":round(state["balance"],2)}); continue
-            if (bull and cur_price>=tp1) or (not bull and cur_price<=tp1):
-                profit=posSize*abs(tp1-entry)*0.5; state["balance"]+=profit
-                t["phase"]="tp1"; t["rawSL"]=entry
-                state["stats"]["netR"]=round(state["stats"]["netR"]+1.5,2)
-                state["history"].insert(0,{**t,"result":"tp1","pnl":round(profit,2),"pnlR":1.5,
-                    "closePrice":round(cur_price,2),"closedAt":datetime.now(timezone.utc).replace(tzinfo=None).isoformat()})
-                state["equityCurve"].append({"t":datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),"v":round(state["balance"],2)})
-                still.append(t); continue
-        elif phase=="tp1":
-            if (bull and cur_price<=entry) or (not bull and cur_price>=entry):
-                state["stats"]["be"]+=1; state["stats"]["totalTrades"]+=1
-                state["history"].insert(0,{**t,"result":"be","pnl":0.0,"pnlR":0.0,
-                    "closePrice":round(cur_price,2),"closedAt":datetime.now(timezone.utc).replace(tzinfo=None).isoformat()})
-                state["equityCurve"].append({"t":datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),"v":round(state["balance"],2)}); continue
-            if (bull and cur_price>=tp2) or (not bull and cur_price<=tp2):
-                profit=posSize*abs(tp2-entry)*0.5; netR=round(1.5+abs(tp2-entry)/risk*0.5,1)
-                state["balance"]+=profit; state["stats"]["wins"]+=1; state["stats"]["totalTrades"]+=1
-                state["stats"]["netR"]=round(state["stats"]["netR"]+netR,2)
-                state["stats"]["bestR"]=max(state["stats"]["bestR"],netR)
-                state["history"].insert(0,{**t,"result":"win","pnl":round(profit,2),"pnlR":netR,
-                    "closePrice":round(cur_price,2),"closedAt":datetime.now(timezone.utc).replace(tzinfo=None).isoformat()})
-                state["equityCurve"].append({"t":datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),"v":round(state["balance"],2)}); continue
+        bull    = t.get("bull", t["direction"] == "LONG")
+        entry   = t["rawEntry"]
+        sl      = t["rawSL"]
+        risk    = t.get("rawRisk", abs(entry - sl))
+        if risk <= 0: still.append(t); continue
+
+        riskAmt = t.get("entryBalance", SIM_START) * (RISK_PCT.get(t.get("grade","b").lower().replace("+","plus"), 1.0) / 100)
+        posSize = riskAmt / risk
+        phase   = t.get("phase", "entry")
+        tpLevels = t.get("tpLevels", [t.get("rawTP1", entry), t.get("rawTP2", entry)])
+        tpIndex  = t.get("tpIndex", 0)
+
+        now_ts = datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
+
+        # ── SL hit ──────────────────────────────────────────
+        if (bull and cur_price <= sl) or (not bull and cur_price >= sl):
+            pnl = -riskAmt if phase == "entry" else 0.0
+            result = "loss" if phase == "entry" else "be"
+            if phase == "entry":
+                state["balance"] -= riskAmt
+                state["stats"]["losses"] += 1
+                state["stats"]["netR"] = round(state["stats"]["netR"] - 1, 2)
+            else:
+                state["stats"]["be"] += 1
+            state["stats"]["totalTrades"] += 1
+            state["history"].insert(0, {**t, "result": result, "pnl": round(pnl, 2),
+                "pnlR": -1.0 if result == "loss" else 0.0,
+                "closePrice": round(cur_price, 2), "closedAt": now_ts})
+            state["equityCurve"].append({"t": now_ts, "v": round(state["balance"], 2)})
+            continue
+
+        # ── TP level hit — trail to next ────────────────────
+        if tpIndex < len(tpLevels):
+            current_tp = tpLevels[tpIndex]
+            if (bull and cur_price >= current_tp) or (not bull and cur_price <= current_tp):
+                profit = posSize * abs(current_tp - entry)
+                state["balance"] += profit
+                netR = round(abs(current_tp - entry) / risk, 1)
+                state["stats"]["netR"] = round(state["stats"]["netR"] + netR, 2)
+                state["stats"]["bestR"] = max(state["stats"]["bestR"], netR)
+
+                state["history"].insert(0, {**t, "result": f"tp{tpIndex+1}", "pnl": round(profit, 2),
+                    "pnlR": netR, "closePrice": round(cur_price, 2), "closedAt": now_ts})
+                state["equityCurve"].append({"t": now_ts, "v": round(state["balance"], 2)})
+
+                # Check if more TP levels exist — trail
+                if tpIndex + 1 < len(tpLevels):
+                    # Trail SL to previous TP (or entry if first TP)
+                    t["rawSL"]   = entry if tpIndex == 0 else tpLevels[tpIndex - 1]
+                    t["tpIndex"] = tpIndex + 1
+                    t["rawTP1"]  = tpLevels[tpIndex + 1]
+                    t["phase"]   = f"tp{tpIndex+1}"
+                    still.append(t)
+                else:
+                    # All TPs hit — final win
+                    state["stats"]["wins"] += 1
+                    state["stats"]["totalTrades"] += 1
+                continue
+
         still.append(t)
-    state["activeTrades"]=still
-    state["history"]=state["history"][:100]
-    state["equityCurve"]=state["equityCurve"][-200:]
+
+    state["activeTrades"] = still
+    state["history"]      = state["history"][:100]
+    state["equityCurve"]  = state["equityCurve"][-200:]
+
 
 
 # ── MAIN ──────────────────────────────────────────────────────
@@ -545,6 +629,8 @@ def main():
                     send_telegram(msg)
                     mark_alert(state, "mssAlerts", key_b)
                     alerts_sent += 1
+                    # Auto enter simulator trade
+                    auto_enter_trade(state, mss, lv, grade, bias, cur_price, lvl_4h)
                     # Save last alert for website
                     state["lastAlert"] = {
                         "type":      "MSS",
