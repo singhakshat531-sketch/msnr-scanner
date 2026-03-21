@@ -164,30 +164,50 @@ def get_bias(tr1w, tr1d):
     return "RANGING"
 
 # ── KEY LEVELS ────────────────────────────────────────────────
-def find_key_levels(candles, lb=2, max_dist_pct=20.0):
+def find_key_levels(candles, max_dist_pct=20.0):
     """
-    V-level: bearish candle confirmed by next bullish candle
-             → level price = bearish candle's CLOSE
-    A-level: bullish candle confirmed by next bearish candle
-             → level price = bullish candle's CLOSE
+    V-level: bear candle at swing low + bull confirmation
+             level price = bear candle close
+             level time  = bull candle open
+
+    A-level: bull candle at swing high + bear confirmation
+             level price = bull candle close
+             level time  = bear candle open
+
+    Only extreme swing points — not every bear/bull flip.
     """
-    if len(candles) < 4: return []
+    if len(candles) < 6: return []
     cur    = candles[-1]["c"]
     levels = []
+    LB = 2
 
-    for i in range(len(candles) - 2):
+    for i in range(LB, len(candles) - LB - 1):
         c0 = candles[i]
         c1 = candles[i + 1]
 
-        is_bearish = c0["c"] < c0["o"]
-        is_bullish = c0["c"] > c0["o"]
-        conf_bull  = c1["c"] > c1["o"]
-        conf_bear  = c1["c"] < c1["o"]
+        bear0 = c0["c"] < c0["o"]
+        bull0 = c0["c"] > c0["o"]
+        bull1 = c1["c"] > c1["o"]
+        bear1 = c1["c"] < c1["o"]
 
-        if is_bearish and conf_bull:
-            price = c0["c"]; t = "V"
-        elif is_bullish and conf_bear:
-            price = c0["c"]; t = "A"
+        if bear0 and bull1:
+            is_swing_low = all(
+                c0["l"] < candles[i - j]["l"] and c0["l"] < candles[i + 1 + j]["l"]
+                for j in range(1, LB + 1)
+                if i + 1 + j < len(candles)
+            )
+            if not is_swing_low: continue
+            price = c0["c"]; t = "V"; level_time = c1["t"]
+
+        elif bull0 and bear1:
+            is_swing_high = all(
+                c0["h"] > candles[i - j]["h"] and c0["h"] > candles[i + 1 + j]["h"]
+                for j in range(1, LB + 1)
+                if i + 1 + j < len(candles)
+            )
+            if not is_swing_high: continue
+            price = c0["c"]; t = "A"; level_time = c1["t"]
+
         else:
             continue
 
@@ -217,57 +237,25 @@ def find_key_levels(candles, lb=2, max_dist_pct=20.0):
 
     return sorted(levels, key=lambda x: x["dist"])[:10]
 
+
 def grade_level(lv, has_1d):
     score = 0
-    if lv["fresh"]:    score += 2
-    if lv["hsl"]:      score += 1
-    if has_1d:         score += 2
-    if lv["dist"]<0.5: score += 1
-    return "aplus" if score>=5 else "a" if score>=3 else "b"
+    if lv["fresh"]: score += 2
+    if lv["hsl"]:   score += 1
+    if has_1d:      score += 2
+    if lv["dist"] < 0.5: score += 1
+    return "aplus" if score >= 5 else "a" if score >= 3 else "b"
 
-# ── SPAM CONTROL ──────────────────────────────────────────────
-def was_alerted(state, bucket, key, hours):
-    ts = state.get(bucket,{}).get(key)
-    if not ts: return False
-    try:
-        return (datetime.now(timezone.utc).replace(tzinfo=None)-datetime.fromisoformat(ts)).total_seconds() < hours*3600
-    except: return False
 
-def mark_alert(state, bucket, key):
-    state[bucket][key] = datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
-
-# ── TELEGRAM ──────────────────────────────────────────────────
-def send_telegram(msg):
-    if not TELEGRAM_TOKEN:
-        print("  [no token]\n" + msg); return
-    url  = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-    data = urllib.parse.urlencode({"chat_id":TELEGRAM_CHAT_ID,"text":msg,"parse_mode":"HTML"}).encode()
-    try:
-        with urllib.request.urlopen(url, data=data, timeout=10) as r:
-            res = json.loads(r.read())
-        print("  Telegram ✓" if res.get("ok") else f"  Telegram error: {res}")
-    except Exception as e:
-        print(f"  Telegram error: {e}")
-
-# ── CORE: 1H MSS DETECTION ────────────────────────────────────
 def find_1h_mss(h1, level):
     """
-    EXACT LOGIC (confirmed from chart 19 Mar):
+    LONG (V-level):
+      1. 1H wick goes BELOW level, closes ABOVE = sweep
+      2. Track all candles after sweep: rH = highest high, rL = lowest low
+      3. MSS ONLY: range low swept (wick below rL, close above rL)
+                   AND body closes ABOVE rH
 
-    BULLISH setup (V-level / support):
-      1. Price sweeps or touches the 4H level (wick below or within 1%)
-      2. After the sweep, look for the most recent group of consecutive
-         BEARISH 1H candles (close < open) — these form the external range
-         Can be 1 candle or many, but ALL must be bearish (same direction)
-      3. external range HIGH = highest high of those consecutive bearish candles
-      4. MSS = next 1H candle BODY CLOSES ABOVE that range high
-         (close > range high — body, not wick)
-
-    BEARISH setup (A-level / resistance):
-      1. Price sweeps or touches the 4H level (wick above or within 1%)
-      2. After the sweep, look for consecutive BULLISH 1H candles
-      3. external range LOW = lowest low of those consecutive bullish candles
-      4. MSS = next 1H candle BODY CLOSES BELOW that range low
+    SHORT (A-level): mirror, flipped.
     """
     if len(h1) < 4: return None
 
@@ -276,106 +264,91 @@ def find_1h_mss(h1, level):
     scan = h1[-SWING_LOOKBACK:]
     n    = len(scan)
 
-    # Step 1: find the LAST valid sweep before MSS
-    # Valid = wick went through the level AND closed back inside
-    # Always use the LAST sweep — if price swept, consolidated, swept again,
-    # the LAST sweep is always the reference point for the external range.
-    TOUCH_PCT = 1.5
+    # Step 1: last valid sweep
     last_touch_idx = None
-
     for i in range(n - 3, -1, -1):
         c = scan[i]
-        if bull and c["l"] < lp and c["c"] > lp:    # wick below, closed above
+        if bull and c["l"] < lp and c["c"] > lp:
             last_touch_idx = i; break
-        elif not bull and c["h"] > lp and c["c"] < lp:  # wick above, closed below
+        elif not bull and c["h"] > lp and c["c"] < lp:
             last_touch_idx = i; break
-
-    # Fallback: touch within 1.5% that closed back inside
-    if last_touch_idx is None:
-        for i in range(n - 3, -1, -1):
-            c = scan[i]
-            if bull and c["l"] <= lp * (1 + TOUCH_PCT / 100) and c["c"] > lp:
-                last_touch_idx = i; break
-            elif not bull and c["h"] >= lp * (1 - TOUCH_PCT / 100) and c["c"] < lp:
-                last_touch_idx = i; break
 
     if last_touch_idx is None: return None
 
-    swept = scan[last_touch_idx]["l"] < lp if bull else scan[last_touch_idx]["h"] > lp
+    sweep_candle = scan[last_touch_idx]
 
-    # Step 2 + 3: scan every candle after the sweep
-    # External range = ALL candles between sweep and MSS/BREAK candle
-    # rH = highest high, rL = lowest low of those candles
-    # MSS   = rL swept (wick below, closed back above) before body closes above rH
-    # BREAK = body closes above rH directly without sweeping rL first
-
-    # Helper: unix-ms → short IST string
     def ts(unix_ms):
         dt = datetime.fromtimestamp(unix_ms / 1000, IST)
-        return dt.strftime('%d %b  %I:%M %p')
+        return dt.strftime("%d %b  %I:%M %p")
 
-    sweep_candle = scan[last_touch_idx]
-    rH           = 0
-    rL           = float("inf")
-    range_swept  = False
+    # Step 2+3: replay forward from sweep
+    # range_low  = sweep candle low
+    # range_high = highest high since sweep
+    # Re-sweep: if candle closes below sweep low → reset if valid sweep, else invalidate
+    # MSS: body closes above range high → alert
 
-    for i in range(last_touch_idx + 1, n):
-        mss_c = scan[i]
+    sweep_idx = last_touch_idx
+    sweep_c   = scan[sweep_idx]
+    rH        = sweep_c["h"]
+    rL        = sweep_c["l"]
+
+    for i in range(sweep_idx + 1, n):
+        mc = scan[i]
 
         if bull:
-            rH = max(rH, mss_c["h"])
-            rL = min(rL, mss_c["l"])
-            if mss_c["l"] < rL and mss_c["c"] > rL:
-                range_swept = True
-            if mss_c["c"] > rH:
-                pre = scan[last_touch_idx + 1:i]
-                if not pre: return None
-                signal = "MSS" if range_swept else "BREAK"
+            if mc["c"] < rL:
+                if mc["l"] < lp and mc["c"] > lp:
+                    sweep_idx = i; sweep_c = mc
+                    rH = mc["h"]; rL = mc["l"]
+                else:
+                    return None
+            rH = max(rH, mc["h"])
+            if mc["c"] > rH and i > sweep_idx + 1:
+                ext = scan[sweep_idx:i]
                 return {
                     "bull":          True,
-                    "signal":        signal,
-                    "range_high":    max(c["h"] for c in pre),
-                    "range_low":     min(c["l"] for c in pre),
-                    "range_candles": len(pre),
-                    "mss_close":     mss_c["c"],
-                    "swept_level":   swept,
+                    "signal":        "MSS",
+                    "range_high":    max(c["h"] for c in ext),
+                    "range_low":     min(c["l"] for c in ext),
+                    "range_candles": len(ext),
+                    "mss_close":     mc["c"],
+                    "swept_level":   True,
                     "broke":         "ABOVE range high",
-                    "sweep_time":    ts(sweep_candle["t"]),
-                    "sweep_wick":    sweep_candle["l"],
-                    "sweep_close":   sweep_candle["c"],
-                    "range_open":    ts(pre[0]["t"]),
-                    "range_close":   ts(pre[-1]["t"]),
-                    "mss_open":      ts(mss_c["t"]),
+                    "sweep_time":    ts(sweep_c["t"]),
+                    "sweep_wick":    sweep_c["l"],
+                    "sweep_close":   sweep_c["c"],
+                    "range_open":    ts(ext[0]["t"]),
+                    "range_close":   ts(ext[-1]["t"]),
+                    "mss_open":      ts(mc["t"]),
                 }
         else:
-            rH = max(rH, mss_c["h"])
-            rL = min(rL, mss_c["l"])
-            if mss_c["h"] > rH and mss_c["c"] < rH:
-                range_swept = True
-            if mss_c["c"] < rL:
-                pre = scan[last_touch_idx + 1:i]
-                if not pre: return None
-                signal = "MSS" if range_swept else "BREAK"
+            if mc["c"] > rH:
+                if mc["h"] > lp and mc["c"] < lp:
+                    sweep_idx = i; sweep_c = mc
+                    rH = mc["h"]; rL = mc["l"]
+                else:
+                    return None
+            rL = min(rL, mc["l"])
+            if mc["c"] < rL and i > sweep_idx + 1:
+                ext = scan[sweep_idx:i]
                 return {
                     "bull":          False,
-                    "signal":        signal,
-                    "range_high":    max(c["h"] for c in pre),
-                    "range_low":     min(c["l"] for c in pre),
-                    "range_candles": len(pre),
-                    "mss_close":     mss_c["c"],
-                    "swept_level":   swept,
+                    "signal":        "MSS",
+                    "range_high":    max(c["h"] for c in ext),
+                    "range_low":     min(c["l"] for c in ext),
+                    "range_candles": len(ext),
+                    "mss_close":     mc["c"],
+                    "swept_level":   True,
                     "broke":         "BELOW range low",
-                    "sweep_time":    ts(sweep_candle["t"]),
-                    "sweep_wick":    sweep_candle["h"],
-                    "sweep_close":   sweep_candle["c"],
-                    "range_open":    ts(pre[0]["t"]),
-                    "range_close":   ts(pre[-1]["t"]),
-                    "mss_open":      ts(mss_c["t"]),
+                    "sweep_time":    ts(sweep_c["t"]),
+                    "sweep_wick":    sweep_c["h"],
+                    "sweep_close":   sweep_c["c"],
+                    "range_open":    ts(ext[0]["t"]),
+                    "range_close":   ts(ext[-1]["t"]),
+                    "mss_open":      ts(mc["t"]),
                 }
 
     return None
-
-
 
 # ── ALERT FORMATTERS ──────────────────────────────────────────
 def format_alert_a(lv, cur_price, grade, bias, tr1w, tr1d, has_1d):
@@ -507,49 +480,4 @@ def main():
         if bull  and bias != "BULLISH": continue
         if not bull and bias != "BEARISH": continue
 
-        has_1d = any(
-            l["type"]==lv["type"] and abs(l["price"]-lv["price"])/lv["price"]*100 < 1.5
-            for l in lvl_1d
-        )
-        grade  = grade_level(lv, has_1d)
-        lv_key = f"BTC_{lv['type']}_{int(lv['price'])}"
-        dist   = abs(cur_price - lv["price"]) / lv["price"] * 100
-
-        print(f"\n  {lv['type']} ${lv['price']:,.0f} | "
-              f"{'FRESH' if lv['fresh'] else 'USED'} | "
-              f"Grade:{grade} | dist:{dist:.2f}%"
-              f"{' | 1D+4H' if has_1d else ''}")
-
-        # ── ALERT A: price just arrived at level ──────────────
-        if dist <= NEAR_PCT:
-            key_a = lv_key + "_AT"
-            if not was_alerted(state, "levelAlerts", key_a, SPAM_HOURS_A):
-                msg = format_alert_a(lv, cur_price, grade, bias, tr1w, tr1d, has_1d)
-                send_telegram(msg)
-                mark_alert(state, "levelAlerts", key_a)
-                alerts_sent += 1
-                print(f"  → ALERT A: price at level")
-
-        # ── ALERT B: 1H MSS at this level ─────────────────────
-        if dist <= ZONE_PCT:
-            key_b = lv_key + "_MSS"
-            if not was_alerted(state, "mssAlerts", key_b, SPAM_HOURS_B):
-                mss = find_1h_mss(h1, lv)
-                if mss:
-                    msg = format_alert_b(lv, mss, cur_price, grade, bias, tr1w, tr1d, has_1d)
-                    send_telegram(msg)
-                    mark_alert(state, "mssAlerts", key_b)
-                    alerts_sent += 1
-                    print(f"  → ALERT B: 1H MSS {'bullish' if mss['bull'] else 'bearish'} "
-                          f"| range {mss['range_candles']}c "
-                          f"| broke {mss['broke']} @ ${mss['mss_close']:,.0f}")
-                else:
-                    print(f"  → In zone, no 1H MSS yet")
-
-    print(f"\n{'No alerts this run' if alerts_sent==0 else str(alerts_sent)+' alert(s) sent'}")
-    update_simulator(state, cur_price)
-    save_state(state, sha)
-    print("=== Done ===")
-
-if __name__ == "__main__":
-    main()
+        has_1
