@@ -44,10 +44,10 @@ GITHUB_REPO      = "singhakshat531-sketch/msnr-scanner"
 DATA_FILE        = "trades.json"
 
 NEAR_PCT         = 0.5   # Alert A: price within 0.5% of 4H level
-ZONE_PCT         = 2.0   # scan for MSS when price within 2% of level
+ZONE_PCT         = 10.0  # scan for MSS when price within 10% of level
 SPAM_HOURS_A     = 4     # re-alert cooldown for Alert A
 SPAM_HOURS_B     = 2     # re-alert cooldown for Alert B (MSS)
-SWING_LOOKBACK   = 30    # 1H candles to look back for swing formation
+SWING_LOOKBACK   = 200   # 1H candles to look back for swing formation
 SIM_START        = 1000.0
 RISK_PCT         = {"aplus": 3.0, "a": 2.0, "b": 1.0}
 
@@ -326,14 +326,16 @@ def find_1h_mss(h1, level):
         return target, swing_i
 
     mss_target, swing_idx = calc_target(level_idx, sweep_idx)
-    sweep_c = scan[sweep_idx]
+    sweep_c        = scan[sweep_idx]
+    prev_sweep_idx = sweep_idx
 
     for i in range(sweep_idx + 1, n):
         mc = scan[i]
         if bull:
             if mc["l"] < sweep_c["l"] and mc["c"] > lp:
+                prev_sweep_idx = sweep_idx
                 sweep_idx = i; sweep_c = mc
-                mss_target, swing_idx = calc_target(level_idx, sweep_idx)
+                mss_target, swing_idx = calc_target(prev_sweep_idx, sweep_idx)
                 continue
             if mc["c"] > mss_target:
                 ext = scan[swing_idx:sweep_idx + 1]
@@ -355,8 +357,9 @@ def find_1h_mss(h1, level):
                 }
         else:
             if mc["h"] > sweep_c["h"] and mc["c"] < lp:
+                prev_sweep_idx = sweep_idx
                 sweep_idx = i; sweep_c = mc
-                mss_target, swing_idx = calc_target(level_idx, sweep_idx)
+                mss_target, swing_idx = calc_target(prev_sweep_idx, sweep_idx)
                 continue
             if mc["c"] < mss_target:
                 ext = scan[swing_idx:sweep_idx + 1]
@@ -482,7 +485,7 @@ def main():
     w1 = fetch_candles("BTC","1w",52);  time.sleep(1)
     d1 = fetch_candles("BTC","1d",90);  time.sleep(1)
     h4 = fetch_candles("BTC","4h",200); time.sleep(1)
-    h1 = fetch_candles("BTC","1h",100)
+    h1 = fetch_candles("BTC","1h",250)
 
     if not (d1 and h4 and h1):
         print("Insufficient data — aborting"); return
@@ -499,7 +502,7 @@ def main():
         save_state(state, sha); return
 
     lvl_4h = find_key_levels(h4, max_dist_pct=15.0)
-    lvl_1d = find_key_levels(d1, max_dist_pct=20.0)
+    lvl_1d = find_key_levels(d1, max_dist_pct=15.0)
     print(f"4H levels: {len(lvl_4h)} | 1D levels: {len(lvl_1d)}")
 
     alerts_sent = 0
