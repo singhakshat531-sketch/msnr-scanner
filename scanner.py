@@ -474,8 +474,8 @@ def main():
         print("Bias RANGING — no directional setups this run")
         save_state(state, sha); return
 
-    lvl_4h = find_key_levels(h4, lb=2, max_dist_pct=15.0)
-    lvl_1d = find_key_levels(d1, lb=2, max_dist_pct=20.0)
+    lvl_4h = find_key_levels(h4, max_dist_pct=15.0)
+    lvl_1d = find_key_levels(d1, max_dist_pct=20.0)
     print(f"4H levels: {len(lvl_4h)} | 1D levels: {len(lvl_1d)}")
 
     alerts_sent = 0
