@@ -248,35 +248,45 @@ def grade_level(lv, has_1d):
 
 
 def find_1h_mss(h1, level):
-    """Same logic as find_mss in backtest."""
+    """Same logic as find_mss. Scanner uses ms timestamps, backtest uses seconds."""
     if len(h1) < 4: return None
-    bull = level["type"] == "V"
-    lp   = level["price"]
-    scan = h1[-SWING_LOOKBACK:]
-    n    = len(scan)
+    bull      = level["type"] == "V"
+    lp        = level["price"]
+    # scanner stores timestamps in ms, convert level ts to ms for comparison
+    level_ts  = level.get("ts", 0) * 1000 if level.get("ts", 0) < 1e12 else level.get("ts", 0)
+    scan      = h1[-SWING_LOOKBACK:]
+    n         = len(scan)
 
     def ts(unix_ms):
         dt = datetime.fromtimestamp(unix_ms / 1000, IST)
         return dt.strftime("%d %b  %I:%M %p")
 
-    # Step 1: last valid sweep
+    # Find first candle at or after level formation
+    level_idx = 0
+    for i in range(n):
+        if scan[i]["t"] >= level_ts:
+            level_idx = i
+            break
+
+    # Step 1: last valid sweep after level formed
     sweep_idx = None
-    for i in range(n - 3, -1, -1):
+    for i in range(n - 3, level_idx - 1, -1):
         c = scan[i]
         if bull and c["l"] < lp and c["c"] > lp:
             sweep_idx = i; break
         elif not bull and c["h"] > lp and c["c"] < lp:
             sweep_idx = i; break
     if sweep_idx is None: return None
+    if sweep_idx <= level_idx: return None
     sweep_c = scan[sweep_idx]
 
-    # Step 2: find highest swing high (LONG) or lowest swing low (SHORT) before sweep
+    # Step 2: highest swing high / lowest swing low between level and sweep
     mss_target = None
     swing_idx  = None
 
     if bull:
         best_high = None
-        for i in range(0, sweep_idx - 1):
+        for i in range(level_idx, sweep_idx - 1):
             c0, c1 = scan[i], scan[i + 1]
             if c0["c"] > c0["o"] and c1["c"] < c1["o"]:
                 if best_high is None or c0["h"] > best_high:
@@ -285,7 +295,7 @@ def find_1h_mss(h1, level):
                     swing_idx  = i
     else:
         best_low = None
-        for i in range(0, sweep_idx - 1):
+        for i in range(level_idx, sweep_idx - 1):
             c0, c1 = scan[i], scan[i + 1]
             if c0["c"] < c0["o"] and c1["c"] > c1["o"]:
                 if best_low is None or c0["l"] < best_low:
@@ -296,10 +306,16 @@ def find_1h_mss(h1, level):
     if mss_target is None:
         swing_idx  = sweep_idx
         mss_target = sweep_c["h"] if bull else sweep_c["l"]
+    else:
+        if bull and sweep_c["h"] > mss_target:
+            mss_target = sweep_c["h"]
+            swing_idx  = sweep_idx
+        elif not bull and sweep_c["l"] < mss_target:
+            mss_target = sweep_c["l"]
+            swing_idx  = sweep_idx
 
     ext = scan[swing_idx:sweep_idx + 1]
 
-    # Step 3: first candle after sweep closing beyond target
     for i in range(sweep_idx + 1, n):
         mc = scan[i]
         if bull and mc["c"] > mss_target:
