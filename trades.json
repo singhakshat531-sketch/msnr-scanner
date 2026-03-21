@@ -17,7 +17,7 @@
     "netR": 0.0,
     "bestR": 0.0
   },
-  "lastUpdated": "2026-03-21T18:58:04.912710",
+  "lastUpdated": "2026-03-21T19:04:19.662746",
   "levelAlerts": {
     "BTCUSDT_V_69403": "2026-03-20T15:21:20.928298",
     "BTC_V_69403_AT": "2026-03-20T17:43:15.903486",
@@ -86,7 +86,7 @@
       "hsl": true,
       "has1d": false,
       "grade": "B",
-      "dist": 0.63
+      "dist": 0.62
     },
     {
       "type": "V",
@@ -95,7 +95,7 @@
       "hsl": true,
       "has1d": false,
       "grade": "B",
-      "dist": 0.79
+      "dist": 0.8
     },
     {
       "type": "V",
@@ -104,7 +104,7 @@
       "hsl": true,
       "has1d": false,
       "grade": "B",
-      "dist": 1.44
+      "dist": 1.45
     },
     {
       "type": "V",
@@ -113,7 +113,7 @@
       "hsl": true,
       "has1d": false,
       "grade": "B",
-      "dist": 1.76
+      "dist": 1.77
     },
     {
       "type": "V",
@@ -131,7 +131,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 5.98
+      "dist": 5.97
     },
     {
       "type": "V",
@@ -140,7 +140,7 @@
       "hsl": true,
       "has1d": true,
       "grade": "A",
-      "dist": 7.04
+      "dist": 7.05
     },
     {
       "type": "V",
@@ -149,14 +149,14 @@
       "hsl": true,
       "has1d": true,
       "grade": "A+",
-      "dist": 10.3
+      "dist": 10.31
     }
   ],
-  "currentPrice": 70405.72,
+  "currentPrice": 70410.68,
   "currentBias": "BULLISH",
   "currentTrend": {
     "w1": "BEARISH",
     "d1": "BULLISH"
   },
-  "scanTime": "22 Mar 2026  12:28 AM IST"
+  "scanTime": "22 Mar 2026  12:34 AM IST"
 }
