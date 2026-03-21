@@ -62,10 +62,10 @@
     "netR": 0.0,
     "bestR": 0.0
   },
-  "lastUpdated": "2026-03-21T22:55:14.698307",
+  "lastUpdated": "2026-03-21T23:50:53.357854",
   "levelAlerts": {
     "BTCUSDT_V_69403": "2026-03-20T15:21:20.928298",
-    "BTC_V_69403_AT": "2026-03-20T17:43:15.903486",
+    "BTC_V_69403_AT": "2026-03-21T23:50:53.357557",
     "BTC_V_69851_AT": "2026-03-20T21:02:57.028562"
   },
   "brokenLevels": {
@@ -128,30 +128,12 @@
   "currentLevels": [
     {
       "type": "V",
-      "price": 69851.02,
-      "fresh": false,
-      "hsl": true,
-      "has1d": false,
-      "grade": "B",
-      "dist": 0.64
-    },
-    {
-      "type": "A",
-      "price": 70852.3,
-      "fresh": false,
-      "hsl": true,
-      "has1d": false,
-      "grade": "B",
-      "dist": 0.78
-    },
-    {
-      "type": "V",
       "price": 69403.95,
       "fresh": false,
       "hsl": true,
       "has1d": false,
       "grade": "B",
-      "dist": 1.29
+      "dist": 0.36
     },
     {
       "type": "V",
@@ -160,7 +142,16 @@
       "hsl": true,
       "has1d": false,
       "grade": "B",
-      "dist": 1.61
+      "dist": 0.68
+    },
+    {
+      "type": "A",
+      "price": 70852.3,
+      "fresh": false,
+      "hsl": true,
+      "has1d": false,
+      "grade": "B",
+      "dist": 1.69
     },
     {
       "type": "V",
@@ -169,7 +160,7 @@
       "hsl": true,
       "has1d": true,
       "grade": "A+",
-      "dist": 6.55
+      "dist": 5.58
     },
     {
       "type": "V",
@@ -178,7 +169,7 @@
       "hsl": true,
       "has1d": true,
       "grade": "A",
-      "dist": 6.88
+      "dist": 5.9
     },
     {
       "type": "A",
@@ -187,7 +178,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 6.13
+      "dist": 6.99
     },
     {
       "type": "V",
@@ -196,16 +187,16 @@
       "hsl": true,
       "has1d": true,
       "grade": "A+",
-      "dist": 10.13
+      "dist": 9.12
     }
   ],
-  "currentPrice": 70296.52,
+  "currentPrice": 69653.03,
   "currentBias": "BULLISH",
   "currentTrend": {
     "w1": "BEARISH",
     "d1": "BULLISH"
   },
-  "scanTime": "22 Mar 2026  04:25 AM IST",
+  "scanTime": "22 Mar 2026  05:20 AM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "LONG",
