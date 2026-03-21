@@ -249,13 +249,10 @@ def grade_level(lv, has_1d):
 
 def find_1h_mss(h1, level):
     """
-    LONG (V-level):
-      1. 1H wick goes BELOW level, closes ABOVE = sweep
-      2. Track all candles after sweep: rH = highest high, rL = lowest low
-      3. MSS ONLY: range low swept (wick below rL, close above rL)
-                   AND body closes ABOVE rH
-
-    SHORT (A-level): mirror, flipped.
+    Same logic as find_mss in backtest:
+    1. Find last 1H sweep of 4H level
+    2. Look backwards for most recent 1H swing high/low before sweep
+    3. MSS = body closes beyond that swing high/low close
     """
     if len(h1) < 4: return None
 
@@ -264,94 +261,89 @@ def find_1h_mss(h1, level):
     scan = h1[-SWING_LOOKBACK:]
     n    = len(scan)
 
-    # Step 1: last valid sweep
-    last_touch_idx = None
-    for i in range(n - 3, -1, -1):
-        c = scan[i]
-        if bull and c["l"] < lp and c["c"] > lp:
-            last_touch_idx = i; break
-        elif not bull and c["h"] > lp and c["c"] < lp:
-            last_touch_idx = i; break
-
-    if last_touch_idx is None: return None
-
-    sweep_candle = scan[last_touch_idx]
-
     def ts(unix_ms):
         dt = datetime.fromtimestamp(unix_ms / 1000, IST)
         return dt.strftime("%d %b  %I:%M %p")
 
-    # Step 2+3: replay forward from sweep
-    # range_low  = sweep candle low
-    # range_high = highest high since sweep
-    # Re-sweep: if candle closes below sweep low → reset if valid sweep, else invalidate
-    # MSS: body closes above range high → alert
+    # Step 1: find last valid sweep
+    sweep_idx = None
+    for i in range(n - 3, -1, -1):
+        c = scan[i]
+        if bull and c["l"] < lp and c["c"] > lp:
+            sweep_idx = i; break
+        elif not bull and c["h"] > lp and c["c"] < lp:
+            sweep_idx = i; break
 
-    sweep_idx = last_touch_idx
-    sweep_c   = scan[sweep_idx]
-    rH        = sweep_c["h"]
-    rL        = sweep_c["l"]
+    if sweep_idx is None: return None
+    sweep_c = scan[sweep_idx]
 
+    # Step 2: find most recent 1H swing high/low BEFORE sweep
+    mss_target = None
+
+    if bull:
+        for i in range(sweep_idx - 1, 0, -1):
+            c0 = scan[i]
+            c1 = scan[i + 1] if i + 1 <= sweep_idx else None
+            if c1 is None: continue
+            if c0["c"] > c0["o"] and c1["c"] < c1["o"]:
+                is_swing = all(c0["h"] > scan[i-j]["h"] for j in range(1,3) if i-j >= 0)
+                if is_swing:
+                    mss_target = c0["c"]; break
+    else:
+        for i in range(sweep_idx - 1, 0, -1):
+            c0 = scan[i]
+            c1 = scan[i + 1] if i + 1 <= sweep_idx else None
+            if c1 is None: continue
+            if c0["c"] < c0["o"] and c1["c"] > c1["o"]:
+                is_swing = all(c0["l"] < scan[i-j]["l"] for j in range(1,3) if i-j >= 0)
+                if is_swing:
+                    mss_target = c0["c"]; break
+
+    if mss_target is None:
+        mss_target = sweep_c["h"] if bull else sweep_c["l"]
+
+    # Step 3: first candle after sweep that closes beyond mss_target
     for i in range(sweep_idx + 1, n):
         mc = scan[i]
-
-        if bull:
-            if mc["c"] < rL:
-                if mc["l"] < lp and mc["c"] > lp:
-                    sweep_idx = i; sweep_c = mc
-                    rH = mc["h"]; rL = mc["l"]
-                else:
-                    return None
-            # Check MSS BEFORE updating rH
-            if mc["c"] > rH and i > sweep_idx + 1:
-                ext = scan[sweep_idx:i]
-                return {
-                    "bull":          True,
-                    "signal":        "MSS",
-                    "range_high":    max(c["h"] for c in ext),
-                    "range_low":     min(c["l"] for c in ext),
-                    "range_candles": len(ext),
-                    "mss_close":     mc["c"],
-                    "swept_level":   True,
-                    "broke":         "ABOVE range high",
-                    "sweep_time":    ts(sweep_c["t"]),
-                    "sweep_wick":    sweep_c["l"],
-                    "sweep_close":   sweep_c["c"],
-                    "range_open":    ts(ext[0]["t"]),
-                    "range_close":   ts(ext[-1]["t"]),
-                    "mss_open":      ts(mc["t"]),
-                }
-            rH = max(rH, mc["h"])  # update AFTER check
-
-        else:
-            if mc["c"] > rH:
-                if mc["h"] > lp and mc["c"] < lp:
-                    sweep_idx = i; sweep_c = mc
-                    rH = mc["h"]; rL = mc["l"]
-                else:
-                    return None
-            # Check MSS BEFORE updating rL
-            if mc["c"] < rL and i > sweep_idx + 1:
-                ext = scan[sweep_idx:i]
-                return {
-                    "bull":          False,
-                    "signal":        "MSS",
-                    "range_high":    max(c["h"] for c in ext),
-                    "range_low":     min(c["l"] for c in ext),
-                    "range_candles": len(ext),
-                    "mss_close":     mc["c"],
-                    "swept_level":   True,
-                    "broke":         "BELOW range low",
-                    "sweep_time":    ts(sweep_c["t"]),
-                    "sweep_wick":    sweep_c["h"],
-                    "sweep_close":   sweep_c["c"],
-                    "range_open":    ts(ext[0]["t"]),
-                    "range_close":   ts(ext[-1]["t"]),
-                    "mss_open":      ts(mc["t"]),
-                }
-            rL = min(rL, mc["l"])  # update AFTER check
+        if bull and mc["c"] > mss_target:
+            ext = scan[sweep_idx:i]
+            return {
+                "bull":          True,
+                "signal":        "MSS",
+                "range_high":    mss_target,
+                "range_low":     sweep_c["l"],
+                "range_candles": len(ext) if ext else 1,
+                "mss_close":     mc["c"],
+                "swept_level":   True,
+                "broke":         "ABOVE range high",
+                "sweep_time":    ts(sweep_c["t"]),
+                "sweep_wick":    sweep_c["l"],
+                "sweep_close":   sweep_c["c"],
+                "range_open":    ts(ext[0]["t"]) if ext else ts(sweep_c["t"]),
+                "range_close":   ts(ext[-1]["t"]) if ext else ts(sweep_c["t"]),
+                "mss_open":      ts(mc["t"]),
+            }
+        elif not bull and mc["c"] < mss_target:
+            ext = scan[sweep_idx:i]
+            return {
+                "bull":          False,
+                "signal":        "MSS",
+                "range_high":    sweep_c["h"],
+                "range_low":     mss_target,
+                "range_candles": len(ext) if ext else 1,
+                "mss_close":     mc["c"],
+                "swept_level":   True,
+                "broke":         "BELOW range low",
+                "sweep_time":    ts(sweep_c["t"]),
+                "sweep_wick":    sweep_c["h"],
+                "sweep_close":   sweep_c["c"],
+                "range_open":    ts(ext[0]["t"]) if ext else ts(sweep_c["t"]),
+                "range_close":   ts(ext[-1]["t"]) if ext else ts(sweep_c["t"]),
+                "mss_open":      ts(mc["t"]),
+            }
 
     return None
+
 
 # ── ALERT FORMATTERS ──────────────────────────────────────────
 def format_alert_a(lv, cur_price, grade, bias, tr1w, tr1d, has_1d):
