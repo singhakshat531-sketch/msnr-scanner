@@ -247,6 +247,30 @@ def grade_level(lv, has_1d):
     return "aplus" if score >= 5 else "a" if score >= 3 else "b"
 
 
+def was_alerted(state, bucket, key, hours):
+    ts = state.get(bucket,{}).get(key)
+    if not ts: return False
+    try:
+        return (datetime.now(timezone.utc).replace(tzinfo=None)-datetime.fromisoformat(ts)).total_seconds() < hours*3600
+    except: return False
+
+def mark_alert(state, bucket, key):
+    state[bucket][key] = datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
+
+# ── TELEGRAM ──────────────────────────────────────────────────
+def send_telegram(msg):
+    if not TELEGRAM_TOKEN:
+        print("  [no token]\n" + msg); return
+    url  = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+    data = urllib.parse.urlencode({"chat_id":TELEGRAM_CHAT_ID,"text":msg,"parse_mode":"HTML"}).encode()
+    try:
+        with urllib.request.urlopen(url, data=data, timeout=10) as r:
+            res = json.loads(r.read())
+        print("  Telegram ✓" if res.get("ok") else f"  Telegram error: {res}")
+    except Exception as e:
+        print(f"  Telegram error: {e}")
+
+# ── CORE: 1H MSS DETECTION ────────────────────────────────────
 def find_1h_mss(h1, level):
     """Same logic as find_mss. Scanner uses ms timestamps, backtest uses seconds."""
     if len(h1) < 4: return None
@@ -261,10 +285,10 @@ def find_1h_mss(h1, level):
         dt = datetime.fromtimestamp(unix_ms / 1000, IST)
         return dt.strftime("%d %b  %I:%M %p")
 
-    # Find first candle at or after level formation
+    # Find first candle strictly after level formation
     level_idx = 0
     for i in range(n):
-        if scan[i]["t"] >= level_ts:
+        if scan[i]["t"] > level_ts:
             level_idx = i
             break
 
