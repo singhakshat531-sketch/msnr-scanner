@@ -402,32 +402,33 @@ def format_alert_a(lv, cur_price, grade, bias, tr1w, tr1d, has_1d):
 
 def format_alert_b(lv, mss, cur_price, grade, bias, tr1w, tr1d, has_1d):
     bull   = mss["bull"]
-    signal = mss.get("signal", "MSS")
     gl     = "A+" if grade=="aplus" else grade.upper()
     pf     = lambda p: f"${p:,.0f}"
-    shape  = "V-shape" if bull else "A-shape"
-    tf     = "1D+4H" if has_1d else "4H"
-    n      = mss["range_candles"]
-    rclr   = "red" if bull else "green"
-    wick   = pf(mss["sweep_wick"])
+    shape  = "V" if bull else "A"
+    conf   = "1D+4H ✓" if has_1d else "4H only"
+    fresh  = "Fresh" if lv['fresh'] else "Used"
 
-    if signal == "MSS":
-        header = f"🚀 LONG — SWEEP+MSS" if bull else f"💥 SHORT — SWEEP+MSS"
-    else:
-        header = f"⚡ LONG — BREAK" if bull else f"⚡ SHORT — BREAK"
+    header = "🚀 LONG  —  SWEEP + MSS" if bull else "💥 SHORT  —  SWEEP + MSS"
+    grade_line = f"Grade {gl}  ·  {bias}  ·  {conf}"
 
     return "\n".join([
-        f"{header}",
+        header,
+        "─" * 28,
         f"",
-        f"4H Level  : {pf(lv['price'])}  ({shape} · {'Fresh' if lv['fresh'] else 'Used'} · {tf} · {mss['sweep_time']} IST)",
-        f"1H Sweep  : {mss['sweep_time']} IST  wick→{wick}  close→{pf(mss['sweep_close'])}",
-        f"Ext Range : {n}x {rclr}  |  {pf(mss['range_low'])}—{pf(mss['range_high'])}  |  {mss['range_open']}→{mss['range_close']} IST",
-        f"{signal}       : {mss['mss_open']} IST  close {pf(mss['mss_close'])}",
+        f"Level    {pf(lv['price'])}  [{shape}-shape · {fresh}]",
+        f"Formed   {mss['sweep_time'].split('  ')[0] if '  ' in mss['sweep_time'] else mss['sweep_time']}",
         f"",
-        f"Bias: {bias}  |  Grade: {gl}  |  BTCUSDT",
-        f"{now_ist()}",
+        f"Sweep    {mss['sweep_time']} IST",
+        f"  wick → {pf(mss['sweep_wick'])}",
+        f"  close → {pf(mss['sweep_close'])}",
+        f"",
+        f"MSS      {mss['mss_open']} IST",
+        f"  close → {pf(mss['mss_close'])}",
+        f"",
+        "─" * 28,
+        grade_line,
+        f"BTCUSDT  ·  {now_ist()}",
     ])
-
 
 # ── SIMULATOR ─────────────────────────────────────────────────
 def auto_enter_trade(state, mss, lv, grade, bias, cur_price, h4_levels):
