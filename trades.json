@@ -22,6 +22,28 @@
       "enteredAt": "2026-03-21T20:54:50.390713",
       "bias": "BULLISH",
       "auto": true
+    },
+    {
+      "id": "auto_1774126760",
+      "bull": true,
+      "direction": "LONG",
+      "grade": "B",
+      "level": 69184.69,
+      "rawEntry": 70265.96,
+      "rawSL": 68709.33,
+      "rawRisk": 1556.63,
+      "tpLevels": [
+        70852.3,
+        74884.52
+      ],
+      "tpIndex": 0,
+      "rawTP1": 70852.3,
+      "rawTP2": 74884.52,
+      "phase": "entry",
+      "entryBalance": 1000.0,
+      "enteredAt": "2026-03-21T20:59:20.575554",
+      "bias": "BULLISH",
+      "auto": true
     }
   ],
   "history": [],
@@ -40,7 +62,7 @@
     "netR": 0.0,
     "bestR": 0.0
   },
-  "lastUpdated": "2026-03-21T20:54:50.979976",
+  "lastUpdated": "2026-03-21T20:59:20.575704",
   "levelAlerts": {
     "BTCUSDT_V_69403": "2026-03-20T15:21:20.928298",
     "BTC_V_69403_AT": "2026-03-20T17:43:15.903486",
@@ -99,7 +121,9 @@
     "BTC_V_68438_MSS": "2026-03-20T17:43:16.382142",
     "BTC_V_69403_MSS": "2026-03-21T17:22:45.096558",
     "BTC_V_69184_MSS": "2026-03-21T20:54:50.979778",
-    "BTC_V_69851_MSS": "2026-03-21T20:54:50.390666"
+    "BTC_V_69851_MSS": "2026-03-21T20:54:50.390666",
+    "BTC_V_69851_MSS_20_Mar__0830_AM": "2026-03-21T20:59:20.050512",
+    "BTC_V_69184_MSS_20_Mar__1230_AM": "2026-03-21T20:59:20.575507"
   },
   "currentLevels": [
     {
@@ -109,7 +133,7 @@
       "hsl": true,
       "has1d": false,
       "grade": "B",
-      "dist": 0.58
+      "dist": 0.56
     },
     {
       "type": "V",
@@ -118,7 +142,7 @@
       "hsl": true,
       "has1d": false,
       "grade": "B",
-      "dist": 0.84
+      "dist": 0.86
     },
     {
       "type": "V",
@@ -127,7 +151,7 @@
       "hsl": true,
       "has1d": false,
       "grade": "B",
-      "dist": 1.49
+      "dist": 1.51
     },
     {
       "type": "V",
@@ -136,7 +160,7 @@
       "hsl": true,
       "has1d": false,
       "grade": "B",
-      "dist": 1.81
+      "dist": 1.83
     },
     {
       "type": "A",
@@ -145,7 +169,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 5.94
+      "dist": 5.92
     },
     {
       "type": "V",
@@ -154,7 +178,7 @@
       "hsl": true,
       "has1d": true,
       "grade": "A+",
-      "dist": 6.77
+      "dist": 6.79
     },
     {
       "type": "V",
@@ -163,7 +187,7 @@
       "hsl": true,
       "has1d": true,
       "grade": "A",
-      "dist": 7.09
+      "dist": 7.11
     },
     {
       "type": "V",
@@ -172,16 +196,16 @@
       "hsl": true,
       "has1d": true,
       "grade": "A+",
-      "dist": 10.35
+      "dist": 10.38
     }
   ],
-  "currentPrice": 70438.22,
+  "currentPrice": 70452.47,
   "currentBias": "BULLISH",
   "currentTrend": {
     "w1": "BEARISH",
     "d1": "BULLISH"
   },
-  "scanTime": "22 Mar 2026  02:24 AM IST",
+  "scanTime": "22 Mar 2026  02:29 AM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "LONG",
@@ -192,6 +216,6 @@
     "mssTime": "20 Mar  12:30 AM",
     "mssClose": 70265.96,
     "bias": "BULLISH",
-    "time": "22 Mar 2026  02:24 AM IST"
+    "time": "22 Mar 2026  02:29 AM IST"
   }
 }
