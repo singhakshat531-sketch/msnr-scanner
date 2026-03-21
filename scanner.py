@@ -545,6 +545,19 @@ def main():
                     send_telegram(msg)
                     mark_alert(state, "mssAlerts", key_b)
                     alerts_sent += 1
+                    # Save last alert for website
+                    state["lastAlert"] = {
+                        "type":      "MSS",
+                        "direction": "LONG" if mss["bull"] else "SHORT",
+                        "level":     round(lv["price"], 2),
+                        "grade":     "A+" if grade == "aplus" else grade.upper(),
+                        "has1d":     has_1d,
+                        "sweepTime": mss["sweep_time"],
+                        "mssTime":   mss["mss_open"],
+                        "mssClose":  round(mss["mss_close"], 2),
+                        "bias":      bias,
+                        "time":      datetime.now(IST).strftime("%d %b %Y  %I:%M %p IST"),
+                    }
                     print(f"  → ALERT B: 1H MSS {'bullish' if mss['bull'] else 'bearish'} "
                           f"| range {mss['range_candles']}c "
                           f"| broke {mss['broke']} @ ${mss['mss_close']:,.0f}")
@@ -553,6 +566,31 @@ def main():
 
     print(f"\n{'No alerts this run' if alerts_sent==0 else str(alerts_sent)+' alert(s) sent'}")
     update_simulator(state, cur_price)
+
+    # ── Save current levels to state for website display ──────
+    state["currentLevels"] = []
+    for lv in lvl_4h:
+        has_1d = any(
+            l["type"] == lv["type"] and abs(l["price"] - lv["price"]) / lv["price"] * 100 < 1.0
+            for l in lvl_1d
+        )
+        grade = grade_level(lv, has_1d)
+        gl    = "A+" if grade == "aplus" else grade.upper()
+        state["currentLevels"].append({
+            "type":   lv["type"],
+            "price":  round(lv["price"], 2),
+            "fresh":  lv["fresh"],
+            "hsl":    lv["hsl"],
+            "has1d":  has_1d,
+            "grade":  gl,
+            "dist":   round(abs(cur_price - lv["price"]) / lv["price"] * 100, 2),
+        })
+
+    state["currentPrice"] = round(cur_price, 2)
+    state["currentBias"]  = bias
+    state["currentTrend"] = {"w1": tr1w, "d1": tr1d}
+    state["scanTime"]     = datetime.now(IST).strftime("%d %b %Y  %I:%M %p IST")
+
     save_state(state, sha)
     print("=== Done ===")
 
