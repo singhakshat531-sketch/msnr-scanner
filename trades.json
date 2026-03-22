@@ -1,6 +1,7 @@
 {
-  "balance": 940.0,
-  "activeTrades": [
+  "balance": 930.0,
+  "activeTrades": [],
+  "history": [
     {
       "id": "auto_1774126760",
       "bull": true,
@@ -21,10 +22,13 @@
       "entryBalance": 1000.0,
       "enteredAt": "2026-03-21T20:59:20.575554",
       "bias": "BULLISH",
-      "auto": true
-    }
-  ],
-  "history": [
+      "auto": true,
+      "result": "loss",
+      "pnl": -10.0,
+      "pnlR": -1.0,
+      "closePrice": 68668.5,
+      "closedAt": "2026-03-22T10:57:22.387777"
+    },
     {
       "id": "auto_1774126490",
       "bull": true,
@@ -256,18 +260,22 @@
     {
       "t": "2026-03-22T09:04:20.570503",
       "v": 940.0
+    },
+    {
+      "t": "2026-03-22T10:57:22.387777",
+      "v": 930.0
     }
   ],
   "alerts": {},
   "stats": {
-    "totalTrades": 6,
+    "totalTrades": 7,
     "wins": 0,
-    "losses": 6,
+    "losses": 7,
     "be": 0,
-    "netR": -6.0,
+    "netR": -7.0,
     "bestR": 0.0
   },
-  "lastUpdated": "2026-03-22T09:04:20.570905",
+  "lastUpdated": "2026-03-22T10:57:22.388168",
   "levelAlerts": {
     "BTCUSDT_V_69403": "2026-03-20T15:21:20.928298",
     "BTC_V_69403_AT": "2026-03-22T04:22:39.005181",
@@ -275,7 +283,10 @@
     "BTC_V_69184_AT": "2026-03-22T04:22:38.348340",
     "BTC_V_69447_AT": "2026-03-22T04:22:39.689630",
     "BTC_V_69560_AT": "2026-03-22T04:22:40.346486",
-    "BTC_V_68909_AT": "2026-03-22T09:04:20.533086"
+    "BTC_V_68909_AT": "2026-03-22T09:04:20.533086",
+    "BTC_A_68605_AT": "2026-03-22T10:57:21.421956",
+    "BTC_A_68441_AT": "2026-03-22T10:57:21.888517",
+    "BTC_A_69011_AT": "2026-03-22T10:57:22.378964"
   },
   "brokenLevels": {
     "BTCUSDT_V_69184": {
@@ -344,40 +355,13 @@
   },
   "currentLevels": [
     {
-      "type": "V",
-      "price": 68909.77,
-      "fresh": false,
-      "hsl": false,
-      "has1d": true,
-      "grade": "A",
-      "dist": 0.18
-    },
-    {
       "type": "A",
       "price": 68605.02,
       "fresh": false,
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 0.26
-    },
-    {
-      "type": "A",
-      "price": 69011.95,
-      "fresh": false,
-      "hsl": false,
-      "has1d": true,
-      "grade": "A",
-      "dist": 0.33
-    },
-    {
-      "type": "A",
-      "price": 69062.0,
-      "fresh": false,
-      "hsl": false,
-      "has1d": true,
-      "grade": "A",
-      "dist": 0.4
+      "dist": 0.09
     },
     {
       "type": "A",
@@ -386,7 +370,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 0.5
+      "dist": 0.33
     },
     {
       "type": "V",
@@ -395,25 +379,34 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 0.51
-    },
-    {
-      "type": "A",
-      "price": 69142.11,
-      "fresh": false,
-      "hsl": false,
-      "has1d": true,
-      "grade": "B",
-      "dist": 0.51
+      "dist": 0.34
     },
     {
       "type": "V",
-      "price": 69184.69,
+      "price": 68909.77,
+      "fresh": false,
+      "hsl": false,
+      "has1d": true,
+      "grade": "A",
+      "dist": 0.35
+    },
+    {
+      "type": "A",
+      "price": 69011.95,
       "fresh": false,
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 0.58
+      "dist": 0.5
+    },
+    {
+      "type": "A",
+      "price": 69062.0,
+      "fresh": false,
+      "hsl": false,
+      "has1d": true,
+      "grade": "B",
+      "dist": 0.57
     },
     {
       "type": "A",
@@ -422,16 +415,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 0.82
-    },
-    {
-      "type": "A",
-      "price": 69337.77,
-      "fresh": true,
-      "hsl": false,
-      "has1d": true,
-      "grade": "A",
-      "dist": 0.8
+      "dist": 0.65
     },
     {
       "type": "A",
@@ -440,25 +424,25 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 0.85
+      "dist": 0.68
     },
     {
-      "type": "V",
-      "price": 69403.95,
+      "type": "A",
+      "price": 69142.11,
       "fresh": false,
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 0.89
+      "dist": 0.68
     },
     {
       "type": "V",
-      "price": 69447.83,
+      "price": 69184.69,
       "fresh": false,
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 0.95
+      "dist": 0.75
     },
     {
       "type": "A",
@@ -467,7 +451,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 1.02
+      "dist": 0.85
     },
     {
       "type": "A",
@@ -476,7 +460,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 1.08
+      "dist": 0.9
     },
     {
       "type": "A",
@@ -485,7 +469,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 1.12
+      "dist": 0.95
     },
     {
       "type": "A",
@@ -494,7 +478,16 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 1.14
+      "dist": 0.96
+    },
+    {
+      "type": "A",
+      "price": 69337.77,
+      "fresh": true,
+      "hsl": false,
+      "has1d": true,
+      "grade": "A",
+      "dist": 0.97
     },
     {
       "type": "V",
@@ -503,7 +496,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 1.16
+      "dist": 0.98
     },
     {
       "type": "V",
@@ -512,7 +505,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 1.16
+      "dist": 0.98
     },
     {
       "type": "A",
@@ -521,16 +514,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 1.16
-    },
-    {
-      "type": "V",
-      "price": 69560.9,
-      "fresh": false,
-      "hsl": false,
-      "has1d": true,
-      "grade": "B",
-      "dist": 1.11
+      "dist": 0.99
     },
     {
       "type": "V",
@@ -539,16 +523,25 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 1.21
+      "dist": 1.04
     },
     {
-      "type": "A",
-      "price": 69664.75,
+      "type": "V",
+      "price": 69403.95,
       "fresh": false,
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 1.26
+      "dist": 1.06
+    },
+    {
+      "type": "V",
+      "price": 69447.83,
+      "fresh": false,
+      "hsl": false,
+      "has1d": true,
+      "grade": "B",
+      "dist": 1.12
     },
     {
       "type": "V",
@@ -557,7 +550,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 1.38
+      "dist": 1.21
     },
     {
       "type": "V",
@@ -566,7 +559,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 1.39
+      "dist": 1.22
     },
     {
       "type": "A",
@@ -575,7 +568,16 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 1.44
+      "dist": 1.26
+    },
+    {
+      "type": "V",
+      "price": 69560.9,
+      "fresh": false,
+      "hsl": false,
+      "has1d": true,
+      "grade": "B",
+      "dist": 1.28
     },
     {
       "type": "A",
@@ -584,7 +586,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 1.51
+      "dist": 1.33
     },
     {
       "type": "V",
@@ -593,16 +595,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 1.55
-    },
-    {
-      "type": "V",
-      "price": 69851.02,
-      "fresh": false,
-      "hsl": false,
-      "has1d": true,
-      "grade": "B",
-      "dist": 1.52
+      "dist": 1.38
     },
     {
       "type": "A",
@@ -611,7 +604,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 1.62
+      "dist": 1.44
     },
     {
       "type": "A",
@@ -620,7 +613,16 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 1.64
+      "dist": 1.47
+    },
+    {
+      "type": "A",
+      "price": 69664.75,
+      "fresh": false,
+      "hsl": false,
+      "has1d": true,
+      "grade": "B",
+      "dist": 1.43
     },
     {
       "type": "V",
@@ -629,16 +631,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 1.67
-    },
-    {
-      "type": "V",
-      "price": 69918.84,
-      "fresh": false,
-      "hsl": false,
-      "has1d": true,
-      "grade": "B",
-      "dist": 1.62
+      "dist": 1.5
     },
     {
       "type": "A",
@@ -647,7 +640,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 1.71
+      "dist": 1.54
     },
     {
       "type": "A",
@@ -656,7 +649,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 1.76
+      "dist": 1.58
     },
     {
       "type": "A",
@@ -665,7 +658,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 1.88
+      "dist": 1.7
     },
     {
       "type": "A",
@@ -674,7 +667,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 1.88
+      "dist": 1.7
     },
     {
       "type": "V",
@@ -683,7 +676,16 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 1.91
+      "dist": 1.73
+    },
+    {
+      "type": "V",
+      "price": 69851.02,
+      "fresh": false,
+      "hsl": false,
+      "has1d": true,
+      "grade": "B",
+      "dist": 1.69
     },
     {
       "type": "V",
@@ -692,7 +694,16 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 1.94
+      "dist": 1.77
+    },
+    {
+      "type": "V",
+      "price": 69918.84,
+      "fresh": false,
+      "hsl": false,
+      "has1d": true,
+      "grade": "B",
+      "dist": 1.79
     },
     {
       "type": "V",
@@ -701,7 +712,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 2.05
+      "dist": 1.88
     },
     {
       "type": "V",
@@ -710,7 +721,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 2.07
+      "dist": 1.89
     },
     {
       "type": "V",
@@ -719,7 +730,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 2.11
+      "dist": 1.94
     },
     {
       "type": "V",
@@ -728,7 +739,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 2.14
+      "dist": 1.96
     },
     {
       "type": "A",
@@ -737,7 +748,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 2.17
+      "dist": 1.99
     },
     {
       "type": "V",
@@ -746,16 +757,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 2.2
-    },
-    {
-      "type": "A",
-      "price": 70265.96,
-      "fresh": false,
-      "hsl": false,
-      "has1d": true,
-      "grade": "B",
-      "dist": 2.11
+      "dist": 2.02
     },
     {
       "type": "A",
@@ -764,7 +766,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 2.27
+      "dist": 2.09
     },
     {
       "type": "V",
@@ -773,16 +775,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 2.35
-    },
-    {
-      "type": "V",
-      "price": 70357.32,
-      "fresh": false,
-      "hsl": false,
-      "has1d": true,
-      "grade": "B",
-      "dist": 2.23
+      "dist": 2.17
     },
     {
       "type": "A",
@@ -791,16 +784,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 2.38
-    },
-    {
-      "type": "A",
-      "price": 70443.28,
-      "fresh": false,
-      "hsl": false,
-      "has1d": true,
-      "grade": "B",
-      "dist": 2.35
+      "dist": 2.21
     },
     {
       "type": "V",
@@ -809,7 +793,16 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 2.53
+      "dist": 2.36
+    },
+    {
+      "type": "A",
+      "price": 70265.96,
+      "fresh": false,
+      "hsl": false,
+      "has1d": true,
+      "grade": "B",
+      "dist": 2.27
     },
     {
       "type": "A",
@@ -818,7 +811,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 2.61
+      "dist": 2.43
     },
     {
       "type": "V",
@@ -827,7 +820,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 2.64
+      "dist": 2.46
     },
     {
       "type": "V",
@@ -836,7 +829,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 2.66
+      "dist": 2.49
     },
     {
       "type": "V",
@@ -845,34 +838,25 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 2.69
+      "dist": 2.52
     },
     {
       "type": "V",
-      "price": 70601.38,
+      "price": 70357.32,
       "fresh": false,
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 2.57
-    },
-    {
-      "type": "V",
-      "price": 70613.21,
-      "fresh": false,
-      "hsl": false,
-      "has1d": true,
-      "grade": "B",
-      "dist": 2.59
+      "dist": 2.4
     },
     {
       "type": "A",
-      "price": 70668.6,
+      "price": 70443.28,
       "fresh": false,
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 2.66
+      "dist": 2.52
     },
     {
       "type": "A",
@@ -881,16 +865,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 2.89
-    },
-    {
-      "type": "A",
-      "price": 70710.48,
-      "fresh": false,
-      "hsl": false,
-      "has1d": true,
-      "grade": "B",
-      "dist": 2.72
+      "dist": 2.71
     },
     {
       "type": "A",
@@ -899,7 +874,43 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 2.93
+      "dist": 2.76
+    },
+    {
+      "type": "V",
+      "price": 70601.38,
+      "fresh": false,
+      "hsl": false,
+      "has1d": true,
+      "grade": "B",
+      "dist": 2.74
+    },
+    {
+      "type": "V",
+      "price": 70613.21,
+      "fresh": false,
+      "hsl": false,
+      "has1d": true,
+      "grade": "B",
+      "dist": 2.75
+    },
+    {
+      "type": "A",
+      "price": 70668.6,
+      "fresh": false,
+      "hsl": false,
+      "has1d": true,
+      "grade": "B",
+      "dist": 2.83
+    },
+    {
+      "type": "A",
+      "price": 70710.48,
+      "fresh": false,
+      "hsl": false,
+      "has1d": true,
+      "grade": "B",
+      "dist": 2.89
     },
     {
       "type": "A",
@@ -908,7 +919,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 2.78
+      "dist": 2.95
     },
     {
       "type": "A",
@@ -917,34 +928,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 2.92
-    },
-    {
-      "type": "V",
-      "price": 70883.43,
-      "fresh": false,
-      "hsl": false,
-      "has1d": false,
-      "grade": "B",
-      "dist": 2.96
-    },
-    {
-      "type": "V",
-      "price": 70941.65,
-      "fresh": false,
-      "hsl": false,
-      "has1d": false,
-      "grade": "B",
-      "dist": 3.04
-    },
-    {
-      "type": "V",
-      "price": 71068.3,
-      "fresh": false,
-      "hsl": false,
-      "has1d": false,
-      "grade": "B",
-      "dist": 3.21
+      "dist": 3.08
     },
     {
       "type": "V",
@@ -953,25 +937,25 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 3.47
+      "dist": 3.3
     },
     {
-      "type": "A",
-      "price": 71084.83,
+      "type": "V",
+      "price": 70883.43,
       "fresh": false,
       "hsl": false,
-      "has1d": true,
+      "has1d": false,
       "grade": "B",
-      "dist": 3.23
+      "dist": 3.12
     },
     {
-      "type": "A",
-      "price": 71085.61,
+      "type": "V",
+      "price": 70941.65,
       "fresh": false,
       "hsl": false,
-      "has1d": true,
+      "has1d": false,
       "grade": "B",
-      "dist": 3.23
+      "dist": 3.2
     },
     {
       "type": "V",
@@ -980,16 +964,34 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 3.62
+      "dist": 3.44
     },
     {
-      "type": "A",
-      "price": 71248.69,
+      "type": "V",
+      "price": 71068.3,
       "fresh": false,
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 3.46
+      "dist": 3.38
+    },
+    {
+      "type": "A",
+      "price": 71084.83,
+      "fresh": false,
+      "hsl": false,
+      "has1d": true,
+      "grade": "B",
+      "dist": 3.4
+    },
+    {
+      "type": "A",
+      "price": 71085.61,
+      "fresh": false,
+      "hsl": false,
+      "has1d": true,
+      "grade": "B",
+      "dist": 3.4
     },
     {
       "type": "A",
@@ -998,16 +1000,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 3.89
-    },
-    {
-      "type": "A",
-      "price": 71369.21,
-      "fresh": false,
-      "hsl": false,
-      "has1d": false,
-      "grade": "B",
-      "dist": 3.62
+      "dist": 3.71
     },
     {
       "type": "V",
@@ -1016,16 +1009,16 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 3.98
+      "dist": 3.81
     },
     {
-      "type": "V",
-      "price": 71486.47,
+      "type": "A",
+      "price": 71248.69,
       "fresh": false,
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 3.78
+      "dist": 3.62
     },
     {
       "type": "V",
@@ -1034,7 +1027,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 4.2
+      "dist": 4.02
     },
     {
       "type": "V",
@@ -1043,7 +1036,16 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 4.26
+      "dist": 4.08
+    },
+    {
+      "type": "A",
+      "price": 71369.21,
+      "fresh": false,
+      "hsl": false,
+      "has1d": false,
+      "grade": "B",
+      "dist": 3.78
     },
     {
       "type": "A",
@@ -1052,7 +1054,16 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 4.43
+      "dist": 4.25
+    },
+    {
+      "type": "V",
+      "price": 71486.47,
+      "fresh": false,
+      "hsl": false,
+      "has1d": false,
+      "grade": "B",
+      "dist": 3.94
     },
     {
       "type": "V",
@@ -1061,7 +1072,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 4.58
+      "dist": 4.4
     },
     {
       "type": "A",
@@ -1070,16 +1081,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 4.27
-    },
-    {
-      "type": "V",
-      "price": 72069.24,
-      "fresh": false,
-      "hsl": false,
-      "has1d": false,
-      "grade": "B",
-      "dist": 4.56
+      "dist": 4.43
     },
     {
       "type": "A",
@@ -1088,7 +1090,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 5.18
+      "dist": 5.0
     },
     {
       "type": "V",
@@ -1097,7 +1099,16 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 5.19
+      "dist": 5.01
+    },
+    {
+      "type": "V",
+      "price": 72069.24,
+      "fresh": false,
+      "hsl": false,
+      "has1d": false,
+      "grade": "B",
+      "dist": 4.72
     },
     {
       "type": "A",
@@ -1106,7 +1117,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 4.79
+      "dist": 4.95
     },
     {
       "type": "V",
@@ -1115,7 +1126,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 5.77
+      "dist": 5.59
     },
     {
       "type": "V",
@@ -1124,7 +1135,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 5.93
+      "dist": 5.75
     },
     {
       "type": "A",
@@ -1133,16 +1144,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 6.41
-    },
-    {
-      "type": "A",
-      "price": 72929.51,
-      "fresh": false,
-      "hsl": false,
-      "has1d": true,
-      "grade": "B",
-      "dist": 5.68
+      "dist": 6.23
     },
     {
       "type": "A",
@@ -1151,7 +1153,16 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 6.73
+      "dist": 6.55
+    },
+    {
+      "type": "A",
+      "price": 72929.51,
+      "fresh": false,
+      "hsl": false,
+      "has1d": true,
+      "grade": "B",
+      "dist": 5.84
     },
     {
       "type": "V",
@@ -1160,25 +1171,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 6.99
-    },
-    {
-      "type": "V",
-      "price": 73285.58,
-      "fresh": false,
-      "hsl": false,
-      "has1d": false,
-      "grade": "B",
-      "dist": 6.14
-    },
-    {
-      "type": "V",
-      "price": 73462.56,
-      "fresh": false,
-      "hsl": false,
-      "has1d": false,
-      "grade": "B",
-      "dist": 6.37
+      "dist": 6.81
     },
     {
       "type": "V",
@@ -1187,34 +1180,25 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 7.36
+      "dist": 7.18
     },
     {
-      "type": "A",
-      "price": 73560.17,
+      "type": "V",
+      "price": 73285.58,
       "fresh": false,
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 6.49
+      "dist": 6.3
     },
     {
-      "type": "A",
-      "price": 73580.09,
+      "type": "V",
+      "price": 73462.56,
       "fresh": false,
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 6.52
-    },
-    {
-      "type": "A",
-      "price": 73665.77,
-      "fresh": false,
-      "hsl": false,
-      "has1d": false,
-      "grade": "B",
-      "dist": 6.62
+      "dist": 6.53
     },
     {
       "type": "V",
@@ -1223,7 +1207,34 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 7.77
+      "dist": 7.58
+    },
+    {
+      "type": "A",
+      "price": 73560.17,
+      "fresh": false,
+      "hsl": false,
+      "has1d": false,
+      "grade": "B",
+      "dist": 6.65
+    },
+    {
+      "type": "A",
+      "price": 73580.09,
+      "fresh": false,
+      "hsl": false,
+      "has1d": false,
+      "grade": "B",
+      "dist": 6.68
+    },
+    {
+      "type": "A",
+      "price": 73665.77,
+      "fresh": false,
+      "hsl": false,
+      "has1d": false,
+      "grade": "B",
+      "dist": 6.78
     },
     {
       "type": "V",
@@ -1232,7 +1243,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 6.97
+      "dist": 7.13
     },
     {
       "type": "V",
@@ -1241,7 +1252,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 6.97
+      "dist": 7.13
     },
     {
       "type": "V",
@@ -1250,7 +1261,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 8.87
+      "dist": 8.68
     },
     {
       "type": "A",
@@ -1259,7 +1270,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 7.65
+      "dist": 7.8
     },
     {
       "type": "A",
@@ -1268,7 +1279,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 7.72
+      "dist": 7.88
     },
     {
       "type": "A",
@@ -1277,16 +1288,16 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 8.14
+      "dist": 8.3
     }
   ],
-  "currentPrice": 68786.15,
-  "currentBias": "BULLISH",
+  "currentPrice": 68668.5,
+  "currentBias": "BEARISH",
   "currentTrend": {
     "w1": "BEARISH",
-    "d1": "BULLISH"
+    "d1": "RANGING"
   },
-  "scanTime": "22 Mar 2026  02:34 PM IST",
+  "scanTime": "22 Mar 2026  04:27 PM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "LONG",
