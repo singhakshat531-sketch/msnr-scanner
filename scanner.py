@@ -1,31 +1,71 @@
 #!/usr/bin/env python3
 """
-MSNR Scanner v9 — MSNR + 1H MSS Alerts
-──────────────────────────────────────────────────────────────
-EXACT STRATEGY:
+MSNR Scanner v10 — Clean Rebuild
+══════════════════════════════════════════════════════════════════
 
-  BIAS:     1W + 1D trend → direction
-  LEVELS:   4H key levels (primary). 1D nearby = A+ grade.
+STRATEGY (exact):
 
-  ALERT A — "Price at level"
-    Price comes within 0.5% of a 4H key level.
-    → Your cue to open 1H and watch.
+  4H KEY LEVELS
+  ─────────────
+  A-level : bull candle (c0) → bear candle (c1)
+            price  = c0.close
+            confirmed at c1.open + 4h (c1 fully closed)
+            DEAD if any later 4H candle CLOSES above price
 
-  ALERT B — "1H MSS confirmed"
-    After price reaches the 4H level:
-    1. On 1H, price sweeps the level (wick beyond, close back inside)
-       OR simply consolidates near it forming a swing
-    2. Those 1H candles form a swing high (bearish) or swing low (bullish)
-       — can be 1 candle or many consecutive candles
-    3. A 1H candle BODY CLOSES beyond the swing low (bearish MSS)
-       or swing high (bullish MSS)
-    → MSS confirmed. Alert fires. You go to 5min for entry.
+  V-level : bear candle (c0) → bull candle (c1)
+            price  = c0.close
+            confirmed at c1.open + 4h
+            DEAD if any later 4H candle CLOSES below price
 
-  MSS rule (strict):
-    - Bearish MSS: candle CLOSE < swing low of the consecutive candles
-    - Bullish MSS: candle CLOSE > swing high of the consecutive candles
-    - WICK does not count. BODY CLOSE only.
-──────────────────────────────────────────────────────────────
+  freshness: 0 wicks through price after formation = FRESH
+
+  1H SWEEP + MSS
+  ──────────────
+  Only look at 1H candles AFTER the level confirmation timestamp.
+
+  SHORT sweep (A-level): 1H wick > level AND close < level
+  LONG  sweep (V-level): 1H wick < level AND close > level
+
+  Re-sweep: if another sweep candle appears before MSS fires,
+            it becomes the new active sweep. MSS target is
+            recalculated from prev_sweep_idx → new_sweep_idx.
+
+  MSS target (SHORT): highest swing high between prev_sweep and
+                      active sweep. Swing high = bull candle
+                      followed by bear candle → c0.high.
+                      If sweep candle.high > any found swing →
+                      use sweep candle.high instead.
+                      If no swings at all → sweep candle.high.
+
+  MSS target (LONG):  lowest swing low between prev_sweep and
+                      active sweep. Swing low = bear candle
+                      followed by bull candle → c0.low.
+                      Fall back to sweep candle.low.
+
+  MSS fires: 1H candle BODY CLOSES beyond the target.
+             SHORT → close < target
+             LONG  → close > target
+
+  ALERT GATE
+  ──────────
+  Alert fires only if MSS candle open time is within last 2h.
+  Prevents re-alerting stale setups on scanner startup.
+  Each MSS event is keyed by level_price + mss_candle_time.
+  Never re-alerted once sent.
+
+  GRADE
+  ─────
+  Fresh level   → +2
+  1D confluence → +2  (same-type 1D level within 1.5% of price)
+  HSL           → +1  (future: hardcoded False for now)
+  Dist < 0.5%   → +1
+  ≥5 = A+,  ≥3 = A,  else B
+
+  Bias adds confluence to grade but does NOT block alerts.
+  A SHORT at a bearish-bias level scores higher, but a SHORT
+  at a bullish-bias level still fires if sweep+MSS are valid.
+
+══════════════════════════════════════════════════════════════════
 """
 
 import json, urllib.request, urllib.parse, os, time, base64
@@ -36,20 +76,20 @@ IST = timezone(timedelta(hours=5, minutes=30))
 def now_ist():
     return datetime.now(IST).strftime('%d %b %Y  %I:%M %p IST')
 
+def fmt_ts(ts_ms):
+    return datetime.fromtimestamp(ts_ms / 1000, IST).strftime('%d %b  %I:%M %p')
+
 # ── CONFIG ────────────────────────────────────────────────────
 TELEGRAM_TOKEN   = os.environ.get("TELEGRAM_TOKEN", "")
-TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "1247283950")
+TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
 GITHUB_PAT       = os.environ.get("PAT_TOKEN", "")
 GITHUB_REPO      = "singhakshat531-sketch/msnr-scanner"
 DATA_FILE        = "trades.json"
 
-NEAR_PCT         = 0.5   # Alert A: price within 0.5% of 4H level
-ZONE_PCT         = 10.0  # scan for MSS when price within 10% of level
-SPAM_HOURS_A     = 4     # re-alert cooldown for Alert A
-SPAM_HOURS_B     = 2     # re-alert cooldown for Alert B (MSS)
-SWING_LOOKBACK   = 200   # 1H candles to look back for swing formation
 SIM_START        = 1000.0
-RISK_PCT         = {"aplus": 3.0, "a": 2.0, "b": 1.0}
+RISK_PCT         = {"A+": 3.0, "A": 2.0, "B": 1.0}
+MSS_RECENT_HOURS = 2      # only alert if MSS fired within last 2h
+H1_LOOKBACK      = 300    # 1H candles to scan for sweep+MSS
 
 # ── GITHUB ────────────────────────────────────────────────────
 def github_read(filename):
@@ -61,7 +101,7 @@ def github_read(filename):
     req = urllib.request.Request(url, headers={
         "Authorization": f"token {GITHUB_PAT}",
         "Accept": "application/vnd.github.v3+json",
-        "User-Agent": "MSNR-Scanner/9.0"
+        "User-Agent": "MSNR-Scanner/10"
     })
     try:
         with urllib.request.urlopen(req, timeout=15) as r:
@@ -79,7 +119,7 @@ def github_write(filename, content, sha=None):
         return True
     url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{filename}"
     body = {
-        "message": f"scanner {datetime.now(timezone.utc).replace(tzinfo=None).strftime('%Y-%m-%d %H:%M UTC')}",
+        "message": f"scan {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}",
         "content": base64.b64encode(json.dumps(content, indent=2).encode()).decode(),
         "branch": "main"
     }
@@ -88,11 +128,11 @@ def github_write(filename, content, sha=None):
         "Authorization": f"token {GITHUB_PAT}",
         "Accept": "application/vnd.github.v3+json",
         "Content-Type": "application/json",
-        "User-Agent": "MSNR-Scanner/9.0"
+        "User-Agent": "MSNR-Scanner/10"
     }, method="PUT")
     try:
         with urllib.request.urlopen(req, timeout=15) as r: json.loads(r.read())
-        print(f"  GitHub write OK"); return True
+        print("  GitHub write OK"); return True
     except Exception as e:
         print(f"  GitHub write error: {e}"); return False
 
@@ -100,143 +140,309 @@ def load_state():
     data, sha = github_read(DATA_FILE)
     if data is None:
         data = {
-            "balance": SIM_START, "activeTrades": [], "history": [],
-            "equityCurve": [{"t": datetime.now(timezone.utc).replace(tzinfo=None).isoformat(), "v": SIM_START}],
-            "stats": {"totalTrades":0,"wins":0,"losses":0,"be":0,"netR":0.0,"bestR":0.0},
-            "lastUpdated": datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),
-            "levelAlerts": {}, "mssAlerts": {}
+            "balance":      SIM_START,
+            "activeTrades": [],
+            "history":      [],
+            "equityCurve":  [{"t": datetime.now(timezone.utc).isoformat(), "v": SIM_START}],
+            "stats":        {"totalTrades": 0, "wins": 0, "losses": 0, "be": 0, "netR": 0.0, "bestR": 0.0},
+            "mssAlerts":    {},
+            "levelAlerts":  {},
         }
-    data.setdefault("levelAlerts", {})
     data.setdefault("mssAlerts", {})
+    data.setdefault("levelAlerts", {})
     return data, sha
 
 def save_state(data, sha):
-    data["lastUpdated"] = datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
+    data["lastUpdated"] = datetime.now(timezone.utc).isoformat()
     return github_write(DATA_FILE, data, sha)
 
 # ── FETCH ─────────────────────────────────────────────────────
 def fetch_candles(symbol, interval, limit=200):
-    endpoint  = "histoday" if interval in ("1d","1w") else "histohour"
-    aggregate = {"1w":7,"1d":1,"4h":4,"1h":1}.get(interval, 1)
+    endpoint  = "histoday" if interval in ("1d", "1w") else "histohour"
+    aggregate = {"1w": 7, "1d": 1, "4h": 4, "1h": 1}.get(interval, 1)
     url = (f"https://min-api.cryptocompare.com/data/v2/{endpoint}"
            f"?fsym={symbol}&tsym=USD&limit={limit}&aggregate={aggregate}")
     try:
-        req = urllib.request.Request(url, headers={"User-Agent":"MSNR-Scanner/9.0"})
+        req = urllib.request.Request(url, headers={"User-Agent": "MSNR-Scanner/10"})
         with urllib.request.urlopen(req, timeout=20) as r:
             data = json.loads(r.read())
         if data.get("Response") != "Success":
-            print(f"  Error {symbol} {interval}: {data.get('Message','?')}"); return []
-        result = [
-            {"t":k["time"]*1000,"o":float(k["open"]),"h":float(k["high"]),
-             "l":float(k["low"]),"c":float(k["close"])}
+            print(f"  API error {symbol} {interval}: {data.get('Message', '?')}"); return []
+        candles = [
+            {"t": k["time"] * 1000, "o": float(k["open"]), "h": float(k["high"]),
+             "l": float(k["low"]),  "c": float(k["close"])}
             for k in data["Data"]["Data"]
-            if not (k["open"]==0 and k["close"]==0)
+            if not (k["open"] == 0 and k["close"] == 0)
         ]
-        print(f"  {symbol} {interval}: {len(result)} candles")
-        return result
+        print(f"  {symbol} {interval}: {len(candles)} candles, "
+              f"last={fmt_ts(candles[-1]['t']) if candles else 'none'}")
+        return candles
     except Exception as e:
         print(f"  Fetch error {symbol} {interval}: {e}"); return []
 
 # ── TREND & BIAS ──────────────────────────────────────────────
 def get_trend(candles, lookback=20):
     if len(candles) < lookback: return "UNKNOWN"
-    c = [x["c"] for x in candles[-lookback:]]
-    half = len(c)//2
-    avg_s = sum(c[:half])/half
-    avg_e = sum(c[half:])/half
-    pct   = (avg_e - avg_s)/avg_s*100
-    bull  = sum(1 for i in range(2,len(c)) if c[i]>c[i-1]>c[i-2])
-    bear  = sum(1 for i in range(2,len(c)) if c[i]<c[i-1]<c[i-2])
-    if pct>3  and bull>bear:        return "BULLISH"
-    if pct<-3 and bear>bull:        return "BEARISH"
-    if pct>2  and bull>bear*1.5:    return "BULLISH"
-    if pct<-2 and bear>bull*1.5:    return "BEARISH"
+    c    = [x["c"] for x in candles[-lookback:]]
+    half = len(c) // 2
+    avg_s = sum(c[:half]) / half
+    avg_e = sum(c[half:]) / half
+    pct   = (avg_e - avg_s) / avg_s * 100
+    bull  = sum(1 for i in range(2, len(c)) if c[i] > c[i-1] > c[i-2])
+    bear  = sum(1 for i in range(2, len(c)) if c[i] < c[i-1] < c[i-2])
+    if pct > 3  and bull > bear:      return "BULLISH"
+    if pct < -3 and bear > bull:      return "BEARISH"
+    if pct > 2  and bull > bear*1.5:  return "BULLISH"
+    if pct < -2 and bear > bull*1.5:  return "BEARISH"
     return "RANGING"
 
 def get_bias(tr1w, tr1d):
-    if tr1w=="BULLISH" and tr1d in ("BULLISH","RANGING"): return "BULLISH"
-    if tr1w=="BEARISH" and tr1d in ("BEARISH","RANGING"): return "BEARISH"
-    if tr1w=="RANGING":
-        if tr1d=="BULLISH": return "BULLISH"
-        if tr1d=="BEARISH": return "BEARISH"
-    if tr1d=="BULLISH": return "BULLISH"
-    if tr1d=="BEARISH": return "BEARISH"
+    """
+    Bias: confluence only. Does NOT block alerts — only affects grade.
+    """
+    if tr1w == "BULLISH" and tr1d in ("BULLISH", "RANGING"): return "BULLISH"
+    if tr1w == "BEARISH" and tr1d in ("BEARISH", "RANGING"): return "BEARISH"
+    if tr1w == "RANGING":
+        if tr1d == "BULLISH": return "BULLISH"
+        if tr1d == "BEARISH": return "BEARISH"
+    if tr1d == "BULLISH": return "BULLISH"
+    if tr1d == "BEARISH": return "BEARISH"
     return "RANGING"
 
-# ── KEY LEVELS ────────────────────────────────────────────────
-def find_key_levels(candles, max_dist_pct=20.0):
+# ── 4H KEY LEVELS ─────────────────────────────────────────────
+MIN_BODY_PCT = 0.1   # c0 body must be at least 0.1% of price
+DEDUP_PCT    = 0.5   # levels of same type within 0.5% → keep most recent only
+
+def find_key_levels(candles):
     """
-    A-level: bull candle (c0) + bear candle (c1) → price = c0 close
-    V-level: bear candle (c0) + bull candle (c1) → price = c0 close
-    Level time = c1 open (confirmation candle open)
+    Scan all 4H candle pairs for A/V levels.
+    Rules:
+    - c0 must have a real body (>= MIN_BODY_PCT of price)
+    - Kill any level where a subsequent 4H candle closes beyond the price
+    - Deduplicate: same-type levels within DEDUP_PCT% → keep most recent
+    - Sort newest confirmed first
     """
-    if len(candles) < 3: return []
-    cur    = candles[-1]["c"]
-    levels = []
+    if len(candles) < 2: return []
+    raw = []
+
     for i in range(len(candles) - 1):
         c0 = candles[i]
         c1 = candles[i + 1]
+
         bull0 = c0["c"] > c0["o"]
         bear0 = c0["c"] < c0["o"]
         bull1 = c1["c"] > c1["o"]
         bear1 = c1["c"] < c1["o"]
 
         if bull0 and bear1:
-            price = c0["c"]; t = "A"
+            ltype = "A"
         elif bear0 and bull1:
-            price = c0["c"]; t = "V"
+            ltype = "V"
         else:
             continue
 
-        dist = abs(cur - price) / cur * 100
-        if dist > max_dist_pct: continue
+        price = c0["c"]
 
-        wicks, dead = 0, False
+        # Minimum body size — filters doji and near-doji candles
+        body_pct = abs(c0["c"] - c0["o"]) / c0["o"] * 100
+        if body_pct < MIN_BODY_PCT:
+            continue
+
+        # Dead level check
+        dead  = False
+        wicks = 0
         for fc in candles[i + 2:]:
-            if t == "A":
+            if ltype == "A":
                 if fc["c"] > price: dead = True; break
                 if fc["h"] > price: wicks += 1
             else:
                 if fc["c"] < price: dead = True; break
                 if fc["l"] < price: wicks += 1
+
         if dead: continue
 
-        levels.append({
-            "type":  t,
-            "price": price,
-            "fresh": wicks == 0,
-            "hsl":   False,
-            "dist":  dist,
-            "ts":    c1["t"] + 4*3600,
-            "c0_open": c0["t"],
+        raw.append({
+            "type":         ltype,
+            "price":        price,
+            "fresh":        wicks == 0,
+            "hsl":          False,
+            # CryptoCompare time = open time of candle
+            # Level confirmed when c1 fully closes = c1 open + 4h
+            "confirmed_ts": c1["t"] + 4 * 3600 * 1000,
+            "c0_open_ts":   c0["t"],
         })
-    return sorted(levels, key=lambda x: x["dist"])
 
-def grade_level(lv, has_1d):
+    # Deduplicate — same type within DEDUP_PCT% → keep most recent (highest confirmed_ts)
+    raw.sort(key=lambda x: x["confirmed_ts"], reverse=True)
+    levels = []
+    for lv in raw:
+        duplicate = any(
+            l["type"] == lv["type"]
+            and abs(l["price"] - lv["price"]) / lv["price"] * 100 < DEDUP_PCT
+            for l in levels
+        )
+        if not duplicate:
+            levels.append(lv)
+
+    return levels  # already sorted newest first
+
+def grade_level(lv, has_1d, bias, cur_price):
+    """
+    Grade based on level quality. Bias adds confluence but doesn't block.
+    """
     score = 0
+    bull  = lv["type"] == "V"
+
     if lv["fresh"]: score += 2
-    if lv["hsl"]:   score += 1
     if has_1d:      score += 2
-    if lv["dist"] < 0.5: score += 1
-    return "aplus" if score >= 5 else "a" if score >= 3 else "b"
+    if lv["hsl"]:   score += 1
+    dist = abs(cur_price - lv["price"]) / lv["price"] * 100
+    if dist < 0.5:  score += 1
 
+    # Bias confluence
+    if (bull and bias == "BULLISH") or (not bull and bias == "BEARISH"):
+        score += 1
 
-def was_alerted(state, bucket, key, hours):
-    ts = state.get(bucket,{}).get(key)
-    if not ts: return False
-    try:
-        return (datetime.now(timezone.utc).replace(tzinfo=None)-datetime.fromisoformat(ts)).total_seconds() < hours*3600
-    except: return False
+    return "A+" if score >= 5 else "A" if score >= 3 else "B"
 
-def mark_alert(state, bucket, key):
-    state[bucket][key] = datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
+# ── 1H SWEEP + MSS ────────────────────────────────────────────
+def calc_mss_target(scan, from_idx, to_idx, bull):
+    """
+    Find MSS target by scanning BACKWARDS from the sweep candle.
+
+    SHORT (bull=False, A-level):
+      Find the most recent bear+bull pair before the sweep → c0.low is target
+      MSS fires when 1H close < target
+
+    LONG (bull=True, V-level):
+      Find the most recent bull+bear pair before the sweep → c0.high is target
+      MSS fires when 1H close > target
+
+    "Most recent" = first pair found going backwards from sweep_idx.
+    If no pair found at all → fall back to sweep candle extreme.
+    """
+    sweep_c = scan[to_idx]
+
+    if bull:
+        # LONG: scan backwards for most recent bull+bear pair → c0.high
+        for j in range(to_idx - 1, from_idx, -1):
+            c0, c1 = scan[j - 1], scan[j]
+            if c0["c"] > c0["o"] and c1["c"] < c1["o"]:
+                return c0["h"]
+        # fallback: sweep candle high
+        return sweep_c["h"]
+    else:
+        # SHORT: scan backwards for most recent bear+bull pair → c0.low
+        for j in range(to_idx - 1, from_idx, -1):
+            c0, c1 = scan[j - 1], scan[j]
+            if c0["c"] < c0["o"] and c1["c"] > c1["o"]:
+                return c0["l"]
+        # fallback: sweep candle low
+        return sweep_c["l"]
+
+def find_mss(h1, level):
+    """
+    Scan 1H candles for sweep + MSS at the given 4H key level.
+
+    Returns dict with all setup details, or None if no valid setup.
+    """
+    lp              = level["price"]
+    # confirmed_ts = c1 open + 4h = exact moment level confirms
+    # First valid 1H candle has open time >= confirmed_ts
+    confirmed_ts    = level["confirmed_ts"]
+    bull            = level["type"] == "V"
+
+    scan = [c for c in h1[-H1_LOOKBACK:] if c["t"] >= confirmed_ts]
+    n    = len(scan)
+    if n < 2: return None
+
+    # ── Find first sweep ──────────────────────────────────────
+    sweep_idx = None
+    for i in range(n - 1):
+        c = scan[i]
+        if bull and c["l"] < lp and c["c"] > lp:
+            sweep_idx = i; break
+        elif not bull and c["h"] > lp and c["c"] < lp:
+            sweep_idx = i; break
+
+    if sweep_idx is None: return None
+
+    prev_sweep_idx = 0            # start of confirmed window
+    sweep_c        = scan[sweep_idx]
+    mss_target     = calc_mss_target(scan, prev_sweep_idx, sweep_idx, bull)
+
+    # ── Scan for re-sweeps and MSS ────────────────────────────
+    mss_result = None  # holds latest MSS candidate
+
+    for i in range(sweep_idx + 1, n):
+        mc = scan[i]
+
+        if bull:
+            if mc["l"] < lp and mc["c"] > lp:
+                prev_sweep_idx = sweep_idx
+                sweep_idx      = i
+                sweep_c        = mc
+                mss_target     = calc_mss_target(scan, prev_sweep_idx, sweep_idx, bull)
+                mss_result     = None
+                continue
+            if mc["c"] > mss_target and mc["c"] > lp:
+                mss_result = {
+                    "bull":        True,
+                    "sweep_ts":    sweep_c["t"],
+                    "sweep_wick":  sweep_c["l"],
+                    "sweep_close": sweep_c["c"],
+                    "mss_ts":      mc["t"],
+                    "mss_close":   mc["c"],
+                    "mss_target":  mss_target,
+                }
+
+        else:
+            if mc["h"] > lp and mc["c"] < lp:
+                prev_sweep_idx = sweep_idx
+                sweep_idx      = i
+                sweep_c        = mc
+                mss_target     = calc_mss_target(scan, prev_sweep_idx, sweep_idx, bull)
+                mss_result     = None
+                continue
+            if mc["c"] < mss_target and mc["c"] < lp:
+                mss_result = {
+                    "bull":        False,
+                    "sweep_ts":    sweep_c["t"],
+                    "sweep_wick":  sweep_c["h"],
+                    "sweep_close": sweep_c["c"],
+                    "mss_ts":      mc["t"],
+                    "mss_close":   mc["c"],
+                    "mss_target":  mss_target,
+                }
+                # Don't return yet — keep scanning for further sweeps
+
+    return mss_result
+
+# ── ALERT HELPERS ─────────────────────────────────────────────
+def already_alerted(state, key):
+    return key in state["mssAlerts"]
+
+def mark_alerted(state, key):
+    state["mssAlerts"][key] = datetime.now(timezone.utc).isoformat()
+
+def mss_is_recent(mss_ts_ms):
+    """True if MSS candle opened within last MSS_RECENT_HOURS hours."""
+    age = (datetime.now(timezone.utc).timestamp() * 1000 - mss_ts_ms) / 3600000
+    return age <= MSS_RECENT_HOURS
+
+def alert_key(mss):
+    """Unique key per MSS event — keyed by MSS candle time only.
+    Prevents double-alerting when two near-identical levels find the same MSS candle."""
+    return f"MSS_{mss['mss_ts']}"
 
 # ── TELEGRAM ──────────────────────────────────────────────────
 def send_telegram(msg):
     if not TELEGRAM_TOKEN:
         print("  [no token]\n" + msg); return
     url  = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-    data = urllib.parse.urlencode({"chat_id":TELEGRAM_CHAT_ID,"text":msg,"parse_mode":"HTML"}).encode()
+    data = urllib.parse.urlencode({
+        "chat_id": TELEGRAM_CHAT_ID, "text": msg, "parse_mode": "HTML"
+    }).encode()
     try:
         with urllib.request.urlopen(url, data=data, timeout=10) as r:
             res = json.loads(r.read())
@@ -244,282 +450,157 @@ def send_telegram(msg):
     except Exception as e:
         print(f"  Telegram error: {e}")
 
-# ── CORE: 1H MSS DETECTION ────────────────────────────────────
-def find_1h_mss(h1, level):
-    lp        = level["price"]
-    level_ts  = level.get("ts", 0)
-    # scanner stores timestamps in ms
-    if level_ts < 1e12: level_ts = level_ts * 1000
-    bull      = level["type"] == "V"
-    scan      = h1[-SWING_LOOKBACK:]
-    n         = len(scan)
-
-    def fmt(ts_ms):
-        dt = datetime.fromtimestamp(ts_ms/1000, IST)
-        return dt.strftime("%d %b  %I:%M %p")
-
-    level_idx = None
-    for i in range(n):
-        if scan[i]["t"] >= level_ts:
-            level_idx = i; break
-    if level_idx is None: return None
-
-    sweep_idx = None
-    for i in range(level_idx, n-1):
-        c = scan[i]
-        if bull and c["l"] < lp and c["c"] > lp:
-            sweep_idx = i; break
-        elif not bull and c["h"] > lp and c["c"] < lp:
-            sweep_idx = i; break
-    if sweep_idx is None or sweep_idx <= level_idx: return None
-
-    sweep_c        = scan[sweep_idx]
-    prev_sweep_idx = level_idx  # FIX: start from level confirmation, not first sweep
-
-    def calc_target(from_i, to_i):
-        sc = scan[to_i]
-        # Use sweep candle extreme as default (if no swing pair found)
-        target  = sc["h"] if bull else sc["l"]
-        swing_i = to_i
-        if bull:
-            for j in range(from_i, to_i-1):
-                c0,c1 = scan[j],scan[j+1]
-                if c0["c"]>c0["o"] and c1["c"]<c1["o"] and c0["h"]>target:
-                    target=c0["h"]; swing_i=j
-        else:
-            for j in range(from_i, to_i-1):
-                c0,c1 = scan[j],scan[j+1]
-                if c0["c"]<c0["o"] and c1["c"]>c1["o"] and c0["l"]<target:
-                    target=c0["l"]; swing_i=j
-        return target, swing_i
-
-    mss_target, swing_idx = calc_target(prev_sweep_idx, sweep_idx)
-
-    for i in range(sweep_idx+1, n):
-        mc = scan[i]
-        if bull:
-            # FIX: re-sweep = any candle that wicks below level and closes back above
-            # (was: mc["l"] < sweep_c["l"] — too strict, missed partial re-sweeps)
-            if mc["l"] < lp and mc["c"] > lp:
-                prev_sweep_idx = sweep_idx
-                sweep_idx = i; sweep_c = mc
-                mss_target, swing_idx = calc_target(prev_sweep_idx, sweep_idx)
-                continue
-            if mc["c"] > mss_target:
-                ext = scan[swing_idx:sweep_idx+1]
-                return {
-                    "bull":        True,
-                    "signal":      "MSS",
-                    "sweep_time":  fmt(sweep_c["t"]),
-                    "sweep_wick":  sweep_c["l"],
-                    "sweep_close": sweep_c["c"],
-                    "mss_open":    fmt(mc["t"]),
-                    "mss_close":   mc["c"],
-                    "range_high":  mss_target,
-                    "range_low":   min(c["l"] for c in ext),
-                    "range_candles": len(ext),
-                    "broke":       "ABOVE range high",
-                    "swept_level": True,
-                }
-        else:
-            # FIX: re-sweep = any candle that wicks above level and closes back below
-            # (was: mc["h"] > sweep_c["h"] — too strict, missed partial re-sweeps)
-            if mc["h"] > lp and mc["c"] < lp:
-                prev_sweep_idx = sweep_idx
-                sweep_idx = i; sweep_c = mc
-                mss_target, swing_idx = calc_target(prev_sweep_idx, sweep_idx)
-                continue
-            if mc["c"] < mss_target:
-                ext = scan[swing_idx:sweep_idx+1]
-                return {
-                    "bull":        False,
-                    "signal":      "MSS",
-                    "sweep_time":  fmt(sweep_c["t"]),
-                    "sweep_wick":  sweep_c["h"],
-                    "sweep_close": sweep_c["c"],
-                    "mss_open":    fmt(mc["t"]),
-                    "mss_close":   mc["c"],
-                    "range_high":  max(c["h"] for c in ext),
-                    "range_low":   mss_target,
-                    "range_candles": len(ext),
-                    "broke":       "BELOW range low",
-                    "swept_level": True,
-                }
-    return None
-
-# ── ALERT FORMATTERS ──────────────────────────────────────────
-def format_alert_a(lv, cur_price, grade, bias, tr1w, tr1d, has_1d):
-    bull = lv["type"] == "V"
-    gl   = "A+" if grade=="aplus" else grade.upper()
-    pf   = lambda p: f"${p:,.0f}"
-    shape = "V-shape" if bull else "A-shape"
-    tf    = "1D+4H" if has_1d else "4H"
-    return "\n".join([
-        f"🔔 AT KEY LEVEL — WATCH 1H",
-        f"",
-        f"4H Level : {pf(lv['price'])}  ({shape} · {'Fresh' if lv['fresh'] else 'Used'} · {tf})",
-        f"Price    : {pf(cur_price)}  ({abs(cur_price-lv['price'])/lv['price']*100:.2f}% away)",
-        f"Bias     : {bias}  |  Grade: {gl}  |  BTCUSDT",
-        f"",
-        f"→ Open 1H, watch for sweep + MSS/BREAK",
-        f"{now_ist()}",
-    ])
-
-def format_alert_b(lv, mss, cur_price, grade, bias, tr1w, tr1d, has_1d):
+def format_alert(lv, mss, grade, bias, has_1d, cur_price):
     bull   = mss["bull"]
-    gl     = "A+" if grade=="aplus" else grade.upper()
     pf     = lambda p: f"${p:,.0f}"
+    gl     = grade
     shape  = "V" if bull else "A"
     conf   = "1D+4H ✓" if has_1d else "4H only"
-    fresh  = "Fresh" if lv['fresh'] else "Used"
+    fresh  = "Fresh" if lv["fresh"] else "Used"
+    header = "🚀 LONG  — SWEEP + MSS" if bull else "💥 SHORT — SWEEP + MSS"
 
-    header = "🚀 LONG  —  SWEEP + MSS" if bull else "💥 SHORT  —  SWEEP + MSS"
-    grade_line = f"Grade {gl}  ·  {bias}  ·  {conf}"
+    # c0 open time for TradingView navigation
+    c0_time  = fmt_ts(lv["c0_open_ts"])
+    sw_time  = fmt_ts(mss["sweep_ts"])
+    mss_time = fmt_ts(mss["mss_ts"])
 
-    c0_ts = lv.get('c0_open', lv['ts'] - 8*3600)
-    if c0_ts > 1e10: c0_ts = c0_ts / 1000  # convert ms to seconds
-    lv_ts = lv['ts']
-    if lv_ts > 1e10: lv_ts = lv_ts / 1000
-    IST2 = timezone(timedelta(hours=5, minutes=30))
-    c0_time = datetime.fromtimestamp(c0_ts, IST2).strftime('%d %b  %I:%M %p IST')
+    direction_bias = "WITH bias ✓" if (
+        (bull and bias == "BULLISH") or (not bull and bias == "BEARISH")
+    ) else "AGAINST bias"
 
     return "\n".join([
         header,
-        "─" * 30,
-        f"",
-        f"Level    {pf(lv['price'])}  [{shape}-shape · {fresh}]",
-        f"Signal   {c0_time}  ← open this on TV",
-        f"",
-        f"Sweep    {mss['sweep_time']} IST",
-        f"  wick → {pf(mss['sweep_wick'])}  close → {pf(mss['sweep_close'])}",
-        f"",
-        f"MSS      {mss['mss_open']} IST",
-        f"  close → {pf(mss['mss_close'])}",
-        f"",
-        "─" * 30,
-        grade_line,
-        f"BTCUSDT  ·  {now_ist()}",
+        "─" * 32,
+        "",
+        f"Level    {pf(lv['price'])}  [{shape}-shape · {fresh} · {conf}]",
+        f"Signal   {c0_time} IST  ← open on TradingView",
+        "",
+        f"Sweep    {sw_time} IST",
+        f"  wick → {pf(mss['sweep_wick'])}   close → {pf(mss['sweep_close'])}",
+        "",
+        f"MSS      {mss_time} IST",
+        f"  target → {pf(mss['mss_target'])}   close → {pf(mss['mss_close'])}",
+        "",
+        "─" * 32,
+        f"Grade: {gl}   Bias: {bias} ({direction_bias})",
+        f"BTCUSDT · {now_ist()}",
     ])
 
 # ── SIMULATOR ─────────────────────────────────────────────────
-def auto_enter_trade(state, mss, lv, grade, bias, cur_price, h4_levels):
+def auto_enter_trade(state, lv, mss, grade, bias, all_levels):
     """
-    Auto enter trade on MSS confirmation:
-    - Entry  = MSS candle close price
-    - SL     = sweep candle low (LONG) / high (SHORT) with 0.1% buffer
-    - TPs    = all 4H levels beyond entry in trade direction, sorted nearest first
+    Auto enter sim trade on MSS confirmation.
+    Entry  = MSS candle close
+    SL     = sweep candle extreme (wick) with 0.1% buffer
+    TPs    = all valid 4H levels beyond entry in trade direction
     """
-    bull    = mss["bull"]
-    entry   = round(mss["mss_close"], 2)
-    sl_raw  = mss.get("sweep_wick", mss.get("sweep_low", mss.get("sweep_high", entry)))
-    buffer  = entry * 0.001  # 0.1% buffer on SL
+    bull   = mss["bull"]
+    entry  = round(mss["mss_close"], 2)
+    sl_raw = mss["sweep_wick"]
 
     if bull:
-        sl  = round(sl_raw * (1 - 0.001), 2)  # slightly below sweep low
-        tps = sorted(
-            [lv["price"] for lv in h4_levels if lv["price"] > entry and lv["type"] == "A"],
-        )
+        sl  = round(sl_raw * 0.999, 2)
+        tps = sorted([l["price"] for l in all_levels
+                      if l["type"] == "A" and l["price"] > entry])
     else:
-        sl  = round(sl_raw * (1 + 0.001), 2)  # slightly above sweep high
-        tps = sorted(
-            [lv["price"] for lv in h4_levels if lv["price"] < entry and lv["type"] == "V"],
-            reverse=True
-        )
+        sl  = round(sl_raw * 1.001, 2)
+        tps = sorted([l["price"] for l in all_levels
+                      if l["type"] == "V" and l["price"] < entry], reverse=True)
 
-    if not tps: return  # no target levels found
+    if not tps:
+        print("  → No TP levels found, skipping auto trade"); return
+
     risk = abs(entry - sl)
     if risk <= 0: return
 
-    trade_id = f"auto_{int(datetime.now(timezone.utc).timestamp())}"
-    # avoid duplicate entries for same MSS
+    trade_id = f"t_{int(datetime.now(timezone.utc).timestamp())}"
+    # Deduplicate
     if any(t.get("id") == trade_id or
-           (t.get("rawEntry") == entry and t.get("bull") == bull)
+           (abs(t.get("rawEntry", 0) - entry) < 10 and t.get("bull") == bull)
            for t in state["activeTrades"]):
         return
 
-    gl = "A+" if grade == "aplus" else grade.upper()
     trade = {
         "id":           trade_id,
         "bull":         bull,
         "direction":    "LONG" if bull else "SHORT",
-        "grade":        gl,
+        "grade":        grade,
         "level":        round(lv["price"], 2),
         "rawEntry":     entry,
         "rawSL":        sl,
         "rawRisk":      round(risk, 2),
-        "tpLevels":     [round(t, 2) for t in tps],   # all TP levels
-        "tpIndex":      0,                              # which TP we're targeting
+        "tpLevels":     [round(t, 2) for t in tps],
+        "tpIndex":      0,
         "rawTP1":       round(tps[0], 2),
         "rawTP2":       round(tps[1], 2) if len(tps) > 1 else round(tps[0], 2),
         "phase":        "entry",
         "entryBalance": round(state["balance"], 2),
-        "enteredAt":    datetime.now(timezone.utc).replace(tzinfo=None).isoformat(),
+        "enteredAt":    datetime.now(timezone.utc).isoformat(),
         "bias":         bias,
-        "auto":         True,
     }
     state["activeTrades"].append(trade)
-    print(f"  → AUTO TRADE: {'LONG' if bull else 'SHORT'} entry ${entry:,.0f} sl ${sl:,.0f} tp1 ${tps[0]:,.0f} ({len(tps)} levels)")
-
+    print(f"  → Auto trade: {'LONG' if bull else 'SHORT'} "
+          f"entry {entry:,.0f}  sl {sl:,.0f}  tp1 {tps[0]:,.0f}  ({len(tps)} targets)")
 
 def update_simulator(state, cur_price):
-    still = []
+    """Check active trades against current price. Hit SL or TP → close."""
+    still    = []
+    risk_map = {"A+": 3.0, "A": 2.0, "B": 1.0}
+    now_ts   = datetime.now(timezone.utc).isoformat()
+
     for t in state["activeTrades"]:
-        bull    = t.get("bull", t["direction"] == "LONG")
-        entry   = t["rawEntry"]
-        sl      = t["rawSL"]
-        risk    = t.get("rawRisk", abs(entry - sl))
+        bull     = t["bull"]
+        entry    = t["rawEntry"]
+        sl       = t["rawSL"]
+        risk     = t["rawRisk"]
+        phase    = t.get("phase", "entry")
+        tp_lvls  = t.get("tpLevels", [t.get("rawTP1", entry)])
+        tp_idx   = t.get("tpIndex", 0)
+        risk_pct = risk_map.get(t.get("grade", "B"), 1.0)
+        risk_amt = t.get("entryBalance", SIM_START) * risk_pct / 100
+
         if risk <= 0: still.append(t); continue
 
-        riskAmt = t.get("entryBalance", SIM_START) * (RISK_PCT.get(t.get("grade","b").lower().replace("+","plus"), 1.0) / 100)
-        posSize = riskAmt / risk
-        phase   = t.get("phase", "entry")
-        tpLevels = t.get("tpLevels", [t.get("rawTP1", entry), t.get("rawTP2", entry)])
-        tpIndex  = t.get("tpIndex", 0)
-
-        now_ts = datetime.now(timezone.utc).replace(tzinfo=None).isoformat()
-
-        # ── SL hit ──────────────────────────────────────────
+        # SL hit
         if (bull and cur_price <= sl) or (not bull and cur_price >= sl):
-            pnl = -riskAmt if phase == "entry" else 0.0
-            result = "loss" if phase == "entry" else "be"
-            if phase == "entry":
-                state["balance"] -= riskAmt
-                state["stats"]["losses"] += 1
-                state["stats"]["netR"] = round(state["stats"]["netR"] - 1, 2)
+            pnl    = 0.0 if phase != "entry" else -risk_amt
+            result = "be" if phase != "entry" else "loss"
+            if result == "loss":
+                state["balance"] -= risk_amt
+                state["stats"]["losses"]    += 1
+                state["stats"]["netR"]      = round(state["stats"]["netR"] - 1, 2)
             else:
-                state["stats"]["be"] += 1
-            state["stats"]["totalTrades"] += 1
-            state["history"].insert(0, {**t, "result": result, "pnl": round(pnl, 2),
-                "pnlR": -1.0 if result == "loss" else 0.0,
+                state["stats"]["be"]        += 1
+            state["stats"]["totalTrades"]   += 1
+            state["history"].insert(0, {**t, "result": result,
+                "pnl": round(pnl, 2), "pnlR": -1.0 if result == "loss" else 0.0,
                 "closePrice": round(cur_price, 2), "closedAt": now_ts})
             state["equityCurve"].append({"t": now_ts, "v": round(state["balance"], 2)})
             continue
 
-        # ── TP level hit — trail to next ────────────────────
-        if tpIndex < len(tpLevels):
-            current_tp = tpLevels[tpIndex]
-            if (bull and cur_price >= current_tp) or (not bull and cur_price <= current_tp):
-                profit = posSize * abs(current_tp - entry)
+        # TP hit
+        if tp_idx < len(tp_lvls):
+            tp = tp_lvls[tp_idx]
+            if (bull and cur_price >= tp) or (not bull and cur_price <= tp):
+                pos_size = risk_amt / risk
+                profit   = pos_size * abs(tp - entry)
+                net_r    = round(abs(tp - entry) / risk, 1)
                 state["balance"] += profit
-                netR = round(abs(current_tp - entry) / risk, 1)
-                state["stats"]["netR"] = round(state["stats"]["netR"] + netR, 2)
-                state["stats"]["bestR"] = max(state["stats"]["bestR"], netR)
-
-                state["history"].insert(0, {**t, "result": f"tp{tpIndex+1}", "pnl": round(profit, 2),
-                    "pnlR": netR, "closePrice": round(cur_price, 2), "closedAt": now_ts})
+                state["stats"]["netR"]  = round(state["stats"]["netR"] + net_r, 2)
+                state["stats"]["bestR"] = max(state["stats"]["bestR"], net_r)
+                state["history"].insert(0, {**t, "result": f"tp{tp_idx+1}",
+                    "pnl": round(profit, 2), "pnlR": net_r,
+                    "closePrice": round(cur_price, 2), "closedAt": now_ts})
                 state["equityCurve"].append({"t": now_ts, "v": round(state["balance"], 2)})
 
-                # Check if more TP levels exist — trail
-                if tpIndex + 1 < len(tpLevels):
-                    # Trail SL to previous TP (or entry if first TP)
-                    t["rawSL"]   = entry if tpIndex == 0 else tpLevels[tpIndex - 1]
-                    t["tpIndex"] = tpIndex + 1
-                    t["rawTP1"]  = tpLevels[tpIndex + 1]
-                    t["phase"]   = f"tp{tpIndex+1}"
+                if tp_idx + 1 < len(tp_lvls):
+                    # Trail SL to entry (first TP) or previous TP
+                    t["rawSL"]   = entry if tp_idx == 0 else tp_lvls[tp_idx - 1]
+                    t["tpIndex"] = tp_idx + 1
+                    t["phase"]   = f"tp{tp_idx + 1}"
                     still.append(t)
                 else:
-                    # All TPs hit — final win
-                    state["stats"]["wins"] += 1
+                    state["stats"]["wins"]        += 1
                     state["stats"]["totalTrades"] += 1
                 continue
 
@@ -529,141 +610,136 @@ def update_simulator(state, cur_price):
     state["history"]      = state["history"][:100]
     state["equityCurve"]  = state["equityCurve"][-200:]
 
-
-
 # ── MAIN ──────────────────────────────────────────────────────
 def main():
-    print(f"\n=== MSNR Scanner v9  {datetime.now(timezone.utc).replace(tzinfo=None).strftime('%Y-%m-%d %H:%M UTC')} ===\n")
+    print(f"\n=== MSNR Scanner v10  {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')} ===\n")
+
     state, sha = load_state()
-    print(f"Balance: ${state['balance']:.2f} | Active trades: {len(state['activeTrades'])}")
+    print(f"Balance: ${state['balance']:.2f}  |  Active trades: {len(state['activeTrades'])}\n")
 
-    print("\nFetching candles...")
-    w1 = fetch_candles("BTC","1w",52);  time.sleep(1)
-    d1 = fetch_candles("BTC","1d",90);  time.sleep(1)
-    h4 = fetch_candles("BTC","4h",200); time.sleep(1)
-    h1 = fetch_candles("BTC","1h",250)
+    # ── Fetch data ────────────────────────────────────────────
+    print("Fetching candles...")
+    w1 = fetch_candles("BTC", "1w", 52);  time.sleep(1)
+    d1 = fetch_candles("BTC", "1d", 90);  time.sleep(1)
+    h4 = fetch_candles("BTC", "4h", 200); time.sleep(1)
+    h1 = fetch_candles("BTC", "1h", 300)
 
-    if not (d1 and h4 and h1):
+    if not h4 or not h1:
         print("Insufficient data — aborting"); return
 
     cur_price = h1[-1]["c"]
-    tr1w = get_trend(w1, 12) if w1 else "UNKNOWN"
-    tr1d = get_trend(d1, 20)
-    bias = get_bias(tr1w, tr1d)
+    tr1w      = get_trend(w1, 12) if w1 else "UNKNOWN"
+    tr1d      = get_trend(d1, 20) if d1 else "UNKNOWN"
+    tr4h      = get_trend(h4, 42)
+    bias      = get_bias(tr1w, tr1d)
 
-    print(f"\nBTC: ${cur_price:,.0f} | 1W:{tr1w} | 1D:{tr1d} | Bias:{bias}")
+    print(f"\nBTC: ${cur_price:,.0f}  |  1W:{tr1w}  1D:{tr1d}  4H:{tr4h}  |  Bias:{bias}\n")
 
-    if bias == "RANGING":
-        print("Bias RANGING — no directional setups this run")
-        save_state(state, sha); return
-
-    lvl_4h = find_key_levels(h4, max_dist_pct=15.0)
-    lvl_1d = find_key_levels(d1, max_dist_pct=15.0)
-    print(f"4H levels: {len(lvl_4h)} | 1D levels: {len(lvl_1d)}")
+    # ── Find all valid 4H levels ──────────────────────────────
+    h4_levels = find_key_levels(h4)
+    d1_levels = find_key_levels(d1) if d1 else []
+    print(f"Valid 4H levels: {len(h4_levels)}  |  Valid 1D levels: {len(d1_levels)}\n")
 
     alerts_sent = 0
 
-    for lv in lvl_4h:
+    for lv in h4_levels:
         bull = lv["type"] == "V"
-        if bull  and bias != "BULLISH": continue
-        if not bull and bias != "BEARISH": continue
+        lp   = lv["price"]
+        dist = abs(cur_price - lp) / lp * 100
 
         has_1d = any(
-            l["type"]==lv["type"] and abs(l["price"]-lv["price"])/lv["price"]*100 < 1.5
-            for l in lvl_1d
+            l["type"] == lv["type"]
+            and abs(l["price"] - lp) / lp * 100 < 1.5
+            for l in d1_levels
         )
-        grade  = grade_level(lv, has_1d)
-        lv_key = f"BTC_{lv['type']}_{int(lv['price'])}"
-        dist   = abs(cur_price - lv["price"]) / lv["price"] * 100
+        grade = grade_level(lv, has_1d, bias, cur_price)
 
-        print(f"\n  {lv['type']} ${lv['price']:,.0f} | "
-              f"{'FRESH' if lv['fresh'] else 'USED'} | "
-              f"Grade:{grade} | dist:{dist:.2f}%"
-              f"{' | 1D+4H' if has_1d else ''}")
+        print(f"  {lv['type']} ${lp:,.0f}  {'FRESH' if lv['fresh'] else 'USED'}  "
+              f"grade:{grade}  dist:{dist:.1f}%"
+              f"{'  [1D+4H]' if has_1d else ''}")
 
-        # ── ALERT A: price just arrived at level ──────────────
-        if dist <= NEAR_PCT:
-            key_a = lv_key + "_AT"
-            if not was_alerted(state, "levelAlerts", key_a, SPAM_HOURS_A):
-                msg = format_alert_a(lv, cur_price, grade, bias, tr1w, tr1d, has_1d)
-                send_telegram(msg)
-                mark_alert(state, "levelAlerts", key_a)
-                alerts_sent += 1
-                print(f"  → ALERT A: price at level")
+        # ── Scan for sweep + MSS ──────────────────────────────
+        mss = find_mss(h1, lv)
+        if not mss:
+            print(f"    → no MSS yet")
+            continue
 
-        # ── ALERT B: 1H MSS at this level ─────────────────────
-        if dist <= ZONE_PCT:
-            mss = find_1h_mss(h1, lv)
-            if mss:
-                # Only alert if MSS is recent (within last 2 hours)
-                mss_ts_str = str(mss.get("mss_open",""))
-                key_b = lv_key + "_MSS_" + mss_ts_str.replace(" ","_").replace(":","")
-                # Check recency — parse mss_open time and compare to now
-                try:
-                    mss_dt = datetime.strptime(mss["mss_open"], "%d %b  %I:%M %p")
-                    mss_dt = mss_dt.replace(year=datetime.now(IST).year, tzinfo=IST)
-                    age_hours = (datetime.now(IST) - mss_dt).total_seconds() / 3600
-                    is_recent = age_hours <= 2
-                except:
-                    is_recent = True  # if parse fails, allow it
+        key = alert_key(mss)
 
-                if is_recent and not was_alerted(state, "mssAlerts", key_b, 999999):
-                    msg = format_alert_b(lv, mss, cur_price, grade, bias, tr1w, tr1d, has_1d)
-                    send_telegram(msg)
-                    mark_alert(state, "mssAlerts", key_b)
-                    alerts_sent += 1
-                    # Auto enter simulator trade
-                    auto_enter_trade(state, mss, lv, grade, bias, cur_price, lvl_4h)
-                    # Save last alert for website
-                    state["lastAlert"] = {
-                        "type":      "MSS",
-                        "direction": "LONG" if mss["bull"] else "SHORT",
-                        "level":     round(lv["price"], 2),
-                        "grade":     "A+" if grade == "aplus" else grade.upper(),
-                        "has1d":     has_1d,
-                        "sweepTime": mss["sweep_time"],
-                        "mssTime":   mss["mss_open"],
-                        "mssClose":  round(mss["mss_close"], 2),
-                        "bias":      bias,
-                        "time":      datetime.now(IST).strftime("%d %b %Y  %I:%M %p IST"),
-                    }
-                    print(f"  → ALERT B: 1H MSS {'bullish' if mss['bull'] else 'bearish'} "
-                          f"| range {mss['range_candles']}c "
-                          f"| broke {mss['broke']} @ ${mss['mss_close']:,.0f}")
-                else:
-                    print(f"  → MSS already alerted")
-            else:
-                print(f"  → In zone, no 1H MSS yet")
+        if already_alerted(state, key):
+            print(f"    → MSS found but already alerted  ({fmt_ts(mss['mss_ts'])} IST)")
+            continue
 
-    print(f"\n{'No alerts this run' if alerts_sent==0 else str(alerts_sent)+' alert(s) sent'}")
+        if not mss_is_recent(mss["mss_ts"]):
+            print(f"    → MSS found but stale  ({fmt_ts(mss['mss_ts'])} IST)")
+            # Still mark so we don't re-alert this old one next run
+            mark_alerted(state, key)
+            continue
+
+        # ── Fire alert ────────────────────────────────────────
+        print(f"    → {'LONG' if bull else 'SHORT'} MSS  "
+              f"sweep:{fmt_ts(mss['sweep_ts'])}  mss:{fmt_ts(mss['mss_ts'])}  "
+              f"close:{mss['mss_close']:,.0f}")
+
+        msg = format_alert(lv, mss, grade, bias, has_1d, cur_price)
+        send_telegram(msg)
+        mark_alerted(state, key)
+        alerts_sent += 1
+
+        # Enter sim trade
+        auto_enter_trade(state, lv, mss, grade, bias, h4_levels)
+
+        # Save last alert for dashboard
+        state["lastAlert"] = {
+            "type":       "MSS",
+            "direction":  "LONG" if bull else "SHORT",
+            "level":      round(lp, 2),
+            "grade":      grade,
+            "has1d":      has_1d,
+            "sweepTime":  fmt_ts(mss["sweep_ts"]),
+            "mssTime":    fmt_ts(mss["mss_ts"]),
+            "mssClose":   round(mss["mss_close"], 2),
+            "mssTarget":  round(mss["mss_target"], 2),
+            "sweepWick":  round(mss["sweep_wick"], 2),
+            "bias":       bias,
+            "c0Time":     fmt_ts(lv["c0_open_ts"]),
+            "time":       now_ist(),
+        }
+
+    print(f"\n{'No new alerts' if alerts_sent == 0 else str(alerts_sent) + ' alert(s) sent'}")
+
+    # ── Update simulator ──────────────────────────────────────
     update_simulator(state, cur_price)
 
-    # ── Save current levels to state for website display ──────
-    state["currentLevels"] = []
-    for lv in lvl_4h:
-        has_1d = any(
-            l["type"] == lv["type"] and abs(l["price"] - lv["price"]) / lv["price"] * 100 < 1.0
-            for l in lvl_1d
-        )
-        grade = grade_level(lv, has_1d)
-        gl    = "A+" if grade == "aplus" else grade.upper()
-        state["currentLevels"].append({
+    # ── Save levels for dashboard ─────────────────────────────
+    state["currentLevels"] = [
+        {
             "type":   lv["type"],
             "price":  round(lv["price"], 2),
             "fresh":  lv["fresh"],
             "hsl":    lv["hsl"],
-            "has1d":  has_1d,
-            "grade":  gl,
+            "has1d":  any(
+                l["type"] == lv["type"]
+                and abs(l["price"] - lv["price"]) / lv["price"] * 100 < 1.5
+                for l in d1_levels
+            ),
+            "grade":  grade_level(lv, any(
+                l["type"] == lv["type"]
+                and abs(l["price"] - lv["price"]) / lv["price"] * 100 < 1.5
+                for l in d1_levels
+            ), bias, cur_price),
             "dist":   round(abs(cur_price - lv["price"]) / lv["price"] * 100, 2),
-        })
+        }
+        for lv in sorted(h4_levels, key=lambda x: abs(cur_price - x["price"]))
+    ]
 
     state["currentPrice"] = round(cur_price, 2)
     state["currentBias"]  = bias
-    state["currentTrend"] = {"w1": tr1w, "d1": tr1d, "h4": get_trend(h4, 42)}  # FIX: add h4 trend for dashboard
-    state["scanTime"]     = datetime.now(IST).strftime("%d %b %Y  %I:%M %p IST")
+    state["currentTrend"] = {"w1": tr1w, "d1": tr1d, "h4": tr4h}
+    state["scanTime"]     = now_ist()
 
     save_state(state, sha)
-    print("=== Done ===")
+    print("\n=== Done ===")
 
 if __name__ == "__main__":
     main()
