@@ -996,10 +996,12 @@ function detectCRT(c1h, level) {
 
 function gradeLevel(lv, hasD1Target) {
   let score = 0;
-  if (lv.freshness === 'FRESH') score += 2;
-  if (lv.hsl)                   score += 1;
-  if (hasD1Target)              score += 2;
-  if (lv.dist < 0.5)            score += 1;
+  // FIX: handle both `fresh` (boolean, from scanner remoteState) and `freshness` (string, client-side)
+  const isFresh = lv.fresh === true || lv.freshness === 'FRESH';
+  if (isFresh)     score += 2;
+  if (lv.hsl)      score += 1;
+  if (hasD1Target) score += 2;
+  if (lv.dist < 0.5) score += 1;
   return score >= 5 ? 'aplus' : score >= 3 ? 'a' : 'b';
 }
 
@@ -1025,11 +1027,16 @@ function getTrend(candles, lb=20) {
   return 'RANGING';
 }
 
-function getBias(t1d, t4h) {
-  if (t1d === 'BULLISH') return 'BULLISH';
-  if (t1d === 'BEARISH') return 'BEARISH';
-  if (t4h === 'BULLISH') return 'BULLISH';
-  if (t4h === 'BEARISH') return 'BEARISH';
+// FIX: getBias now matches Python scanner logic: (tr1w, tr1d)
+function getBias(tr1w, tr1d) {
+  if (tr1w === 'BULLISH' && (tr1d === 'BULLISH' || tr1d === 'RANGING')) return 'BULLISH';
+  if (tr1w === 'BEARISH' && (tr1d === 'BEARISH' || tr1d === 'RANGING')) return 'BEARISH';
+  if (tr1w === 'RANGING') {
+    if (tr1d === 'BULLISH') return 'BULLISH';
+    if (tr1d === 'BEARISH') return 'BEARISH';
+  }
+  if (tr1d === 'BULLISH') return 'BULLISH';
+  if (tr1d === 'BEARISH') return 'BEARISH';
   return 'RANGING';
 }
 
@@ -1047,7 +1054,7 @@ function renderDash() {
   const chg   = (cur - prev) / prev * 100;
   const tr1d  = remoteState?.currentTrend?.d1 || getTrend(d1, 20);
   const tr1w  = remoteState?.currentTrend?.w1 || 'UNKNOWN';
-  const bias  = remoteState?.currentBias  || getBias(tr1d, getTrend(h4, 42));
+  const bias  = remoteState?.currentBias  || getBias(tr1w, tr1d);
   const scanTime = remoteState?.scanTime || '';
 
   const dashPrice = document.getElementById('dashPrice');
@@ -1071,12 +1078,14 @@ function renderDash() {
   const h4cur  = h4.at(-1)?.c || cur;
   const h4prev = h4.at(-2)?.c || h4cur;
   const h4chg  = (h4cur - h4prev) / h4prev * 100;
+  // FIX: 4H card bias should show 4H trend, not 1D trend
+  const tr4h   = remoteState?.currentTrend?.h4 || getTrend(h4, 42);
   document.getElementById('pc4hPrice').textContent = '$' + fmt(h4cur, 0);
   document.getElementById('pc4hChg').textContent   = (h4chg >= 0 ? '+' : '') + h4chg.toFixed(2) + '%';
   document.getElementById('pc4hChg').className     = 'pc-chg ' + (h4chg >= 0 ? 'up' : 'dn');
   const b4hEl = document.getElementById('pc4hBias');
-  b4hEl.textContent = tr1d;
-  b4hEl.className   = 'bias-tag ' + (tr1d === 'BULLISH' ? 'bull-tag' : tr1d === 'BEARISH' ? 'bear-tag' : 'neut-tag');
+  b4hEl.textContent = tr4h;
+  b4hEl.className   = 'bias-tag ' + (tr4h === 'BULLISH' ? 'bull-tag' : tr4h === 'BEARISH' ? 'bear-tag' : 'neut-tag');
 
   document.getElementById('updTime').textContent = scanTime || new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
 }
@@ -1101,8 +1110,10 @@ function renderLevels() {
     const gc = {'A+':'var(--green)','A':'var(--gold)','B':'var(--t2)'};
     el.innerHTML = levels.map(lv => {
       const bull = lv.type === 'V';
+      // FIX: handle both fresh (boolean from scanner) and freshness (string from client)
+      const isFresh = lv.fresh === true || lv.freshness === 'FRESH';
       const tag1d = lv.has1d ? '<span class="tag hsl">1D+4H</span>' : '<span class="tag">4H</span>';
-      const tagFresh = lv.fresh ? '<span class="tag fresh">FRESH</span>' : '<span class="tag unfresh">USED</span>';
+      const tagFresh = isFresh ? '<span class="tag fresh">FRESH</span>' : '<span class="tag unfresh">USED</span>';
       const tagHsl   = lv.hsl  ? '<span class="tag hsl">HSL</span>' : '';
       return '<div class="level-row ' + (lv.dist < 2 ? (bull ? 'near-v' : 'near-a') : '') + '">'
         + '<span class="lv-type ' + lv.type.toLowerCase() + '">' + lv.type + '</span>'
@@ -1454,7 +1465,10 @@ async function loadData() {
     remoteState  = remote;
 
     // Detect CRT setups
-    const bias = getBias(getTrend(d1, 20), getTrend(h4, 42));
+    // FIX: getBias takes (tr1w, tr1d) — use weekly + daily, matching Python scanner
+    const tr1w_local = getTrend(btcData.d1.slice(0, Math.ceil(btcData.d1.length * 0.25)), 12); // approximate weekly from daily
+    const tr1d_local = getTrend(d1, 20);
+    const bias = remoteState?.currentBias || getBias(tr1w_local, tr1d_local);
     detectedCRTs = [];
 
     if (bias !== 'RANGING' && h1.length) {
