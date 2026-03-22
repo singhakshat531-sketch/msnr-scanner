@@ -166,77 +166,48 @@ def get_bias(tr1w, tr1d):
 # ── KEY LEVELS ────────────────────────────────────────────────
 def find_key_levels(candles, max_dist_pct=20.0):
     """
-    V-level: bear candle at swing low + bull confirmation
-             level price = bear candle close
-             level time  = bull candle open
-
-    A-level: bull candle at swing high + bear confirmation
-             level price = bull candle close
-             level time  = bear candle open
-
-    Only extreme swing points — not every bear/bull flip.
+    A-level: bull candle (c0) + bear candle (c1) → price = c0 close
+    V-level: bear candle (c0) + bull candle (c1) → price = c0 close
+    Level time = c1 open (confirmation candle open)
     """
-    if len(candles) < 6: return []
+    if len(candles) < 3: return []
     cur    = candles[-1]["c"]
     levels = []
-    LB = 2
-
-    for i in range(LB, len(candles) - LB - 1):
+    for i in range(len(candles) - 1):
         c0 = candles[i]
         c1 = candles[i + 1]
-
-        bear0 = c0["c"] < c0["o"]
         bull0 = c0["c"] > c0["o"]
+        bear0 = c0["c"] < c0["o"]
         bull1 = c1["c"] > c1["o"]
         bear1 = c1["c"] < c1["o"]
 
-        if bear0 and bull1:
-            is_swing_low = all(
-                c0["l"] < candles[i - j]["l"] and c0["l"] < candles[i + 1 + j]["l"]
-                for j in range(1, LB + 1)
-                if i + 1 + j < len(candles)
-            )
-            if not is_swing_low: continue
-            price = c0["c"]; t = "V"; level_time = c1["t"]
-
-        elif bull0 and bear1:
-            is_swing_high = all(
-                c0["h"] > candles[i - j]["h"] and c0["h"] > candles[i + 1 + j]["h"]
-                for j in range(1, LB + 1)
-                if i + 1 + j < len(candles)
-            )
-            if not is_swing_high: continue
-            price = c0["c"]; t = "A"; level_time = c1["t"]
-
+        if bull0 and bear1:
+            price = c0["c"]; t = "A"
+        elif bear0 and bull1:
+            price = c0["c"]; t = "V"
         else:
             continue
 
         dist = abs(cur - price) / cur * 100
         if dist > max_dist_pct: continue
 
-        wicks, dead = 0, False
+        wicks = 0
         for fc in candles[i + 2:]:
             if t == "A":
-                if fc["c"] > price: dead = True; break
-                if fc["h"] >= price: wicks += 1
+                if fc["h"] > price: wicks += 1
             else:
-                if fc["c"] < price: dead = True; break
-                if fc["l"] <= price: wicks += 1
-        if dead: continue
-
-        hsl = sum(1 for c in candles[:i] if abs(c["c"] - price) / price < 0.005) >= 2
+                if fc["l"] < price: wicks += 1
 
         levels.append({
             "type":  t,
             "price": price,
             "fresh": wicks == 0,
-            "hsl":   hsl,
+            "hsl":   False,
             "dist":  dist,
-            "wicks": wicks,
+            "ts":    c1["t"] + 4*3600,
+            "c0_open": c0["t"],
         })
-
-    return sorted(levels, key=lambda x: x["dist"])[:10]
-
+    return sorted(levels, key=lambda x: x["dist"])
 
 def grade_level(lv, has_1d):
     score = 0
@@ -272,64 +243,55 @@ def send_telegram(msg):
 
 # ── CORE: 1H MSS DETECTION ────────────────────────────────────
 def find_1h_mss(h1, level):
-    """Same logic as find_mss in backtest with re-sweep recalculation."""
-    if len(h1) < 4: return None
-    bull      = level["type"] == "V"
     lp        = level["price"]
-    level_ts  = level.get("ts", 0) * 1000 if level.get("ts", 0) < 1e12 else level.get("ts", 0)
+    level_ts  = level.get("ts", 0)
+    # scanner stores timestamps in ms
+    if level_ts < 1e12: level_ts = level_ts * 1000
+    bull      = level["type"] == "V"
     scan      = h1[-SWING_LOOKBACK:]
     n         = len(scan)
 
-    def ts(unix_ms):
-        dt = datetime.fromtimestamp(unix_ms / 1000, IST)
+    def fmt(ts_ms):
+        dt = datetime.fromtimestamp(ts_ms/1000, IST)
         return dt.strftime("%d %b  %I:%M %p")
 
-    level_idx = 0
+    level_idx = None
     for i in range(n):
-        if scan[i]["t"] > level_ts:
+        if scan[i]["t"] >= level_ts:
             level_idx = i; break
+    if level_idx is None: return None
 
     sweep_idx = None
-    for i in range(level_idx, n - 2):
+    for i in range(level_idx, n-1):
         c = scan[i]
         if bull and c["l"] < lp and c["c"] > lp:
             sweep_idx = i; break
         elif not bull and c["h"] > lp and c["c"] < lp:
             sweep_idx = i; break
-    if sweep_idx is None: return None
-    if sweep_idx <= level_idx: return None
+    if sweep_idx is None or sweep_idx <= level_idx: return None
 
-    def calc_target(from_idx, to_idx):
-        sweep_c = scan[to_idx]
-        target  = None
-        swing_i = to_idx
-        if bull:
-            best = None
-            for i in range(from_idx, to_idx - 1):
-                c0, c1 = scan[i], scan[i + 1]
-                if c0["c"] > c0["o"] and c1["c"] < c1["o"]:
-                    if best is None or c0["h"] > best:
-                        best = c0["h"]; target = c0["h"]; swing_i = i
-            if sweep_c["h"] > (target or 0):
-                target = sweep_c["h"]; swing_i = to_idx
-        else:
-            best = None
-            for i in range(from_idx, to_idx - 1):
-                c0, c1 = scan[i], scan[i + 1]
-                if c0["c"] < c0["o"] and c1["c"] > c1["o"]:
-                    if best is None or c0["l"] < best:
-                        best = c0["l"]; target = c0["l"]; swing_i = i
-            if sweep_c["l"] < (target or float("inf")):
-                target = sweep_c["l"]; swing_i = to_idx
-        if target is None:
-            target = sweep_c["h"] if bull else sweep_c["l"]; swing_i = to_idx
-        return target, swing_i
-
-    mss_target, swing_idx = calc_target(level_idx, sweep_idx)
     sweep_c        = scan[sweep_idx]
     prev_sweep_idx = sweep_idx
 
-    for i in range(sweep_idx + 1, n):
+    def calc_target(from_i, to_i):
+        sc = scan[to_i]
+        target  = sc["h"] if bull else sc["l"]
+        swing_i = to_i
+        if bull:
+            for j in range(from_i, to_i-1):
+                c0,c1 = scan[j],scan[j+1]
+                if c0["c"]>c0["o"] and c1["c"]<c1["o"] and c0["h"]>target:
+                    target=c0["h"]; swing_i=j
+        else:
+            for j in range(from_i, to_i-1):
+                c0,c1 = scan[j],scan[j+1]
+                if c0["c"]<c0["o"] and c1["c"]>c1["o"] and c0["l"]<target:
+                    target=c0["l"]; swing_i=j
+        return target, swing_i
+
+    mss_target, swing_idx = calc_target(level_idx, sweep_idx)
+
+    for i in range(sweep_idx+1, n):
         mc = scan[i]
         if bull:
             if mc["l"] < sweep_c["l"] and mc["c"] > lp:
@@ -338,22 +300,20 @@ def find_1h_mss(h1, level):
                 mss_target, swing_idx = calc_target(prev_sweep_idx, sweep_idx)
                 continue
             if mc["c"] > mss_target:
-                ext = scan[swing_idx:sweep_idx + 1]
+                ext = scan[swing_idx:sweep_idx+1]
                 return {
-                    "bull":          True,
-                    "signal":        "MSS",
-                    "range_high":    mss_target,
-                    "range_low":     min(c["l"] for c in ext),
+                    "bull":        True,
+                    "signal":      "MSS",
+                    "sweep_time":  fmt(sweep_c["t"]),
+                    "sweep_wick":  sweep_c["l"],
+                    "sweep_close": sweep_c["c"],
+                    "mss_open":    fmt(mc["t"]),
+                    "mss_close":   mc["c"],
+                    "range_high":  mss_target,
+                    "range_low":   min(c["l"] for c in ext),
                     "range_candles": len(ext),
-                    "mss_close":     mc["c"],
-                    "swept_level":   True,
-                    "broke":         "ABOVE range high",
-                    "sweep_time":    ts(sweep_c["t"]),
-                    "sweep_wick":    sweep_c["l"],
-                    "sweep_close":   sweep_c["c"],
-                    "range_open":    ts(ext[0]["t"]),
-                    "range_close":   ts(ext[-1]["t"]),
-                    "mss_open":      ts(mc["t"]),
+                    "broke":       "ABOVE range high",
+                    "swept_level": True,
                 }
         else:
             if mc["h"] > sweep_c["h"] and mc["c"] < lp:
@@ -362,25 +322,22 @@ def find_1h_mss(h1, level):
                 mss_target, swing_idx = calc_target(prev_sweep_idx, sweep_idx)
                 continue
             if mc["c"] < mss_target:
-                ext = scan[swing_idx:sweep_idx + 1]
+                ext = scan[swing_idx:sweep_idx+1]
                 return {
-                    "bull":          False,
-                    "signal":        "MSS",
-                    "range_high":    max(c["h"] for c in ext),
-                    "range_low":     mss_target,
+                    "bull":        False,
+                    "signal":      "MSS",
+                    "sweep_time":  fmt(sweep_c["t"]),
+                    "sweep_wick":  sweep_c["h"],
+                    "sweep_close": sweep_c["c"],
+                    "mss_open":    fmt(mc["t"]),
+                    "mss_close":   mc["c"],
+                    "range_high":  max(c["h"] for c in ext),
+                    "range_low":   mss_target,
                     "range_candles": len(ext),
-                    "mss_close":     mc["c"],
-                    "swept_level":   True,
-                    "broke":         "BELOW range low",
-                    "sweep_time":    ts(sweep_c["t"]),
-                    "sweep_wick":    sweep_c["h"],
-                    "sweep_close":   sweep_c["c"],
-                    "range_open":    ts(ext[0]["t"]),
-                    "range_close":   ts(ext[-1]["t"]),
-                    "mss_open":      ts(mc["t"]),
+                    "broke":       "BELOW range low",
+                    "swept_level": True,
                 }
     return None
-
 
 # ── ALERT FORMATTERS ──────────────────────────────────────────
 def format_alert_a(lv, cur_price, grade, bias, tr1w, tr1d, has_1d):
@@ -411,21 +368,24 @@ def format_alert_b(lv, mss, cur_price, grade, bias, tr1w, tr1d, has_1d):
     header = "🚀 LONG  —  SWEEP + MSS" if bull else "💥 SHORT  —  SWEEP + MSS"
     grade_line = f"Grade {gl}  ·  {bias}  ·  {conf}"
 
+    from datetime import datetime, timezone, timedelta
+    IST2 = timezone(timedelta(hours=5, minutes=30))
+    c0_time = datetime.fromtimestamp(lv.get('c0_open', lv['ts']-8*3600), IST2).strftime('%d %b  %I:%M %p IST')
+
     return "\n".join([
         header,
-        "─" * 28,
+        "─" * 30,
         f"",
         f"Level    {pf(lv['price'])}  [{shape}-shape · {fresh}]",
-        f"Formed   {mss['sweep_time'].split('  ')[0] if '  ' in mss['sweep_time'] else mss['sweep_time']}",
+        f"Signal   {c0_time}  ← open this on TV",
         f"",
         f"Sweep    {mss['sweep_time']} IST",
-        f"  wick → {pf(mss['sweep_wick'])}",
-        f"  close → {pf(mss['sweep_close'])}",
+        f"  wick → {pf(mss['sweep_wick'])}  close → {pf(mss['sweep_close'])}",
         f"",
         f"MSS      {mss['mss_open']} IST",
         f"  close → {pf(mss['mss_close'])}",
         f"",
-        "─" * 28,
+        "─" * 30,
         grade_line,
         f"BTCUSDT  ·  {now_ist()}",
     ])
