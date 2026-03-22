@@ -328,7 +328,7 @@
     "netR": -7.0,
     "bestR": 0.0
   },
-  "lastUpdated": "2026-03-22T15:03:08.649055",
+  "lastUpdated": "2026-03-22T15:52:20.079981",
   "levelAlerts": {
     "BTCUSDT_V_69403": "2026-03-20T15:21:20.928298",
     "BTC_V_69403_AT": "2026-03-22T04:22:39.005181",
@@ -419,22 +419,22 @@
   },
   "currentLevels": [
     {
-      "type": "V",
-      "price": 68212.86,
-      "fresh": true,
-      "hsl": false,
-      "has1d": false,
-      "grade": "B",
-      "dist": 0.8
-    },
-    {
       "type": "A",
       "price": 69337.77,
       "fresh": true,
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 0.83
+      "dist": 0.76
+    },
+    {
+      "type": "V",
+      "price": 68212.86,
+      "fresh": true,
+      "hsl": false,
+      "has1d": false,
+      "grade": "B",
+      "dist": 0.88
     },
     {
       "type": "A",
@@ -443,7 +443,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 2.76
+      "dist": 2.68
     },
     {
       "type": "A",
@@ -452,7 +452,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 2.95
+      "dist": 2.88
     },
     {
       "type": "A",
@@ -461,7 +461,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 3.49
+      "dist": 3.42
     },
     {
       "type": "V",
@@ -470,7 +470,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 4.22
+      "dist": 4.3
     },
     {
       "type": "V",
@@ -479,7 +479,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 4.54
+      "dist": 4.62
     },
     {
       "type": "V",
@@ -488,7 +488,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 7.73
+      "dist": 7.81
     },
     {
       "type": "V",
@@ -497,7 +497,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 8.83
+      "dist": 8.91
     },
     {
       "type": "A",
@@ -506,7 +506,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 7.68
+      "dist": 7.61
     },
     {
       "type": "A",
@@ -515,7 +515,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 7.75
+      "dist": 7.69
     },
     {
       "type": "A",
@@ -524,17 +524,17 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 8.18
+      "dist": 8.11
     }
   ],
-  "currentPrice": 68760.91,
+  "currentPrice": 68812.46,
   "currentBias": "BULLISH",
   "currentTrend": {
     "w1": "BEARISH",
     "d1": "BULLISH",
     "h4": "BEARISH"
   },
-  "scanTime": "22 Mar 2026  08:33 PM IST",
+  "scanTime": "22 Mar 2026  09:22 PM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "SHORT",
