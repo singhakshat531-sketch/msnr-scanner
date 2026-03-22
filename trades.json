@@ -52,6 +52,29 @@
       "enteredAt": "2026-03-22T11:48:08.699551",
       "bias": "BEARISH",
       "auto": true
+    },
+    {
+      "id": "t_1774202753",
+      "bull": false,
+      "direction": "SHORT",
+      "grade": "A",
+      "level": 70852.3,
+      "rawEntry": 68640.14,
+      "rawSL": 71153.35,
+      "rawRisk": 2513.21,
+      "tpLevels": [
+        68212.86,
+        65974.07,
+        63829.19,
+        63182.25
+      ],
+      "tpIndex": 0,
+      "rawTP1": 68212.86,
+      "rawTP2": 65974.07,
+      "phase": "entry",
+      "entryBalance": 930.0,
+      "enteredAt": "2026-03-22T18:05:53.806753+00:00",
+      "bias": "BEARISH"
     }
   ],
   "history": [
@@ -328,7 +351,7 @@
     "netR": -7.0,
     "bestR": 0.0
   },
-  "lastUpdated": "2026-03-22T17:55:04.034011",
+  "lastUpdated": "2026-03-22T18:05:53.807180+00:00",
   "levelAlerts": {
     "BTCUSDT_V_69403": "2026-03-20T15:21:20.928298",
     "BTC_V_69403_AT": "2026-03-22T04:22:39.005181",
@@ -416,7 +439,8 @@
     "BTC_A_69011_MSS_22_Mar__0430_PM": "2026-03-22T11:48:08.699431",
     "BTC_A_69062_MSS_22_Mar__0430_PM": "2026-03-22T11:48:09.205407",
     "BTC_A_69142_MSS_22_Mar__0430_PM": "2026-03-22T11:48:09.761551",
-    "BTC_A_69664_MSS_22_Mar__0430_PM": "2026-03-22T11:48:10.299086"
+    "BTC_A_69664_MSS_22_Mar__0430_PM": "2026-03-22T11:48:10.299086",
+    "MSS_1774202400000": "2026-03-22T18:05:53.806703+00:00"
   },
   "currentLevels": [
     {
@@ -426,7 +450,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "A",
-      "dist": 0.2
+      "dist": 0.29
     },
     {
       "type": "V",
@@ -435,7 +459,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 0.72
+      "dist": 0.63
     },
     {
       "type": "A",
@@ -443,17 +467,8 @@
       "fresh": true,
       "hsl": false,
       "has1d": false,
-      "grade": "B",
-      "dist": 0.92
-    },
-    {
-      "type": "A",
-      "price": 70710.48,
-      "fresh": false,
-      "hsl": false,
-      "has1d": true,
-      "grade": "B",
-      "dist": 2.84
+      "grade": "A",
+      "dist": 1.01
     },
     {
       "type": "A",
@@ -461,17 +476,17 @@
       "fresh": false,
       "hsl": false,
       "has1d": true,
-      "grade": "B",
-      "dist": 3.03
+      "grade": "A",
+      "dist": 3.12
     },
     {
       "type": "A",
       "price": 71248.69,
       "fresh": false,
       "hsl": false,
-      "has1d": false,
-      "grade": "B",
-      "dist": 3.57
+      "has1d": true,
+      "grade": "A",
+      "dist": 3.66
     },
     {
       "type": "V",
@@ -480,16 +495,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 4.14
-    },
-    {
-      "type": "V",
-      "price": 65774.35,
-      "fresh": false,
-      "hsl": false,
-      "has1d": true,
-      "grade": "B",
-      "dist": 4.45
+      "dist": 4.04
     },
     {
       "type": "V",
@@ -498,7 +504,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 7.64
+      "dist": 7.54
     },
     {
       "type": "V",
@@ -507,7 +513,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 8.74
+      "dist": 8.64
     },
     {
       "type": "A",
@@ -515,17 +521,8 @@
       "fresh": true,
       "hsl": false,
       "has1d": true,
-      "grade": "A",
-      "dist": 7.76
-    },
-    {
-      "type": "A",
-      "price": 74541.45,
-      "fresh": false,
-      "hsl": false,
-      "has1d": true,
-      "grade": "B",
-      "dist": 7.83
+      "grade": "A+",
+      "dist": 7.84
     },
     {
       "type": "A",
@@ -533,28 +530,31 @@
       "fresh": false,
       "hsl": false,
       "has1d": true,
-      "grade": "B",
-      "dist": 8.25
+      "grade": "A",
+      "dist": 8.34
     }
   ],
-  "currentPrice": 68703.21,
+  "currentPrice": 68640.14,
   "currentBias": "BEARISH",
   "currentTrend": {
     "w1": "BEARISH",
     "d1": "RANGING",
     "h4": "BEARISH"
   },
-  "scanTime": "22 Mar 2026  11:25 PM IST",
+  "scanTime": "22 Mar 2026  11:35 PM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "SHORT",
-    "level": 69664.75,
-    "grade": "B",
+    "level": 70852.3,
+    "grade": "A",
     "has1d": true,
-    "sweepTime": "22 Mar  04:30 AM",
-    "mssTime": "22 Mar  04:30 PM",
-    "mssClose": 68345.93,
+    "sweepTime": "21 Mar  07:30 PM",
+    "mssTime": "22 Mar  11:30 PM",
+    "mssClose": 68640.14,
+    "mssTarget": 70554.46,
+    "sweepWick": 71082.27,
     "bias": "BEARISH",
-    "time": "22 Mar 2026  05:18 PM IST"
+    "c0Time": "20 Mar  09:30 AM",
+    "time": "22 Mar 2026  11:35 PM IST"
   }
 }
