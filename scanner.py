@@ -585,13 +585,21 @@ def main():
 
         # ── ALERT B: 1H MSS at this level ─────────────────────
         if dist <= ZONE_PCT:
-            # Find MSS first to get its timestamp for the unique key
             mss = find_1h_mss(h1, lv)
             if mss:
-                # Key includes MSS candle time — so each unique MSS fires exactly once, forever
+                # Only alert if MSS is recent (within last 2 hours)
                 mss_ts_str = str(mss.get("mss_open",""))
                 key_b = lv_key + "_MSS_" + mss_ts_str.replace(" ","_").replace(":","")
-                if not was_alerted(state, "mssAlerts", key_b, 999999):  # never expire
+                # Check recency — parse mss_open time and compare to now
+                try:
+                    mss_dt = datetime.strptime(mss["mss_open"], "%d %b  %I:%M %p")
+                    mss_dt = mss_dt.replace(year=datetime.now(IST).year, tzinfo=IST)
+                    age_hours = (datetime.now(IST) - mss_dt).total_seconds() / 3600
+                    is_recent = age_hours <= 2
+                except:
+                    is_recent = True  # if parse fails, allow it
+
+                if is_recent and not was_alerted(state, "mssAlerts", key_b, 999999):
                     msg = format_alert_b(lv, mss, cur_price, grade, bias, tr1w, tr1d, has_1d)
                     send_telegram(msg)
                     mark_alert(state, "mssAlerts", key_b)
