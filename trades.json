@@ -258,7 +258,7 @@
     "netR": -5.0,
     "bestR": 0.0
   },
-  "lastUpdated": "2026-03-22T04:27:41.710155",
+  "lastUpdated": "2026-03-22T04:28:59.510722",
   "levelAlerts": {
     "BTCUSDT_V_69403": "2026-03-20T15:21:20.928298",
     "BTC_V_69403_AT": "2026-03-22T04:22:39.005181",
@@ -341,7 +341,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 0.05
+      "dist": 0.06
     },
     {
       "type": "A",
@@ -350,7 +350,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 0.11
+      "dist": 0.12
     },
     {
       "type": "A",
@@ -359,7 +359,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 0.17
+      "dist": 0.16
     },
     {
       "type": "A",
@@ -368,7 +368,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 0.23
+      "dist": 0.24
     },
     {
       "type": "V",
@@ -377,7 +377,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 0.26
+      "dist": 0.25
     },
     {
       "type": "A",
@@ -386,7 +386,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 0.3
+      "dist": 0.31
     },
     {
       "type": "V",
@@ -395,7 +395,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 0.33
+      "dist": 0.32
     },
     {
       "type": "V",
@@ -404,7 +404,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 0.45
+      "dist": 0.46
     },
     {
       "type": "V",
@@ -413,7 +413,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 0.49
+      "dist": 0.48
     },
     {
       "type": "A",
@@ -422,7 +422,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 0.51
+      "dist": 0.52
     },
     {
       "type": "A",
@@ -431,16 +431,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 0.64
-    },
-    {
-      "type": "V",
-      "price": 69851.02,
-      "fresh": false,
-      "hsl": false,
-      "has1d": true,
-      "grade": "B",
-      "dist": 0.9
+      "dist": 0.63
     },
     {
       "type": "A",
@@ -449,7 +440,16 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 0.9
+      "dist": 0.91
+    },
+    {
+      "type": "V",
+      "price": 69851.02,
+      "fresh": false,
+      "hsl": false,
+      "has1d": true,
+      "grade": "B",
+      "dist": 0.89
     },
     {
       "type": "V",
@@ -458,7 +458,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 1.0
+      "dist": 0.99
     },
     {
       "type": "A",
@@ -467,7 +467,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 1.14
+      "dist": 1.15
     },
     {
       "type": "V",
@@ -476,7 +476,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 1.14
+      "dist": 1.15
     },
     {
       "type": "A",
@@ -485,7 +485,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 1.46
+      "dist": 1.47
     },
     {
       "type": "A",
@@ -494,7 +494,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 1.49
+      "dist": 1.5
     },
     {
       "type": "A",
@@ -503,7 +503,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 1.49
+      "dist": 1.48
     },
     {
       "type": "V",
@@ -521,7 +521,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 1.66
+      "dist": 1.67
     },
     {
       "type": "A",
@@ -539,7 +539,16 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 1.76
+      "dist": 1.77
+    },
+    {
+      "type": "A",
+      "price": 68012.76,
+      "fresh": false,
+      "hsl": false,
+      "has1d": true,
+      "grade": "B",
+      "dist": 1.79
     },
     {
       "type": "A",
@@ -551,22 +560,13 @@
       "dist": 1.73
     },
     {
-      "type": "A",
-      "price": 68012.76,
-      "fresh": false,
-      "hsl": false,
-      "has1d": true,
-      "grade": "B",
-      "dist": 1.78
-    },
-    {
       "type": "V",
       "price": 67999.01,
       "fresh": false,
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 1.8
+      "dist": 1.81
     },
     {
       "type": "V",
@@ -575,7 +575,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 1.8
+      "dist": 1.81
     },
     {
       "type": "A",
@@ -584,7 +584,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 1.8
+      "dist": 1.81
     },
     {
       "type": "V",
@@ -593,7 +593,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 1.85
+      "dist": 1.86
     },
     {
       "type": "V",
@@ -611,16 +611,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 2.02
-    },
-    {
-      "type": "V",
-      "price": 70613.21,
-      "fresh": false,
-      "hsl": false,
-      "has1d": true,
-      "grade": "B",
-      "dist": 1.97
+      "dist": 2.03
     },
     {
       "type": "V",
@@ -629,7 +620,16 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 2.03
+      "dist": 2.04
+    },
+    {
+      "type": "V",
+      "price": 70613.21,
+      "fresh": false,
+      "hsl": false,
+      "has1d": true,
+      "grade": "B",
+      "dist": 1.96
     },
     {
       "type": "A",
@@ -638,7 +638,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 2.08
+      "dist": 2.09
     },
     {
       "type": "A",
@@ -647,7 +647,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 2.05
+      "dist": 2.04
     },
     {
       "type": "A",
@@ -656,7 +656,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 2.15
+      "dist": 2.16
     },
     {
       "type": "A",
@@ -665,7 +665,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 2.11
+      "dist": 2.1
     },
     {
       "type": "V",
@@ -683,7 +683,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 2.17
+      "dist": 2.16
     },
     {
       "type": "A",
@@ -692,7 +692,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 2.26
+      "dist": 2.27
     },
     {
       "type": "A",
@@ -701,7 +701,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 2.29
+      "dist": 2.3
     },
     {
       "type": "V",
@@ -719,7 +719,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 2.36
+      "dist": 2.37
     },
     {
       "type": "A",
@@ -728,7 +728,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 2.3
+      "dist": 2.29
     },
     {
       "type": "A",
@@ -737,7 +737,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 2.4
+      "dist": 2.41
     },
     {
       "type": "V",
@@ -755,7 +755,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 2.52
+      "dist": 2.53
     },
     {
       "type": "A",
@@ -764,7 +764,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 2.52
+      "dist": 2.53
     },
     {
       "type": "V",
@@ -782,7 +782,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 2.55
+      "dist": 2.56
     },
     {
       "type": "V",
@@ -791,7 +791,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 2.58
+      "dist": 2.59
     },
     {
       "type": "V",
@@ -809,7 +809,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 2.71
+      "dist": 2.72
     },
     {
       "type": "V",
@@ -818,7 +818,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 2.6
+      "dist": 2.59
     },
     {
       "type": "A",
@@ -827,7 +827,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 2.62
+      "dist": 2.61
     },
     {
       "type": "A",
@@ -836,7 +836,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 2.62
+      "dist": 2.61
     },
     {
       "type": "V",
@@ -854,7 +854,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 2.78
+      "dist": 2.79
     },
     {
       "type": "A",
@@ -863,7 +863,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 2.81
+      "dist": 2.82
     },
     {
       "type": "V",
@@ -872,7 +872,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 2.84
+      "dist": 2.85
     },
     {
       "type": "A",
@@ -881,16 +881,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 2.91
-    },
-    {
-      "type": "A",
-      "price": 71248.69,
-      "fresh": false,
-      "hsl": false,
-      "has1d": false,
-      "grade": "B",
-      "dist": 2.85
+      "dist": 2.92
     },
     {
       "type": "V",
@@ -899,7 +890,16 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 3.0
+      "dist": 3.01
+    },
+    {
+      "type": "A",
+      "price": 71248.69,
+      "fresh": false,
+      "hsl": false,
+      "has1d": false,
+      "grade": "B",
+      "dist": 2.84
     },
     {
       "type": "A",
@@ -908,16 +908,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 3.03
-    },
-    {
-      "type": "A",
-      "price": 71369.21,
-      "fresh": false,
-      "hsl": false,
-      "has1d": false,
-      "grade": "B",
-      "dist": 3.01
+      "dist": 3.04
     },
     {
       "type": "V",
@@ -926,7 +917,16 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 3.18
+      "dist": 3.19
+    },
+    {
+      "type": "A",
+      "price": 71369.21,
+      "fresh": false,
+      "hsl": false,
+      "has1d": false,
+      "grade": "B",
+      "dist": 3.0
     },
     {
       "type": "A",
@@ -935,7 +935,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 3.26
+      "dist": 3.27
     },
     {
       "type": "V",
@@ -944,7 +944,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 3.29
+      "dist": 3.3
     },
     {
       "type": "V",
@@ -953,7 +953,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 3.31
+      "dist": 3.32
     },
     {
       "type": "V",
@@ -962,7 +962,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 3.34
+      "dist": 3.35
     },
     {
       "type": "V",
@@ -971,7 +971,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 3.17
+      "dist": 3.16
     },
     {
       "type": "A",
@@ -980,7 +980,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 3.54
+      "dist": 3.55
     },
     {
       "type": "A",
@@ -1007,16 +1007,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 4.13
-    },
-    {
-      "type": "V",
-      "price": 72069.24,
-      "fresh": false,
-      "hsl": false,
-      "has1d": false,
-      "grade": "B",
-      "dist": 3.95
+      "dist": 4.14
     },
     {
       "type": "V",
@@ -1025,16 +1016,16 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 4.27
+      "dist": 4.28
     },
     {
-      "type": "A",
-      "price": 72245.69,
+      "type": "V",
+      "price": 72069.24,
       "fresh": false,
       "hsl": false,
-      "has1d": true,
+      "has1d": false,
       "grade": "B",
-      "dist": 4.19
+      "dist": 3.94
     },
     {
       "type": "A",
@@ -1043,7 +1034,16 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 4.54
+      "dist": 4.55
+    },
+    {
+      "type": "A",
+      "price": 72245.69,
+      "fresh": false,
+      "hsl": false,
+      "has1d": true,
+      "grade": "B",
+      "dist": 4.18
     },
     {
       "type": "V",
@@ -1052,7 +1052,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 4.64
+      "dist": 4.65
     },
     {
       "type": "V",
@@ -1061,7 +1061,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 4.86
+      "dist": 4.87
     },
     {
       "type": "V",
@@ -1070,7 +1070,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 4.92
+      "dist": 4.93
     },
     {
       "type": "A",
@@ -1079,7 +1079,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 5.09
+      "dist": 5.1
     },
     {
       "type": "V",
@@ -1088,7 +1088,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 5.24
+      "dist": 5.25
     },
     {
       "type": "A",
@@ -1106,7 +1106,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 5.84
+      "dist": 5.85
     },
     {
       "type": "V",
@@ -1124,7 +1124,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 5.55
+      "dist": 5.54
     },
     {
       "type": "V",
@@ -1133,7 +1133,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 6.44
+      "dist": 6.45
     },
     {
       "type": "V",
@@ -1151,7 +1151,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 6.6
+      "dist": 6.61
     },
     {
       "type": "A",
@@ -1160,7 +1160,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 5.9
+      "dist": 5.89
     },
     {
       "type": "A",
@@ -1187,7 +1187,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 7.08
+      "dist": 7.09
     },
     {
       "type": "V",
@@ -1196,7 +1196,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 6.38
+      "dist": 6.37
     },
     {
       "type": "V",
@@ -1205,7 +1205,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 6.38
+      "dist": 6.37
     },
     {
       "type": "A",
@@ -1223,7 +1223,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 7.67
+      "dist": 7.68
     },
     {
       "type": "V",
@@ -1232,7 +1232,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 8.04
+      "dist": 8.05
     },
     {
       "type": "A",
@@ -1241,7 +1241,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 7.06
+      "dist": 7.05
     },
     {
       "type": "A",
@@ -1250,7 +1250,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 7.14
+      "dist": 7.13
     },
     {
       "type": "V",
@@ -1259,7 +1259,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 8.45
+      "dist": 8.46
     },
     {
       "type": "A",
@@ -1277,16 +1277,16 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 9.56
+      "dist": 9.57
     }
   ],
-  "currentPrice": 69221.48,
+  "currentPrice": 69226.98,
   "currentBias": "BULLISH",
   "currentTrend": {
     "w1": "BEARISH",
     "d1": "BULLISH"
   },
-  "scanTime": "22 Mar 2026  09:57 AM IST",
+  "scanTime": "22 Mar 2026  09:58 AM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "LONG",
