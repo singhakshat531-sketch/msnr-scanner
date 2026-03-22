@@ -368,9 +368,12 @@ def format_alert_b(lv, mss, cur_price, grade, bias, tr1w, tr1d, has_1d):
     header = "🚀 LONG  —  SWEEP + MSS" if bull else "💥 SHORT  —  SWEEP + MSS"
     grade_line = f"Grade {gl}  ·  {bias}  ·  {conf}"
 
-    from datetime import datetime, timezone, timedelta
+    c0_ts = lv.get('c0_open', lv['ts'] - 8*3600)
+    if c0_ts > 1e10: c0_ts = c0_ts / 1000  # convert ms to seconds
+    lv_ts = lv['ts']
+    if lv_ts > 1e10: lv_ts = lv_ts / 1000
     IST2 = timezone(timedelta(hours=5, minutes=30))
-    c0_time = datetime.fromtimestamp(lv.get('c0_open', lv['ts']-8*3600), IST2).strftime('%d %b  %I:%M %p IST')
+    c0_time = datetime.fromtimestamp(c0_ts, IST2).strftime('%d %b  %I:%M %p IST')
 
     return "\n".join([
         header,
