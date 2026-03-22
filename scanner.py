@@ -308,37 +308,31 @@ def grade_level(lv, has_1d, bias, cur_price):
 # ── 1H SWEEP + MSS ────────────────────────────────────────────
 def calc_mss_target(scan, from_idx, to_idx, bull):
     """
-    Find MSS target by scanning BACKWARDS from the sweep candle.
+    Find MSS target by scanning the window from prev_sweep to sweep candle.
+    Take the MOST RECENT valid swing pair (closest to sweep candle).
 
-    SHORT (bull=False, A-level):
-      Find the most recent bear+bull pair before the sweep → c0.low is target
-      MSS fires when 1H close < target
-
-    LONG (bull=True, V-level):
-      Find the most recent bull+bear pair before the sweep → c0.high is target
-      MSS fires when 1H close > target
-
-    "Most recent" = first pair found going backwards from sweep_idx.
-    If no pair found at all → fall back to sweep candle extreme.
+    SHORT (bull=False): most recent bear+bull pair → c0.low
+    LONG  (bull=True):  most recent bull+bear pair → c0.high
+    Fallback: sweep candle extreme if no pair found.
     """
     sweep_c = scan[to_idx]
 
     if bull:
-        # LONG: scan backwards for most recent bull+bear pair → c0.high
-        for j in range(to_idx - 1, from_idx, -1):
-            c0, c1 = scan[j - 1], scan[j]
+        # LONG: scan forwards, track last found bull+bear → c0.high
+        target = None
+        for j in range(from_idx, to_idx - 1):
+            c0, c1 = scan[j], scan[j + 1]
             if c0["c"] > c0["o"] and c1["c"] < c1["o"]:
-                return c0["h"]
-        # fallback: sweep candle high
-        return sweep_c["h"]
+                target = c0["h"]   # keep updating — last one wins
+        return target if target is not None else sweep_c["h"]
     else:
-        # SHORT: scan backwards for most recent bear+bull pair → c0.low
-        for j in range(to_idx - 1, from_idx, -1):
-            c0, c1 = scan[j - 1], scan[j]
+        # SHORT: scan forwards, track last found bear+bull → c0.low
+        target = None
+        for j in range(from_idx, to_idx - 1):
+            c0, c1 = scan[j], scan[j + 1]
             if c0["c"] < c0["o"] and c1["c"] > c1["o"]:
-                return c0["l"]
-        # fallback: sweep candle low
-        return sweep_c["l"]
+                target = c0["l"]   # keep updating — last one wins
+        return target if target is not None else sweep_c["l"]
 
 def find_mss(h1, level):
     """
@@ -372,7 +366,7 @@ def find_mss(h1, level):
     mss_target     = calc_mss_target(scan, prev_sweep_idx, sweep_idx, bull)
 
     # ── Scan for re-sweeps and MSS ────────────────────────────
-    mss_result = None  # holds latest MSS candidate
+    mss_result = None
 
     for i in range(sweep_idx + 1, n):
         mc = scan[i]
@@ -383,9 +377,9 @@ def find_mss(h1, level):
                 sweep_idx      = i
                 sweep_c        = mc
                 mss_target     = calc_mss_target(scan, prev_sweep_idx, sweep_idx, bull)
-                mss_result     = None
+                mss_result     = None  # new sweep resets MSS
                 continue
-            if mc["c"] > mss_target and mc["c"] > lp:
+            if mss_result is None and mc["c"] > mss_target and mc["c"] > lp:
                 mss_result = {
                     "bull":        True,
                     "sweep_ts":    sweep_c["t"],
@@ -395,16 +389,15 @@ def find_mss(h1, level):
                     "mss_close":   mc["c"],
                     "mss_target":  mss_target,
                 }
-
         else:
             if mc["h"] > lp and mc["c"] < lp:
                 prev_sweep_idx = sweep_idx
                 sweep_idx      = i
                 sweep_c        = mc
                 mss_target     = calc_mss_target(scan, prev_sweep_idx, sweep_idx, bull)
-                mss_result     = None
+                mss_result     = None  # new sweep resets MSS
                 continue
-            if mc["c"] < mss_target and mc["c"] < lp:
+            if mss_result is None and mc["c"] < mss_target and mc["c"] < lp:
                 mss_result = {
                     "bull":        False,
                     "sweep_ts":    sweep_c["t"],
@@ -414,7 +407,6 @@ def find_mss(h1, level):
                     "mss_close":   mc["c"],
                     "mss_target":  mss_target,
                 }
-                # Don't return yet — keep scanning for further sweeps
 
     return mss_result
 
@@ -426,9 +418,14 @@ def mark_alerted(state, key):
     state["mssAlerts"][key] = datetime.now(timezone.utc).isoformat()
 
 def mss_is_recent(mss_ts_ms):
-    """True if MSS candle opened within last MSS_RECENT_HOURS hours."""
+    """True if MSS candle is within last MSS_RECENT_HOURS hours."""
     age = (datetime.now(timezone.utc).timestamp() * 1000 - mss_ts_ms) / 3600000
     return age <= MSS_RECENT_HOURS
+
+def sweep_is_fresh(sweep_ts_ms, max_hours=24):
+    """True if sweep candle is within last max_hours. Stale sweeps = invalid setups."""
+    age = (datetime.now(timezone.utc).timestamp() * 1000 - sweep_ts_ms) / 3600000
+    return age <= max_hours
 
 def alert_key(mss):
     """Unique key per MSS event — keyed by MSS candle time only.
@@ -672,7 +669,11 @@ def main():
 
         if not mss_is_recent(mss["mss_ts"]):
             print(f"    → MSS found but stale  ({fmt_ts(mss['mss_ts'])} IST)")
-            # Still mark so we don't re-alert this old one next run
+            mark_alerted(state, key)
+            continue
+
+        if not sweep_is_fresh(mss["sweep_ts"]):
+            print(f"    → Sweep too old ({fmt_ts(mss['sweep_ts'])} IST) — skipping")
             mark_alerted(state, key)
             continue
 
