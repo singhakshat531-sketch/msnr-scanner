@@ -351,7 +351,7 @@
     "netR": -7.0,
     "bestR": 0.0
   },
-  "lastUpdated": "2026-03-22T20:04:29.939402+00:00",
+  "lastUpdated": "2026-03-22T20:49:11.566809+00:00",
   "levelAlerts": {
     "BTCUSDT_V_69403": "2026-03-20T15:21:20.928298",
     "BTC_V_69403_AT": "2026-03-22T04:22:39.005181",
@@ -454,7 +454,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "A",
-      "dist": 0.16
+      "dist": 0.2
     },
     {
       "type": "A",
@@ -463,7 +463,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "A",
-      "dist": 0.78
+      "dist": 0.74
     },
     {
       "type": "A",
@@ -472,7 +472,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "A",
-      "dist": 1.49
+      "dist": 1.45
     },
     {
       "type": "V",
@@ -481,7 +481,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 3.54
+      "dist": 3.57
     },
     {
       "type": "A",
@@ -490,7 +490,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 3.59
+      "dist": 3.56
     },
     {
       "type": "A",
@@ -499,7 +499,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 4.13
+      "dist": 4.09
     },
     {
       "type": "V",
@@ -508,7 +508,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 7.02
+      "dist": 7.05
     },
     {
       "type": "V",
@@ -517,7 +517,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 8.11
+      "dist": 8.15
     },
     {
       "type": "A",
@@ -526,7 +526,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 8.29
+      "dist": 8.26
     },
     {
       "type": "A",
@@ -535,17 +535,17 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 8.78
+      "dist": 8.75
     }
   ],
-  "currentPrice": 68307.18,
+  "currentPrice": 68331.9,
   "currentBias": "BEARISH",
   "currentTrend": {
     "w1": "BEARISH",
     "d1": "RANGING",
     "h4": "BEARISH"
   },
-  "scanTime": "23 Mar 2026  01:34 AM IST",
+  "scanTime": "23 Mar 2026  02:19 AM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "SHORT",
