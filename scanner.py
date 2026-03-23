@@ -346,8 +346,7 @@ def find_mss(h1, level):
     confirmed_ts    = level["confirmed_ts"]
     bull            = level["type"] == "V"
 
-    # Exclude last candle — it may still be forming (not yet closed)
-    scan = [c for c in h1[-H1_LOOKBACK:-1] if c["t"] >= confirmed_ts]
+    scan = [c for c in h1[-H1_LOOKBACK:] if c["t"] >= confirmed_ts]
     n    = len(scan)
     if n < 2: return None
 
