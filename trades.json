@@ -244,7 +244,7 @@
     "MSS_1774598400000": "2026-03-27T11:31:38.201066+00:00"
   },
   "levelAlerts": {},
-  "lastUpdated": "2026-03-27T22:01:06.805317+00:00",
+  "lastUpdated": "2026-03-27T23:56:16.719339+00:00",
   "currentLevels": [
     {
       "type": "V",
@@ -252,17 +252,8 @@
       "fresh": true,
       "hsl": false,
       "has1d": true,
-      "grade": "A+",
-      "dist": 0.01
-    },
-    {
-      "type": "V",
-      "price": 63829.19,
-      "fresh": true,
-      "hsl": false,
-      "has1d": true,
       "grade": "A",
-      "dist": 3.4
+      "dist": 0.5
     },
     {
       "type": "A",
@@ -271,7 +262,16 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 4.04
+      "dist": 3.57
+    },
+    {
+      "type": "V",
+      "price": 63829.19,
+      "fresh": true,
+      "hsl": false,
+      "has1d": true,
+      "grade": "A",
+      "dist": 3.91
     },
     {
       "type": "V",
@@ -280,7 +280,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 4.46
+      "dist": 4.97
     },
     {
       "type": "A",
@@ -289,7 +289,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 7.44
+      "dist": 6.98
     },
     {
       "type": "A",
@@ -298,7 +298,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 7.92
+      "dist": 7.46
     },
     {
       "type": "A",
@@ -307,7 +307,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 11.38
+      "dist": 10.95
     },
     {
       "type": "A",
@@ -316,17 +316,17 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 11.86
+      "dist": 11.43
     }
   ],
-  "currentPrice": 66000.87,
+  "currentPrice": 66325.45,
   "currentBias": "BEARISH",
   "currentTrend": {
     "w1": "BEARISH",
     "d1": "RANGING",
     "h4": "RANGING"
   },
-  "scanTime": "28 Mar 2026  03:31 AM IST",
+  "scanTime": "28 Mar 2026  05:26 AM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "SHORT",
