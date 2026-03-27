@@ -244,16 +244,16 @@
     "MSS_1774598400000": "2026-03-27T11:31:38.201066+00:00"
   },
   "levelAlerts": {},
-  "lastUpdated": "2026-03-27T18:37:48.929296+00:00",
+  "lastUpdated": "2026-03-27T20:04:39.225257+00:00",
   "currentLevels": [
     {
       "type": "V",
-      "price": 65774.35,
-      "fresh": false,
+      "price": 65992.44,
+      "fresh": true,
       "hsl": false,
       "has1d": true,
-      "grade": "A",
-      "dist": 0.05
+      "grade": "A+",
+      "dist": 0.06
     },
     {
       "type": "V",
@@ -262,16 +262,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 3.1
-    },
-    {
-      "type": "V",
-      "price": 63182.25,
-      "fresh": false,
-      "hsl": false,
-      "has1d": true,
-      "grade": "B",
-      "dist": 4.15
+      "dist": 3.45
     },
     {
       "type": "A",
@@ -280,7 +271,16 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 4.33
+      "dist": 4.0
+    },
+    {
+      "type": "V",
+      "price": 63182.25,
+      "fresh": false,
+      "hsl": false,
+      "has1d": true,
+      "grade": "B",
+      "dist": 4.51
     },
     {
       "type": "A",
@@ -289,7 +289,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 7.71
+      "dist": 7.39
     },
     {
       "type": "A",
@@ -298,7 +298,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 8.19
+      "dist": 7.87
     },
     {
       "type": "A",
@@ -307,7 +307,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 11.65
+      "dist": 11.34
     },
     {
       "type": "A",
@@ -316,17 +316,17 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 12.12
+      "dist": 11.82
     }
   ],
-  "currentPrice": 65805.37,
+  "currentPrice": 66033.75,
   "currentBias": "BEARISH",
   "currentTrend": {
     "w1": "BEARISH",
     "d1": "RANGING",
     "h4": "RANGING"
   },
-  "scanTime": "28 Mar 2026  12:07 AM IST",
+  "scanTime": "28 Mar 2026  01:34 AM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "SHORT",
