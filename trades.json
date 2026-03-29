@@ -246,7 +246,7 @@
     "MSS_1774681200000": "2026-03-28T11:03:46.932337+00:00"
   },
   "levelAlerts": {},
-  "lastUpdated": "2026-03-29T05:55:06.295539+00:00",
+  "lastUpdated": "2026-03-29T08:02:46.608919+00:00",
   "currentLevels": [
     {
       "type": "A",
@@ -255,7 +255,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "A",
-      "dist": 0.19
+      "dist": 0.36
     },
     {
       "type": "V",
@@ -263,8 +263,8 @@
       "fresh": true,
       "hsl": false,
       "has1d": true,
-      "grade": "A",
-      "dist": 0.62
+      "grade": "A+",
+      "dist": 0.44
     },
     {
       "type": "V",
@@ -273,7 +273,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 1.13
+      "dist": 0.95
     },
     {
       "type": "A",
@@ -282,7 +282,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 2.97
+      "dist": 3.14
     },
     {
       "type": "V",
@@ -291,7 +291,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 4.56
+      "dist": 4.37
     },
     {
       "type": "V",
@@ -300,7 +300,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 5.63
+      "dist": 5.44
     },
     {
       "type": "A",
@@ -309,7 +309,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 6.41
+      "dist": 6.57
     },
     {
       "type": "A",
@@ -318,7 +318,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 6.89
+      "dist": 7.05
     },
     {
       "type": "A",
@@ -327,7 +327,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 10.4
+      "dist": 10.55
     },
     {
       "type": "A",
@@ -336,17 +336,17 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 10.88
+      "dist": 11.04
     }
   ],
-  "currentPrice": 66736.77,
+  "currentPrice": 66619.46,
   "currentBias": "BEARISH",
   "currentTrend": {
     "w1": "BEARISH",
     "d1": "RANGING",
     "h4": "BEARISH"
   },
-  "scanTime": "29 Mar 2026  11:25 AM IST",
+  "scanTime": "29 Mar 2026  01:32 PM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "SHORT",
