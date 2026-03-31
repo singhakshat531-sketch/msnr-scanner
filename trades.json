@@ -248,16 +248,25 @@
     "MSS_1774918800000": "2026-03-31T05:57:40.497879+00:00"
   },
   "levelAlerts": {},
-  "lastUpdated": "2026-03-31T09:46:28.242955+00:00",
+  "lastUpdated": "2026-03-31T12:08:23.771566+00:00",
   "currentLevels": [
     {
       "type": "V",
-      "price": 65967.75,
+      "price": 66634.37,
       "fresh": true,
       "hsl": false,
       "has1d": true,
-      "grade": "A",
-      "dist": 0.67
+      "grade": "A+",
+      "dist": 0.04
+    },
+    {
+      "type": "V",
+      "price": 65967.75,
+      "fresh": false,
+      "hsl": false,
+      "has1d": true,
+      "grade": "B",
+      "dist": 1.05
     },
     {
       "type": "A",
@@ -266,7 +275,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 1.84
+      "dist": 1.47
     },
     {
       "type": "A",
@@ -275,7 +284,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 3.44
+      "dist": 3.08
     },
     {
       "type": "V",
@@ -284,7 +293,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 4.05
+      "dist": 4.44
     },
     {
       "type": "A",
@@ -293,7 +302,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 6.86
+      "dist": 6.51
     },
     {
       "type": "A",
@@ -302,7 +311,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 7.34
+      "dist": 6.99
     },
     {
       "type": "A",
@@ -311,7 +320,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 10.83
+      "dist": 10.5
     },
     {
       "type": "A",
@@ -320,17 +329,17 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 11.31
+      "dist": 10.98
     }
   ],
-  "currentPrice": 66412.15,
+  "currentPrice": 66662.01,
   "currentBias": "BEARISH",
   "currentTrend": {
     "w1": "BEARISH",
     "d1": "BEARISH",
     "h4": "BEARISH"
   },
-  "scanTime": "31 Mar 2026  03:16 PM IST",
+  "scanTime": "31 Mar 2026  05:38 PM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "SHORT",
