@@ -282,16 +282,16 @@
     "MSS_1774980000000": "2026-03-31T19:58:34.660384+00:00"
   },
   "levelAlerts": {},
-  "lastUpdated": "2026-04-01T06:13:40.301282+00:00",
+  "lastUpdated": "2026-04-01T10:37:44.365004+00:00",
   "currentLevels": [
     {
       "type": "A",
-      "price": 68781.63,
-      "fresh": false,
+      "price": 68664.74,
+      "fresh": true,
       "hsl": false,
       "has1d": false,
-      "grade": "B",
-      "dist": 0.26
+      "grade": "A",
+      "dist": 0.3
     },
     {
       "type": "V",
@@ -300,7 +300,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 0.72
+      "dist": 0.51
     },
     {
       "type": "V",
@@ -309,7 +309,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 2.95
+      "dist": 2.74
     },
     {
       "type": "V",
@@ -318,7 +318,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 3.99
+      "dist": 3.78
     },
     {
       "type": "A",
@@ -327,7 +327,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 3.79
+      "dist": 3.99
     },
     {
       "type": "A",
@@ -336,7 +336,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 4.29
+      "dist": 4.49
     },
     {
       "type": "V",
@@ -345,7 +345,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 7.48
+      "dist": 7.25
     },
     {
       "type": "A",
@@ -354,7 +354,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 7.89
+      "dist": 8.08
     },
     {
       "type": "A",
@@ -363,17 +363,17 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 8.39
+      "dist": 8.58
     }
   ],
-  "currentPrice": 68601.96,
+  "currentPrice": 68459.47,
   "currentBias": "BEARISH",
   "currentTrend": {
     "w1": "BEARISH",
     "d1": "BEARISH",
     "h4": "RANGING"
   },
-  "scanTime": "01 Apr 2026  11:43 AM IST",
+  "scanTime": "01 Apr 2026  04:07 PM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "LONG",
