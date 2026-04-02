@@ -281,37 +281,38 @@
     "MSS_1774918800000": "2026-03-31T05:57:40.497879+00:00",
     "MSS_1774980000000": "2026-03-31T19:58:34.660384+00:00",
     "MSS_1775044800000": "2026-04-01T14:55:23.444660+00:00",
-    "MSS_1775055600000": "2026-04-01T18:01:03.511181+00:00"
+    "MSS_1775055600000": "2026-04-01T18:01:03.511181+00:00",
+    "MSS_1775138400000": "2026-04-02T16:14:08.745629+00:00"
   },
   "levelAlerts": {},
-  "lastUpdated": "2026-04-02T12:07:24.244877+00:00",
+  "lastUpdated": "2026-04-02T16:14:08.745701+00:00",
   "currentLevels": [
-    {
-      "type": "V",
-      "price": 65967.75,
-      "fresh": false,
-      "hsl": false,
-      "has1d": true,
-      "grade": "A",
-      "dist": 0.36
-    },
     {
       "type": "A",
       "price": 66912.87,
-      "fresh": true,
+      "fresh": false,
       "hsl": false,
       "has1d": false,
-      "grade": "A",
-      "dist": 1.06
+      "grade": "B",
+      "dist": 0.03
     },
     {
       "type": "V",
-      "price": 63829.19,
+      "price": 66202.65,
       "fresh": true,
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 3.72
+      "dist": 1.04
+    },
+    {
+      "type": "V",
+      "price": 65774.35,
+      "fresh": false,
+      "hsl": false,
+      "has1d": true,
+      "grade": "B",
+      "dist": 1.7
     },
     {
       "type": "A",
@@ -320,7 +321,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 3.92
+      "dist": 2.92
     },
     {
       "type": "A",
@@ -329,7 +330,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 7.15
+      "dist": 6.19
     },
     {
       "type": "A",
@@ -338,7 +339,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 7.63
+      "dist": 6.67
     },
     {
       "type": "A",
@@ -347,7 +348,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 11.11
+      "dist": 10.19
     },
     {
       "type": "A",
@@ -356,17 +357,17 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 11.59
+      "dist": 10.67
     }
   ],
-  "currentPrice": 66205.85,
+  "currentPrice": 66892.15,
   "currentBias": "BEARISH",
   "currentTrend": {
     "w1": "BEARISH",
     "d1": "BEARISH",
     "h4": "RANGING"
   },
-  "scanTime": "02 Apr 2026  05:37 PM IST",
+  "scanTime": "02 Apr 2026  09:44 PM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "LONG",
