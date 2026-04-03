@@ -286,7 +286,7 @@
     "MSS_1775178000000": "2026-04-03T05:51:53.373443+00:00"
   },
   "levelAlerts": {},
-  "lastUpdated": "2026-04-03T05:51:53.373767+00:00",
+  "lastUpdated": "2026-04-03T08:36:04.368983+00:00",
   "currentLevels": [
     {
       "type": "V",
@@ -294,17 +294,8 @@
       "fresh": true,
       "hsl": false,
       "has1d": true,
-      "grade": "A+",
-      "dist": 0.03
-    },
-    {
-      "type": "A",
-      "price": 66973.44,
-      "fresh": false,
-      "hsl": false,
-      "has1d": false,
-      "grade": "B",
-      "dist": 0.55
+      "grade": "A",
+      "dist": 0.76
     },
     {
       "type": "V",
@@ -313,7 +304,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 0.6
+      "dist": 1.34
     },
     {
       "type": "V",
@@ -322,7 +313,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 1.26
+      "dist": 2.0
     },
     {
       "type": "A",
@@ -331,7 +322,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 3.34
+      "dist": 2.64
     },
     {
       "type": "A",
@@ -340,7 +331,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 6.59
+      "dist": 5.91
     },
     {
       "type": "A",
@@ -349,7 +340,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 7.08
+      "dist": 6.4
     },
     {
       "type": "A",
@@ -358,7 +349,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 10.58
+      "dist": 9.92
     },
     {
       "type": "A",
@@ -367,17 +358,17 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 11.06
+      "dist": 10.41
     }
   ],
-  "currentPrice": 66603.04,
+  "currentPrice": 67088.7,
   "currentBias": "BEARISH",
   "currentTrend": {
     "w1": "BEARISH",
     "d1": "BEARISH",
     "h4": "RANGING"
   },
-  "scanTime": "03 Apr 2026  11:21 AM IST",
+  "scanTime": "03 Apr 2026  02:06 PM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "LONG",
