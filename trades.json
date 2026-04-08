@@ -1,30 +1,7 @@
 {
   "balance": 2387.6738506996167,
-  "activeTrades": [
-    {
-      "id": "t_1774987114",
-      "bull": true,
-      "direction": "LONG",
-      "grade": "B",
-      "level": 65967.75,
-      "rawEntry": 67799.66,
-      "rawSL": 71305.31,
-      "rawRisk": 1933.21,
-      "tpLevels": [
-        68781.63,
-        71305.31,
-        71674.53,
-        74480.28,
-        74884.52
-      ],
-      "tpIndex": 3,
-      "rawTP1": 68781.63,
-      "rawTP2": 71305.31,
-      "phase": "tp3",
-      "entryBalance": 1056.84,
-      "enteredAt": "2026-03-31T19:58:34.660430+00:00",
-      "bias": "BEARISH"
-    },
+  "activeTrades": [],
+  "history": [
     {
       "id": "t_1775397933",
       "bull": true,
@@ -49,10 +26,42 @@
       "phase": "tp5",
       "entryBalance": 1056.84,
       "enteredAt": "2026-04-05T14:05:33.870426+00:00",
-      "bias": "BEARISH"
-    }
-  ],
-  "history": [
+      "bias": "BEARISH",
+      "result": "be",
+      "pnl": 0.0,
+      "pnlR": 0.0,
+      "closePrice": 71012.86,
+      "closedAt": "2026-04-08T23:10:00.257132+00:00"
+    },
+    {
+      "id": "t_1774987114",
+      "bull": true,
+      "direction": "LONG",
+      "grade": "B",
+      "level": 65967.75,
+      "rawEntry": 67799.66,
+      "rawSL": 71305.31,
+      "rawRisk": 1933.21,
+      "tpLevels": [
+        68781.63,
+        71305.31,
+        71674.53,
+        74480.28,
+        74884.52
+      ],
+      "tpIndex": 3,
+      "rawTP1": 68781.63,
+      "rawTP2": 71305.31,
+      "phase": "tp3",
+      "entryBalance": 1056.84,
+      "enteredAt": "2026-03-31T19:58:34.660430+00:00",
+      "bias": "BEARISH",
+      "result": "be",
+      "pnl": 0.0,
+      "pnlR": 0.0,
+      "closePrice": 71012.86,
+      "closedAt": "2026-04-08T23:10:00.257132+00:00"
+    },
     {
       "id": "t_1775397933",
       "bull": true,
@@ -587,13 +596,21 @@
     {
       "t": "2026-04-08T12:08:19.810898+00:00",
       "v": 2387.67
+    },
+    {
+      "t": "2026-04-08T23:10:00.257132+00:00",
+      "v": 2387.67
+    },
+    {
+      "t": "2026-04-08T23:10:00.257132+00:00",
+      "v": 2387.67
     }
   ],
   "stats": {
-    "totalTrades": 4,
+    "totalTrades": 6,
     "wins": 0,
     "losses": 2,
-    "be": 2,
+    "be": 4,
     "netR": 48.1,
     "bestR": 16.8
   },
@@ -621,17 +638,8 @@
     "MSS_1775656800000": "2026-04-08T16:44:30.366096+00:00"
   },
   "levelAlerts": {},
-  "lastUpdated": "2026-04-08T20:03:02.701701+00:00",
+  "lastUpdated": "2026-04-08T23:10:00.257205+00:00",
   "currentLevels": [
-    {
-      "type": "V",
-      "price": 71306.52,
-      "fresh": true,
-      "hsl": false,
-      "has1d": false,
-      "grade": "A",
-      "dist": 0.11
-    },
     {
       "type": "A",
       "price": 71917.66,
@@ -639,16 +647,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 0.74
-    },
-    {
-      "type": "A",
-      "price": 74480.28,
-      "fresh": true,
-      "hsl": false,
-      "has1d": true,
-      "grade": "A+",
-      "dist": 4.15
+      "dist": 1.26
     },
     {
       "type": "V",
@@ -657,7 +656,16 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 4.74
+      "dist": 4.2
+    },
+    {
+      "type": "A",
+      "price": 74480.28,
+      "fresh": true,
+      "hsl": false,
+      "has1d": true,
+      "grade": "A+",
+      "dist": 4.66
     },
     {
       "type": "A",
@@ -666,7 +674,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 4.67
+      "dist": 5.17
     },
     {
       "type": "V",
@@ -675,7 +683,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 6.85
+      "dist": 6.3
     },
     {
       "type": "V",
@@ -684,17 +692,17 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 7.83
+      "dist": 7.27
     }
   ],
-  "currentPrice": 71385.8,
+  "currentPrice": 71012.86,
   "currentBias": "BEARISH",
   "currentTrend": {
     "w1": "BEARISH",
     "d1": "RANGING",
     "h4": "BULLISH"
   },
-  "scanTime": "09 Apr 2026  01:33 AM IST",
+  "scanTime": "09 Apr 2026  04:40 AM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "SHORT",
