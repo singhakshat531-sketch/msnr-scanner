@@ -1,5 +1,5 @@
 {
-  "balance": 1347.4090363148234,
+  "balance": 1832.3831086791229,
   "activeTrades": [
     {
       "id": "t_1774987114",
@@ -8,7 +8,7 @@
       "grade": "B",
       "level": 65967.75,
       "rawEntry": 67799.66,
-      "rawSL": 67799.66,
+      "rawSL": 68781.63,
       "rawRisk": 1933.21,
       "tpLevels": [
         68781.63,
@@ -17,13 +17,67 @@
         74480.28,
         74884.52
       ],
-      "tpIndex": 1,
+      "tpIndex": 2,
       "rawTP1": 68781.63,
       "rawTP2": 71305.31,
-      "phase": "tp1",
+      "phase": "tp2",
       "entryBalance": 1056.84,
       "enteredAt": "2026-03-31T19:58:34.660430+00:00",
       "bias": "BEARISH"
+    },
+    {
+      "id": "t_1775397933",
+      "bull": true,
+      "direction": "LONG",
+      "grade": "A+",
+      "level": 66806.34,
+      "rawEntry": 66905.41,
+      "rawSL": 68904.99,
+      "rawRisk": 283.1,
+      "tpLevels": [
+        66985.04,
+        67372.76,
+        68904.99,
+        71305.31,
+        71674.53,
+        74480.28,
+        74884.52
+      ],
+      "tpIndex": 4,
+      "rawTP1": 66985.04,
+      "rawTP2": 67372.76,
+      "phase": "tp4",
+      "entryBalance": 1056.84,
+      "enteredAt": "2026-04-05T14:05:33.870426+00:00",
+      "bias": "BEARISH"
+    }
+  ],
+  "history": [
+    {
+      "id": "t_1775513125",
+      "bull": false,
+      "direction": "SHORT",
+      "grade": "A",
+      "level": 69972.97,
+      "rawEntry": 69518.1,
+      "rawSL": 70063.5,
+      "rawRisk": 545.4,
+      "tpLevels": [
+        66806.34,
+        66202.65
+      ],
+      "tpIndex": 0,
+      "rawTP1": 66806.34,
+      "rawTP2": 66202.65,
+      "phase": "entry",
+      "entryBalance": 1347.41,
+      "enteredAt": "2026-04-06T22:05:25.748350+00:00",
+      "bias": "BEARISH",
+      "result": "loss",
+      "pnl": -26.95,
+      "pnlR": -1.0,
+      "closePrice": 71732.21,
+      "closedAt": "2026-04-08T05:30:58.691670+00:00"
     },
     {
       "id": "t_1775397933",
@@ -49,31 +103,42 @@
       "phase": "tp3",
       "entryBalance": 1056.84,
       "enteredAt": "2026-04-05T14:05:33.870426+00:00",
-      "bias": "BEARISH"
+      "bias": "BEARISH",
+      "result": "tp4",
+      "pnl": 492.76,
+      "pnlR": 15.5,
+      "closePrice": 71732.21,
+      "closedAt": "2026-04-08T05:30:58.691670+00:00"
     },
     {
-      "id": "t_1775513125",
-      "bull": false,
-      "direction": "SHORT",
-      "grade": "A",
-      "level": 69972.97,
-      "rawEntry": 69518.1,
-      "rawSL": 70063.5,
-      "rawRisk": 545.4,
+      "id": "t_1774987114",
+      "bull": true,
+      "direction": "LONG",
+      "grade": "B",
+      "level": 65967.75,
+      "rawEntry": 67799.66,
+      "rawSL": 67799.66,
+      "rawRisk": 1933.21,
       "tpLevels": [
-        66806.34,
-        66202.65
+        68781.63,
+        71305.31,
+        71674.53,
+        74480.28,
+        74884.52
       ],
-      "tpIndex": 0,
-      "rawTP1": 66806.34,
-      "rawTP2": 66202.65,
-      "phase": "entry",
-      "entryBalance": 1347.41,
-      "enteredAt": "2026-04-06T22:05:25.748350+00:00",
-      "bias": "BEARISH"
-    }
-  ],
-  "history": [
+      "tpIndex": 1,
+      "rawTP1": 68781.63,
+      "rawTP2": 71305.31,
+      "phase": "tp1",
+      "entryBalance": 1056.84,
+      "enteredAt": "2026-03-31T19:58:34.660430+00:00",
+      "bias": "BEARISH",
+      "result": "tp2",
+      "pnl": 19.16,
+      "pnlR": 1.8,
+      "closePrice": 71732.21,
+      "closedAt": "2026-04-08T05:30:58.691670+00:00"
+    },
     {
       "id": "t_1775397933",
       "bull": true,
@@ -442,15 +507,27 @@
     {
       "t": "2026-04-06T06:18:46.096078+00:00",
       "v": 1347.41
+    },
+    {
+      "t": "2026-04-08T05:30:58.691670+00:00",
+      "v": 1366.57
+    },
+    {
+      "t": "2026-04-08T05:30:58.691670+00:00",
+      "v": 1859.33
+    },
+    {
+      "t": "2026-04-08T05:30:58.691670+00:00",
+      "v": 1832.38
     }
   ],
   "stats": {
-    "totalTrades": 3,
+    "totalTrades": 4,
     "wins": 0,
-    "losses": 1,
+    "losses": 2,
     "be": 2,
-    "netR": 13.0,
-    "bestR": 7.1
+    "netR": 29.3,
+    "bestR": 15.5
   },
   "mssAlerts": {
     "MSS_1774108800000": "2026-03-23T02:29:02.356580+00:00",
@@ -474,52 +551,25 @@
     "MSS_1775509200000": "2026-04-06T22:05:25.748304+00:00"
   },
   "levelAlerts": {},
-  "lastUpdated": "2026-04-07T22:02:59.078170+00:00",
+  "lastUpdated": "2026-04-08T05:30:58.691761+00:00",
   "currentLevels": [
     {
       "type": "A",
-      "price": 71305.31,
+      "price": 71917.66,
       "fresh": true,
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 1.82
-    },
-    {
-      "type": "A",
-      "price": 71674.53,
-      "fresh": false,
-      "hsl": false,
-      "has1d": true,
-      "grade": "A",
-      "dist": 2.32
+      "dist": 0.26
     },
     {
       "type": "V",
-      "price": 68152.09,
+      "price": 71289.65,
       "fresh": true,
       "hsl": false,
-      "has1d": true,
-      "grade": "A",
-      "dist": 2.72
-    },
-    {
-      "type": "V",
-      "price": 66806.34,
-      "fresh": false,
-      "hsl": false,
-      "has1d": true,
+      "has1d": false,
       "grade": "B",
-      "dist": 4.79
-    },
-    {
-      "type": "V",
-      "price": 66202.65,
-      "fresh": true,
-      "hsl": false,
-      "has1d": true,
-      "grade": "A",
-      "dist": 5.75
+      "dist": 0.62
     },
     {
       "type": "A",
@@ -528,7 +578,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 6.0
+      "dist": 3.69
     },
     {
       "type": "A",
@@ -537,17 +587,44 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 6.51
+      "dist": 4.21
+    },
+    {
+      "type": "V",
+      "price": 68152.09,
+      "fresh": true,
+      "hsl": false,
+      "has1d": true,
+      "grade": "A",
+      "dist": 5.25
+    },
+    {
+      "type": "V",
+      "price": 66806.34,
+      "fresh": false,
+      "hsl": false,
+      "has1d": true,
+      "grade": "B",
+      "dist": 7.37
+    },
+    {
+      "type": "V",
+      "price": 66202.65,
+      "fresh": true,
+      "hsl": false,
+      "has1d": true,
+      "grade": "A",
+      "dist": 8.35
     }
   ],
-  "currentPrice": 70008.95,
+  "currentPrice": 71732.21,
   "currentBias": "BEARISH",
   "currentTrend": {
     "w1": "BEARISH",
     "d1": "RANGING",
     "h4": "RANGING"
   },
-  "scanTime": "08 Apr 2026  03:32 AM IST",
+  "scanTime": "08 Apr 2026  11:00 AM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "SHORT",
