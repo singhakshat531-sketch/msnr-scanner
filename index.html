@@ -356,7 +356,6 @@ body::after {
   .levels-grid { grid-template-columns: 1fr; }
   .crt-phases { grid-template-columns: 1fr 1fr 1fr; }
   .alert-levels { grid-template-columns: 1fr 1fr; }
-  .sim-header { grid-template-columns: repeat(3, 1fr); }
   .pc-price { font-size: 22px; }
 }
 
@@ -365,226 +364,278 @@ body::after {
 ::-webkit-scrollbar-track { background: var(--s1); }
 ::-webkit-scrollbar-thumb { background: var(--t4); }
 
-/* ── JOURNAL ── */
-.journal-stats { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-bottom:14px; }
-.jstat { padding:12px; background:var(--s2); border:1px solid var(--border); }
-.jstat-lbl { font-size:10px; letter-spacing:.1em; color:var(--t2); margin-bottom:4px; }
-.jstat-val { font-size:18px; font-weight:700; color:var(--white); }
-.add-trade-form { background:var(--s1); border:1px solid var(--border); padding:16px; margin-bottom:14px; }
-.form-title { font-size:11px; font-weight:700; color:var(--white); letter-spacing:.1em; margin-bottom:12px; }
-.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
-.form-group { display:flex; flex-direction:column; gap:4px; }
-.form-label { font-size:10px; color:var(--t2); letter-spacing:.08em; }
-.form-input {
-  background:var(--s2); border:1px solid var(--border2);
-  color:var(--t1); padding:8px 10px;
-  font-family:var(--font-mono); font-size:12px;
-  outline:none; transition:border-color .15s;
+/* ════════════════════════════════════════════════════════════
+   SIMULATOR — Hierarchy-driven design system
+   L1 = primary (balance/pnl/return) — brightest, largest
+   L2 = secondary (equity/metrics)   — medium emphasis
+   L3 = tertiary (history/details)   — muted, low weight
+   ════════════════════════════════════════════════════════════ */
+
+/* SESSION SUMMARY STRIP — slim, subtle, always visible */
+.sess-strip {
+  background: var(--s2);
+  border-bottom: 1px solid var(--border);
+  padding: 7px 14px;
+  display: flex; align-items: center; gap: 0;
+  font-size: 10px; letter-spacing: .06em;
+  flex-wrap: wrap; gap: 12px;
+  margin-bottom: 0;
 }
-.form-input:focus { border-color:var(--green2); }
-.form-select {
-  background:var(--s2); border:1px solid var(--border2);
-  color:var(--t1); padding:8px 10px;
-  font-family:var(--font-mono); font-size:12px;
-  outline:none; cursor:pointer;
+.ss-item { display: flex; align-items: center; gap: 5px; }
+.ss-lbl  { color: var(--t3); }
+.ss-val  { color: var(--t1); font-weight: 600; }
+.ss-sep  { color: var(--t4); margin: 0 4px; }
+
+/* LEVEL 1 — Primary stats */
+.l1-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 8px; margin-bottom: 8px;
 }
-.form-select:focus { border-color:var(--green2); }
-.form-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:12px; }
-.form-full { grid-column:1/-1; }
-textarea.form-input { resize:vertical; min-height:60px; }
-.btn-add {
-  background:var(--green-dim); border:1px solid var(--green2);
-  color:var(--green); padding:10px 20px;
-  font-family:var(--font-mono); font-size:11px;
-  font-weight:700; letter-spacing:.1em;
-  cursor:pointer; transition:all .2s; width:100%;
+.l1-main {
+  padding: 20px 24px;
+  background: var(--s1); border: 1px solid var(--border);
+  position: relative; overflow: hidden;
 }
-.btn-add:hover { background:rgba(0,255,204,.2); }
-.btn-del {
-  background:none; border:none; color:var(--t3);
-  font-size:14px; cursor:pointer; padding:4px 8px;
-  transition:color .15s;
+.l1-main::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(to right, transparent, var(--gold), transparent);
 }
-.btn-del:hover { color:var(--red); }
-.journal-table { overflow-x:auto; margin-bottom:14px; }
-.jtbl { width:100%; border-collapse:collapse; }
-.jtbl th { padding:10px 12px; font-size:10px; letter-spacing:.12em; color:var(--t2); text-align:left; border-bottom:1px solid var(--border); font-weight:400; white-space:nowrap; }
-.jtbl td { padding:10px 12px; font-size:11px; border-bottom:1px solid var(--border); vertical-align:middle; }
-.jtbl tr:last-child td { border-bottom:none; }
-.jtbl tr:hover td { background:var(--s2); }
-.result-pill { font-size:9px; font-weight:700; letter-spacing:.08em; padding:3px 9px; }
-.result-pill.win  { background:var(--green-dim); color:var(--green); border:1px solid rgba(0,255,204,.3); }
-.result-pill.loss { background:var(--red-dim);   color:var(--red);   border:1px solid rgba(255,51,102,.3); }
-.result-pill.be   { background:var(--s3);         color:var(--t2);   border:1px solid var(--border2); }
-.result-pill.open { background:var(--gold-dim);   color:var(--gold); border:1px solid rgba(255,215,0,.3); }
-.r-pos { color:var(--green); font-weight:700; }
-.r-neg { color:var(--red);   font-weight:700; }
-.notes-cell { max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--t2); font-size:10px; }
-.equity-mini { height:80px; margin-bottom:14px; }
+.l1-balance-label {
+  font-size: 10px; letter-spacing: .2em; color: var(--t3);
+  text-transform: uppercase; margin-bottom: 6px;
+}
+.l1-balance-val {
+  font-family: var(--font-head); font-size: 36px; font-weight: 800;
+  letter-spacing: -.03em; color: var(--white); line-height: 1;
+  margin-bottom: 4px;
+}
+.l1-start-hint {
+  font-size: 10px; color: var(--t4); letter-spacing: .04em;
+}
+.l1-bar-wrap { height: 2px; background: var(--s3); margin-top: 12px; }
+.l1-bar      { height: 100%; min-width: 2px; transition: width .5s, background .3s; }
+
+.l1-side {
+  padding: 16px 18px;
+  background: var(--s1); border: 1px solid var(--border);
+  position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: center;
+}
+.l1-side::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(to right, transparent, var(--border2), transparent);
+}
+.l1-side-lbl { font-size: 10px; letter-spacing: .15em; color: var(--t3); margin-bottom: 6px; }
+.l1-side-val { font-family: var(--font-head); font-size: 24px; font-weight: 800; color: var(--white); letter-spacing: -.02em; }
+
+.l1-secondary-row {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 8px; margin-bottom: 16px;
+}
+.l1-sec-box {
+  padding: 10px 14px;
+  background: var(--s2); border: 1px solid var(--border);
+}
+.l1-sec-lbl { font-size: 10px; letter-spacing: .1em; color: var(--t3); margin-bottom: 4px; }
+.l1-sec-val { font-size: 16px; font-weight: 700; color: var(--white); }
+
 @media(max-width:640px) {
-  .journal-stats { grid-template-columns:1fr 1fr; }
-  .form-grid { grid-template-columns:1fr; }
-  .form-row  { grid-template-columns:1fr 1fr; }
+  .l1-row { grid-template-columns: 1fr 1fr; }
+  .l1-main { grid-column: 1 / -1; }
+  .l1-balance-val { font-size: 28px; }
+  .l1-secondary-row { grid-template-columns: 1fr 1fr 1fr; }
 }
 
-/* ══ SIMULATOR v2 ══════════════════════════════════════════════ */
-
-/* Pre-trade panel */
-.pretrade-panel {
-  background: var(--s2); border: 1px solid var(--border2);
-  padding: 14px; margin-bottom: 14px;
+/* RISK STATUS PANEL */
+.risk-panel {
+  background: var(--s1); border: 1px solid var(--border);
+  padding: 12px 16px; margin-bottom: 16px;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
 }
-.pretrade-title {
-  font-size: 10px; letter-spacing: .2em; color: var(--t2);
+.rp-item {
+  padding: 4px 12px; border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 3px;
+}
+.rp-item:first-child { padding-left: 0; }
+.rp-item:last-child  { border-right: none; }
+.rp-lbl { font-size: 9px; letter-spacing: .15em; color: var(--t3); text-transform: uppercase; }
+.rp-val { font-size: 15px; font-weight: 700; color: var(--white); }
+.rp-val.warn { color: var(--gold); }
+.rp-val.danger { color: var(--red); }
+.rp-val.safe   { color: var(--green); }
+@media(max-width:640px) {
+  .risk-panel { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .rp-item { border-right: none; border-bottom: 1px solid var(--border); padding: 8px 0; }
+  .rp-item:last-child { border-bottom: none; }
+}
+
+/* LEVEL 2 — Equity + Metrics */
+.l2-metrics {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 8px; margin-bottom: 16px;
+}
+.l2-box {
+  padding: 10px 12px;
+  background: var(--s2); border: 1px solid var(--border); opacity: .92;
+}
+.l2-lbl { font-size: 9px; letter-spacing: .12em; color: var(--t3); margin-bottom: 3px; text-transform: uppercase; }
+.l2-val { font-size: 14px; font-weight: 600; color: var(--t1); }
+.l2-sub { font-size: 9px; color: var(--t4); margin-top: 2px; }
+@media(max-width:640px) { .l2-metrics { grid-template-columns: 1fr 1fr; } }
+
+/* PRE-TRADE CALCULATOR */
+.ptc-wrap {
+  background: var(--s1); border: 1px solid var(--border);
+  margin-bottom: 16px; overflow: hidden;
+}
+.ptc-hdr {
+  padding: 10px 14px;
+  background: var(--s2); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.ptc-title { font-size: 10px; letter-spacing: .18em; color: var(--t2); text-transform: uppercase; }
+.ptc-badge { font-size: 10px; color: var(--t3); }
+.ptc-body  { padding: 14px; }
+
+/* Input row — the raw values from last alert */
+.ptc-inputs {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 6px; margin-bottom: 14px;
+}
+.ptc-in-box { padding: 8px 10px; background: var(--s2); border: 1px solid var(--border); }
+.ptc-in-lbl { font-size: 9px; letter-spacing: .1em; color: var(--t3); margin-bottom: 3px; text-transform: uppercase; }
+.ptc-in-val { font-size: 13px; font-weight: 600; color: var(--t1); }
+
+/* Divider label */
+.ptc-divider {
+  font-size: 9px; letter-spacing: .2em; color: var(--t4);
   text-transform: uppercase; margin-bottom: 10px;
-  display: flex; align-items: center; gap: 8px;
-}
-.pretrade-title::after { content:''; flex:1; height:1px; background:linear-gradient(to right,var(--border),transparent); }
-.pretrade-grid {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px;
-}
-.pt-box { padding: 10px; background: var(--s1); border: 1px solid var(--border); }
-.pt-lbl { font-size: 10px; letter-spacing: .08em; color: var(--t3); margin-bottom: 3px; }
-.pt-val { font-size: 14px; font-weight: 700; color: var(--white); }
-.pt-val.green { color: var(--green); }
-.pt-val.gold  { color: var(--gold);  }
-.pt-val.red   { color: var(--red);   }
-.pt-val.purple{ color: var(--purple);}
-.pretrade-grade-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-.ptg-box {
-  padding: 10px; background: var(--s1); border: 1px solid var(--border);
-  cursor: pointer; transition: border-color .15s;
-}
-.ptg-box:hover { border-color: var(--border2); }
-.ptg-box.active-aplus { border-color: var(--gold); background: var(--gold-dim); }
-.ptg-box.active-a     { border-color: var(--green2); background: var(--green-dim); }
-.ptg-box.active-b     { border-color: var(--border2); background: var(--s3); }
-.ptg-name { font-size: 13px; font-weight: 800; margin-bottom: 4px; }
-.ptg-risk { font-size: 11px; color: var(--t2); margin-bottom: 8px; }
-.ptg-computed { display: flex; flex-direction: column; gap: 3px; }
-.ptg-row { display: flex; justify-content: space-between; font-size: 11px; }
-.ptg-row span:first-child { color: var(--t3); }
-.ptg-row span:last-child  { color: var(--white); font-weight: 600; }
-@media(max-width:640px) {
-  .pretrade-grid { grid-template-columns: 1fr 1fr; }
-  .pretrade-grade-row { grid-template-columns: 1fr 1fr 1fr; }
+  padding-bottom: 6px; border-bottom: 1px solid var(--border);
 }
 
-/* Metrics panel */
-.sim-metrics {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px;
+/* RR decision highlight */
+.ptc-rr-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; background: var(--s2); border: 1px solid var(--border);
+  margin-bottom: 14px;
 }
-.sm-box { padding: 12px; background: var(--s2); border: 1px solid var(--border); }
-.sm-lbl { font-size: 10px; letter-spacing:.12em; color:var(--t2); margin-bottom:4px; }
-.sm-val { font-size: 15px; font-weight: 700; color: var(--white); }
-.sm-sub { font-size: 10px; color: var(--t3); margin-top:3px; }
-@media(max-width:640px) { .sim-metrics { grid-template-columns:1fr 1fr; } }
+.ptc-rr-lbl { font-size: 10px; color: var(--t3); letter-spacing: .08em; flex: 1; }
+.ptc-rr-val { font-size: 20px; font-weight: 800; letter-spacing: -.02em; }
+.ptc-rr-sub { font-size: 10px; color: var(--t3); }
 
-/* Session row */
-.session-bar {
-  display: flex; gap: 8px; flex-wrap: wrap; padding: 10px 14px;
-  background: var(--s2); border: 1px solid var(--border);
-  margin-bottom: 14px; align-items: center; font-size: 11px;
-}
-.sess-item { display: flex; align-items: center; gap: 5px; }
-.sess-lbl { color: var(--t3); letter-spacing: .06em; }
-.sess-val { font-weight: 700; color: var(--white); }
-.sess-sep { color: var(--t4); }
-
-/* Active trade card v2 */
-.atc2 {
-  background: var(--s2); border: 1px solid var(--border);
-  margin-bottom: 8px; overflow: hidden;
+/* Grade cards */
+.ptc-grades { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.ptc-grade-card {
+  padding: 12px; background: var(--s2); border: 1px solid var(--border);
   transition: border-color .15s;
 }
-.atc2.long-border  { border-left: 2px solid var(--green); }
-.atc2.short-border { border-left: 2px solid var(--red); }
-.atc2-hdr {
+.ptc-grade-card.active-aplus { border-color: var(--gold); background: rgba(255,215,0,.06); }
+.ptc-grade-card.active-a     { border-color: var(--green2); background: rgba(0,255,204,.05); }
+.ptc-grade-card.active-b     { border-color: var(--border2); }
+.pgc-name  { font-size: 11px; font-weight: 800; letter-spacing: .06em; margin-bottom: 2px; }
+.pgc-pct   { font-size: 10px; color: var(--t3); margin-bottom: 10px; }
+.pgc-row   { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid var(--border); font-size: 11px; }
+.pgc-row:last-child { border-bottom: none; }
+.pgc-row span:first-child { color: var(--t3); }
+.pgc-row span:last-child  { font-weight: 600; color: var(--t1); }
+@media(max-width:640px) {
+  .ptc-inputs  { grid-template-columns: 1fr 1fr; }
+  .ptc-grades  { grid-template-columns: 1fr 1fr 1fr; }
+}
+
+/* ACTIVE TRADES */
+.atc3 {
+  background: var(--s1); border: 1px solid var(--border);
+  margin-bottom: 6px; overflow: hidden;
+}
+.atc3.long-side  { border-left: 2px solid rgba(0,255,204,.6); }
+.atc3.short-side { border-left: 2px solid rgba(255,51,102,.6); }
+.atc3-hdr {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 12px; cursor: pointer; user-select: none;
+  padding: 10px 14px; cursor: pointer; user-select: none;
 }
-.atc2-hdr:hover { background: rgba(255,255,255,.02); }
-.atc2-left  { display: flex; align-items: center; gap: 8px; }
-.atc2-right { display: flex; align-items: center; gap: 8px; }
-.atc2-dir  { font-size: 11px; font-weight: 800; letter-spacing: .1em; }
-.atc2-dir.long  { color: var(--green); }
-.atc2-dir.short { color: var(--red); }
-.atc2-phase {
-  font-size: 10px; letter-spacing: .1em; padding: 2px 7px;
-  background: var(--s3); color: var(--t2); border: 1px solid var(--border2);
+.atc3-hdr:hover { background: rgba(255,255,255,.015); }
+.atc3-left  { display: flex; align-items: center; gap: 10px; }
+.atc3-right { display: flex; align-items: center; gap: 10px; }
+.atc3-dir { font-size: 12px; font-weight: 700; letter-spacing: .08em; }
+.atc3-dir.long  { color: var(--green); }
+.atc3-dir.short { color: var(--red); }
+.atc3-phase-tag {
+  font-size: 9px; letter-spacing: .1em; padding: 2px 7px;
+  background: var(--s2); color: var(--t3); border: 1px solid var(--border2);
 }
-.atc2-r { font-size: 13px; font-weight: 700; }
-.atc2-chevron { font-size: 12px; color: var(--t3); transition: transform .2s; }
-.atc2-chevron.open { transform: rotate(180deg); }
-.atc2-body { display: none; border-top: 1px solid var(--border); }
-.atc2-body.open { display: block; }
-.atc2-section { padding: 12px; }
-.atc2-section + .atc2-section { border-top: 1px solid var(--border); }
-.atc2-sec-title { font-size: 10px; letter-spacing: .15em; color: var(--t3); margin-bottom: 8px; }
-.atc2-kv { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-.atc2-item { display: flex; justify-content: space-between; align-items: center; padding: 4px 8px; background: var(--s1); }
-.atc2-item span:first-child { font-size: 10px; color: var(--t3); }
-.atc2-item span:last-child  { font-size: 12px; font-weight: 600; color: var(--white); }
-.tp-chain { display: flex; gap: 4px; flex-wrap: wrap; padding: 8px; }
-.tp-pill {
-  font-size: 11px; padding: 4px 10px;
-  border: 1px solid var(--border2);
+.atc3-unrealr { font-size: 14px; font-weight: 700; }
+.atc3-chev { font-size: 10px; color: var(--t4); transition: transform .2s; }
+.atc3-chev.open { transform: rotate(180deg); }
+.atc3-body { display: none; border-top: 1px solid var(--border); padding: 12px 14px; }
+.atc3-body.open { display: block; }
+.atc3-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 10px; }
+.atc3-kv {
+  padding: 7px 10px; background: var(--s2); border: 1px solid var(--border);
 }
-.tp-pill.done { background: var(--green-dim); color: var(--green); border-color: rgba(0,255,204,.3); }
-.tp-pill.next { background: var(--gold-dim); color: var(--gold); border-color: rgba(255,215,0,.4); animation: blink .8s infinite; }
-.tp-pill.pending { background: var(--s1); color: var(--t3); }
-.phase-trail { display: flex; gap: 0; overflow-x: auto; padding: 8px; }
-.pt-step {
-  display: flex; align-items: center; gap: 0;
-  font-size: 10px; white-space: nowrap;
-}
-.pt-step-node {
-  padding: 4px 10px; border: 1px solid var(--border2);
+.atc3-kv-l { font-size: 9px; color: var(--t4); letter-spacing: .06em; margin-bottom: 2px; text-transform: uppercase; }
+.atc3-kv-v { font-size: 12px; font-weight: 600; color: var(--t1); }
+.atc3-tp-row { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 10px; }
+.atc3-tp {
+  font-size: 10px; padding: 3px 9px; border: 1px solid var(--border2);
   color: var(--t3);
 }
-.pt-step-node.done { background: var(--green-dim); color: var(--green); border-color: rgba(0,255,204,.3); }
-.pt-step-node.current { background: var(--gold-dim); color: var(--gold); border-color: rgba(255,215,0,.3); }
-.pt-step-arrow { color: var(--t4); padding: 0 2px; font-size: 10px; }
+.atc3-tp.done    { background: var(--green-dim); color: var(--green); border-color: rgba(0,255,204,.3); }
+.atc3-tp.active  { background: var(--gold-dim); color: var(--gold); border-color: rgba(255,215,0,.4); animation: blink .8s infinite; }
+.atc3-phase-row  { display: flex; align-items: center; gap: 0; font-size: 10px; overflow-x: auto; }
+.atc3-pnode { padding: 3px 9px; border: 1px solid var(--border2); color: var(--t4); white-space: nowrap; }
+.atc3-pnode.done    { background: var(--green-dim); color: var(--green); border-color: rgba(0,255,204,.2); }
+.atc3-pnode.current { background: var(--gold-dim); color: var(--gold); border-color: rgba(255,215,0,.3); }
+.atc3-parrow { color: var(--t4); padding: 0 3px; font-size: 9px; }
+.atc3-context { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; font-size: 10px; color: var(--t3); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+.atc3-mistake { padding: 2px 8px; background: var(--red-dim); color: var(--red); border: 1px solid rgba(255,51,102,.3); font-size: 9px; }
 
-/* History table v2 */
-.htbl { width:100%; border-collapse:collapse; }
-.htbl th { padding:8px 10px; font-size:10px; letter-spacing:.12em; color:var(--t2); text-align:left; border-bottom:1px solid var(--border); font-weight:400; white-space:nowrap; }
-.htbl td { padding:8px 10px; font-size:11px; border-bottom:1px solid var(--border); vertical-align:middle; }
-.htbl tr:last-child td { border-bottom:none; }
-.htbl tr { cursor: pointer; }
-.htbl tr:hover td { background: var(--s2); }
-.htbl-detail { display:none; background:var(--s1); }
-.htbl-detail.open { display:table-row; }
-.htbl-detail td { padding:10px 14px; }
-.htbl-detail-inner { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
-.hd-item { padding:8px; background:var(--s2); border:1px solid var(--border); }
-.hd-lbl { font-size:10px; color:var(--t3); margin-bottom:2px; }
-.hd-val { font-size:12px; font-weight:600; color:var(--white); }
-
-/* Journal v2 filters */
-.jf-row { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
-.jf-btn {
-  background:var(--s2); border:1px solid var(--border2);
-  color:var(--t2); padding:5px 12px;
-  font-family:var(--font-mono); font-size:10px;
-  cursor:pointer; letter-spacing:.08em; transition:all .15s;
+/* LEVEL 3 — Trade history (reduced visual weight) */
+.l3-section { opacity: .8; }
+.l3-section .sl { opacity: .7; }
+.htbl3 { width: 100%; border-collapse: collapse; }
+.htbl3 th {
+  padding: 7px 10px; font-size: 9px; letter-spacing: .12em;
+  color: var(--t3); text-align: left; border-bottom: 1px solid var(--border);
+  font-weight: 400; white-space: nowrap; text-transform: uppercase;
 }
-.jf-btn.active { border-color:var(--green2); color:var(--green); background:var(--green-dim); }
-.jf-select {
-  background:var(--s2); border:1px solid var(--border2);
-  color:var(--t2); padding:5px 10px;
-  font-family:var(--font-mono); font-size:10px;
-  cursor:pointer; outline:none;
-}
-.jf-select:focus { border-color:var(--green2); }
+.htbl3 td { padding: 7px 10px; font-size: 11px; border-bottom: 1px solid var(--border); color: var(--t2); }
+.htbl3 tr:last-child td { border-bottom: none; }
+.htbl3 tbody tr { cursor: pointer; }
+.htbl3 tbody tr:hover td { background: var(--s2); color: var(--t1); }
+.htbl3-detail { display: none; background: rgba(0,0,0,.3); }
+.htbl3-detail.open { display: table-row; }
+.htbl3-detail td { padding: 10px 14px; }
+.htbl3-detail-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+.hd3-item { padding: 7px 9px; background: var(--s2); border: 1px solid var(--border); }
+.hd3-lbl { font-size: 9px; color: var(--t4); margin-bottom: 2px; text-transform: uppercase; letter-spacing: .06em; }
+.hd3-val { font-size: 11px; font-weight: 600; color: var(--t2); }
 
-/* Setup performance */
-.setup-perf { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:14px; }
-.sp-box { padding:10px; background:var(--s2); border:1px solid var(--border); }
-.sp-name { font-size:10px; color:var(--t2); letter-spacing:.08em; margin-bottom:4px; }
-.sp-wr   { font-size:16px; font-weight:700; color:var(--green); }
-.sp-sub  { font-size:10px; color:var(--t3); margin-top:2px; }
-@media(max-width:640px){ .setup-perf{grid-template-columns:1fr 1fr;} }
+/* result tags */
+.rtag3 { font-size: 9px; font-weight: 700; letter-spacing: .06em; padding: 2px 6px; }
+.rtag3.win   { color: var(--green); border: 1px solid rgba(0,255,204,.3); }
+.rtag3.loss  { color: var(--red);   border: 1px solid rgba(255,51,102,.3); }
+.rtag3.be    { color: var(--t3);    border: 1px solid var(--border2); }
+.rtag3.tp1, .rtag3.tp2, .rtag3.tp3, .rtag3.tp4 { color: var(--gold); border: 1px solid rgba(255,215,0,.3); }
+
+/* grade chip */
+.gc3 { font-size: 10px; font-weight: 700; letter-spacing: .06em; }
+
+/* equity chart box — L2 */
+.eq-box {
+  background: var(--s1); border: 1px solid var(--border);
+  margin-bottom: 16px; opacity: .95;
+}
+.eq-hdr {
+  padding: 9px 14px; border-bottom: 1px solid var(--border);
+  background: var(--s2); display: flex; align-items: center; justify-content: space-between;
+}
+.eq-title { font-size: 10px; letter-spacing: .15em; color: var(--t2); text-transform: uppercase; }
+
+/* empty state */
+.es { padding: 32px 20px; text-align: center; }
+.es-icon { font-size: 28px; margin-bottom: 8px; opacity: .3; }
+.es-txt { font-size: 10px; color: var(--t3); line-height: 1.7; }
 </style>
 </head>
 <body>
@@ -612,7 +663,6 @@ textarea.form-input { resize:vertical; min-height:60px; }
   <button class="nav-btn" onclick="showPage('alerts',this)">ALERTS <span class="nav-count" id="alertCount">0</span></button>
   <button class="nav-btn" onclick="showPage('simulator',this)">SIMULATOR</button>
   <button class="nav-btn" onclick="showPage('guide',this)">STRATEGY</button>
-  <button class="nav-btn" onclick="showPage('journal',this)">JOURNAL <span class="nav-count" id="journalCount">0</span></button>
 </div>
 
 <div class="main">
@@ -753,157 +803,191 @@ textarea.form-input { resize:vertical; min-height:60px; }
 
 <!-- ══════════════ SIMULATOR ══════════════ -->
 <div id="page-simulator" class="page">
-  <div class="sl">PAPER TRADING SIMULATOR</div>
 
-  <!-- Balance row -->
-  <div class="sim-header">
-    <div class="sim-stat card gold-top">
-      <div class="sim-lbl">BALANCE</div>
-      <div class="sim-val" id="simVal">$1,000</div>
-      <div class="eq-bar-wrap"><div class="eq-bar" id="simBar" style="width:50%"></div></div>
-    </div>
-    <div class="sim-stat card">
-      <div class="sim-lbl">P&L</div>
-      <div class="sim-val" id="simPnl">$0.00</div>
-    </div>
-    <div class="sim-stat card">
-      <div class="sim-lbl">RETURN</div>
-      <div class="sim-val" id="simRet">0.00%</div>
-    </div>
-    <div class="sim-stat card">
-      <div class="sim-lbl">WIN RATE</div>
-      <div class="sim-val" id="simWR">—</div>
-    </div>
-    <div class="sim-stat card">
-      <div class="sim-lbl">NET R</div>
-      <div class="sim-val" id="simNetR">0.0R</div>
-    </div>
-    <div class="sim-stat card">
-      <div class="sim-lbl">OPEN</div>
-      <div class="sim-val" id="simOpen">0</div>
-    </div>
+  <!-- SESSION SUMMARY STRIP -->
+  <div class="sess-strip">
+    <div class="ss-item"><span class="ss-lbl">SESSION START</span><span class="ss-val" id="ssStart">$1,000</span></div>
+    <span class="ss-sep">·</span>
+    <div class="ss-item"><span class="ss-lbl">CURRENT</span><span class="ss-val" id="ssCurrent">$1,000</span></div>
+    <span class="ss-sep">·</span>
+    <div class="ss-item"><span class="ss-lbl">SESSION P&amp;L</span><span class="ss-val" id="ssPnl">+$0.00</span></div>
+    <span class="ss-sep">·</span>
+    <div class="ss-item"><span class="ss-lbl">SESSION R</span><span class="ss-val" id="ssR">0.0R</span></div>
   </div>
 
-  <!-- Session bar -->
-  <div class="session-bar" id="sessionBar">
-    <div class="sess-item"><span class="sess-lbl">SESSION START</span>&nbsp;<span class="sess-val" id="sessBal">$1,000</span></div>
-    <span class="sess-sep">|</span>
-    <div class="sess-item"><span class="sess-lbl">SESSION P&L</span>&nbsp;<span class="sess-val" id="sessRet">+$0.00</span></div>
-    <span class="sess-sep">|</span>
-    <div class="sess-item"><span class="sess-lbl">SESSION R</span>&nbsp;<span class="sess-val" id="sessR">0.0R</span></div>
-    <span class="sess-sep">|</span>
-    <div class="sess-item"><span class="sess-lbl">TRADES TODAY</span>&nbsp;<span class="sess-val" id="sessCount">0</span></div>
-  </div>
-
-  <!-- Metrics panel -->
-  <div class="sim-metrics">
-    <div class="sm-box card">
-      <div class="sm-lbl">AVG R / TRADE</div>
-      <div class="sm-val" id="smAvgR">—</div>
-      <div class="sm-sub">per closed trade</div>
-    </div>
-    <div class="sm-box card">
-      <div class="sm-lbl">EXPECTANCY</div>
-      <div class="sm-val" id="smExpect">—</div>
-      <div class="sm-sub">WR × AvgW − LR × AvgL</div>
-    </div>
-    <div class="sm-box card">
-      <div class="sm-lbl">MAX DRAWDOWN</div>
-      <div class="sm-val" id="smDD">—</div>
-      <div class="sm-sub">peak-to-trough</div>
-    </div>
-    <div class="sm-box card">
-      <div class="sm-lbl">BEST SETUP</div>
-      <div class="sm-val" id="smBestSetup">—</div>
-      <div class="sm-sub">by win rate</div>
-    </div>
-  </div>
-
-  <!-- Pre-trade info panel -->
-  <div class="pretrade-panel card">
-    <div class="pretrade-title">PRE-TRADE CALCULATOR</div>
-    <div class="pretrade-grid">
-      <div class="pt-box">
-        <div class="pt-lbl">CURRENT BALANCE</div>
-        <div class="pt-val gold" id="ptBalance">$1,000</div>
+  <!-- LEVEL 1 — Primary stats -->
+  <div style="margin-top:12px">
+    <div class="l1-row">
+      <div class="l1-main">
+        <div class="l1-balance-label">BALANCE</div>
+        <div class="l1-balance-val" id="simVal">$1,000</div>
+        <div class="l1-start-hint">Start: $<span id="simStart">1,000</span></div>
+        <div class="l1-bar-wrap"><div class="l1-bar" id="simBar" style="width:50%;background:var(--t3)"></div></div>
       </div>
-      <div class="pt-box">
-        <div class="pt-lbl">ENTRY PRICE</div>
-        <div class="pt-val" id="ptEntry">—</div>
+      <div class="l1-side">
+        <div class="l1-side-lbl">P&amp;L</div>
+        <div class="l1-side-val" id="simPnl">$0.00</div>
       </div>
-      <div class="pt-box">
-        <div class="pt-lbl">SL PRICE</div>
-        <div class="pt-val red" id="ptSL">—</div>
-      </div>
-      <div class="pt-box">
-        <div class="pt-lbl">SL DISTANCE</div>
-        <div class="pt-val" id="ptDist">—</div>
-      </div>
-      <div class="pt-box">
-        <div class="pt-lbl">NEXT TP TARGET</div>
-        <div class="pt-val green" id="ptTP">—</div>
-      </div>
-      <div class="pt-box">
-        <div class="pt-lbl">EST. RR (to TP1)</div>
-        <div class="pt-val purple" id="ptRR">—</div>
+      <div class="l1-side">
+        <div class="l1-side-lbl">RETURN</div>
+        <div class="l1-side-val" id="simRet">0.00%</div>
       </div>
     </div>
-    <div class="pretrade-grade-row">
-      <div class="ptg-box" id="ptgAplus">
-        <div class="ptg-name" style="color:var(--gold)">A+ GRADE</div>
-        <div class="ptg-risk">3% risk</div>
-        <div class="ptg-computed">
-          <div class="ptg-row"><span>Risk $</span><span id="ptgAplusRisk">—</span></div>
-          <div class="ptg-row"><span>Pos Size</span><span id="ptgAplusSize">—</span></div>
-          <div class="ptg-row"><span>Potential</span><span id="ptgAplusProfit" style="color:var(--green)">—</span></div>
-        </div>
+    <div class="l1-secondary-row">
+      <div class="l1-sec-box">
+        <div class="l1-sec-lbl">WIN RATE</div>
+        <div class="l1-sec-val" id="simWR">—</div>
       </div>
-      <div class="ptg-box" id="ptgA">
-        <div class="ptg-name" style="color:var(--green)">A GRADE</div>
-        <div class="ptg-risk">2% risk</div>
-        <div class="ptg-computed">
-          <div class="ptg-row"><span>Risk $</span><span id="ptgARisk">—</span></div>
-          <div class="ptg-row"><span>Pos Size</span><span id="ptgASize">—</span></div>
-          <div class="ptg-row"><span>Potential</span><span id="ptgAProfit" style="color:var(--green)">—</span></div>
-        </div>
+      <div class="l1-sec-box">
+        <div class="l1-sec-lbl">NET R</div>
+        <div class="l1-sec-val" id="simNetR">0.0R</div>
       </div>
-      <div class="ptg-box" id="ptgB">
-        <div class="ptg-name" style="color:var(--t2)">B GRADE</div>
-        <div class="ptg-risk">1% risk</div>
-        <div class="ptg-computed">
-          <div class="ptg-row"><span>Risk $</span><span id="ptgBRisk">—</span></div>
-          <div class="ptg-row"><span>Pos Size</span><span id="ptgBSize">—</span></div>
-          <div class="ptg-row"><span>Potential</span><span id="ptgBProfit" style="color:var(--green)">—</span></div>
-        </div>
+      <div class="l1-sec-box">
+        <div class="l1-sec-lbl">OPEN TRADES</div>
+        <div class="l1-sec-val" id="simOpen">0</div>
       </div>
     </div>
   </div>
 
-  <!-- Equity curve -->
-  <div class="chart-box card" style="margin-bottom:14px">
-    <div class="chart-hdr">
-      <div class="chart-title">EQUITY CURVE</div>
+  <!-- RISK STATUS PANEL -->
+  <div class="risk-panel card">
+    <div class="rp-item">
+      <div class="rp-lbl">TRADES TODAY</div>
+      <div class="rp-val" id="rpTrades">0</div>
+    </div>
+    <div class="rp-item">
+      <div class="rp-lbl">SESSION R</div>
+      <div class="rp-val" id="rpSessR">0.0R</div>
+    </div>
+    <div class="rp-item">
+      <div class="rp-lbl">DAILY LIMIT</div>
+      <div class="rp-val" style="color:var(--t3)">−3R</div>
+    </div>
+    <div class="rp-item">
+      <div class="rp-lbl">REMAINING</div>
+      <div class="rp-val safe" id="rpRemain">3.0R</div>
+    </div>
+  </div>
+
+  <!-- LEVEL 2 — Metrics -->
+  <div class="l2-metrics">
+    <div class="l2-box card">
+      <div class="l2-lbl">AVG R</div>
+      <div class="l2-val" id="smAvgR">—</div>
+      <div class="l2-sub">per closed trade</div>
+    </div>
+    <div class="l2-box card">
+      <div class="l2-lbl">EXPECTANCY</div>
+      <div class="l2-val" id="smExpect">—</div>
+      <div class="l2-sub">WR×AvgW − LR×AvgL</div>
+    </div>
+    <div class="l2-box card">
+      <div class="l2-lbl">MAX DRAWDOWN</div>
+      <div class="l2-val" id="smDD">—</div>
+      <div class="l2-sub">peak-to-trough</div>
+    </div>
+    <div class="l2-box card">
+      <div class="l2-lbl">BEST GRADE</div>
+      <div class="l2-val" id="smBestSetup">—</div>
+      <div class="l2-sub">by win rate</div>
+    </div>
+  </div>
+
+  <!-- EQUITY CURVE — L2 -->
+  <div class="eq-box">
+    <div class="eq-hdr">
+      <span class="eq-title">EQUITY CURVE</span>
       <button class="cbtn" onclick="resetSim()">RESET</button>
     </div>
-    <div class="chart-wrap" style="height:200px"><canvas id="equityChart"></canvas></div>
+    <div style="position:relative;height:160px;padding:10px"><canvas id="equityChart"></canvas></div>
   </div>
 
-  <!-- Active trades -->
-  <div class="sl">ACTIVE TRADES</div>
-  <div id="activeTrades" style="margin-bottom:14px">
-    <div class="card empty-state">
-      <div class="empty-icon">📋</div>
-      <div class="empty-txt">No active trades. CRT alerts are automatically logged here.</div>
+  <!-- PRE-TRADE CALCULATOR -->
+  <div class="ptc-wrap">
+    <div class="ptc-hdr">
+      <span class="ptc-title">PRE-TRADE CALCULATOR</span>
+      <span class="ptc-badge" id="ptcAlertBadge">—</span>
+    </div>
+    <div class="ptc-body">
+      <div class="ptc-divider">INPUT — LAST ALERT</div>
+      <div class="ptc-inputs">
+        <div class="ptc-in-box">
+          <div class="ptc-in-lbl">Balance</div>
+          <div class="ptc-in-val" id="ptBalance" style="color:var(--t1)">$1,000</div>
+        </div>
+        <div class="ptc-in-box">
+          <div class="ptc-in-lbl">Entry</div>
+          <div class="ptc-in-val" id="ptEntry">—</div>
+        </div>
+        <div class="ptc-in-box">
+          <div class="ptc-in-lbl">SL Price</div>
+          <div class="ptc-in-val" id="ptSL" style="color:var(--red)">—</div>
+        </div>
+        <div class="ptc-in-box">
+          <div class="ptc-in-lbl">SL Distance</div>
+          <div class="ptc-in-val" id="ptDist">—</div>
+        </div>
+        <div class="ptc-in-box">
+          <div class="ptc-in-lbl">TP1 Target</div>
+          <div class="ptc-in-val" id="ptTP" style="color:var(--green)">—</div>
+        </div>
+        <div class="ptc-in-box">
+          <div class="ptc-in-lbl">Direction / Grade</div>
+          <div class="ptc-in-val" id="ptDirGrade">—</div>
+        </div>
+      </div>
+      <div class="ptc-divider">CALCULATED RR</div>
+      <div class="ptc-rr-row">
+        <span class="ptc-rr-lbl">Risk / Reward to TP1</span>
+        <span class="ptc-rr-val" id="ptRR">—</span>
+        <span class="ptc-rr-sub" id="ptRRsub"></span>
+      </div>
+      <div class="ptc-divider">DECISION — BY GRADE</div>
+      <div class="ptc-grades">
+        <div class="ptc-grade-card" id="ptgAplus">
+          <div class="pgc-name" style="color:var(--gold)">A+</div>
+          <div class="pgc-pct">3% risk</div>
+          <div class="pgc-row"><span>Risk $</span><span id="ptgAplusRisk">—</span></div>
+          <div class="pgc-row"><span>Size</span><span id="ptgAplusSize">—</span></div>
+          <div class="pgc-row"><span>Max profit</span><span id="ptgAplusProfit" style="color:var(--green)">—</span></div>
+        </div>
+        <div class="ptc-grade-card" id="ptgA">
+          <div class="pgc-name" style="color:var(--green)">A</div>
+          <div class="pgc-pct">2% risk</div>
+          <div class="pgc-row"><span>Risk $</span><span id="ptgARisk">—</span></div>
+          <div class="pgc-row"><span>Size</span><span id="ptgASize">—</span></div>
+          <div class="pgc-row"><span>Max profit</span><span id="ptgAProfit" style="color:var(--green)">—</span></div>
+        </div>
+        <div class="ptc-grade-card" id="ptgB">
+          <div class="pgc-name" style="color:var(--t2)">B</div>
+          <div class="pgc-pct">1% risk</div>
+          <div class="pgc-row"><span>Risk $</span><span id="ptgBRisk">—</span></div>
+          <div class="pgc-row"><span>Size</span><span id="ptgBSize">—</span></div>
+          <div class="pgc-row"><span>Max profit</span><span id="ptgBProfit" style="color:var(--green)">—</span></div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- History -->
-  <div class="sl">TRADE HISTORY</div>
-  <div class="card" style="overflow-x:auto;margin-bottom:14px">
-    <div id="simHistory">
-      <div class="empty-state"><div class="empty-txt">No completed trades yet.</div></div>
+  <!-- ACTIVE TRADES -->
+  <div class="sl" style="margin-top:4px">ACTIVE TRADES</div>
+  <div id="activeTrades" style="margin-bottom:16px">
+    <div class="card es">
+      <div class="es-icon">📋</div>
+      <div class="es-txt">No active trades.<br>CRT alerts are automatically logged here.</div>
     </div>
   </div>
+
+  <!-- LEVEL 3 — Trade history -->
+  <div class="l3-section">
+    <div class="sl">TRADE HISTORY</div>
+    <div style="overflow-x:auto;margin-bottom:14px;background:var(--s1);border:1px solid var(--border)">
+      <div id="simHistory">
+        <div class="es"><div class="es-txt">No completed trades yet.</div></div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <!-- ══════════════ GUIDE ══════════════ -->
@@ -955,174 +1039,6 @@ textarea.form-input { resize:vertical; min-height:60px; }
 </div>
 
 
-<!-- ══════════════ JOURNAL ══════════════ -->
-<div id="page-journal" class="page">
-
-  <div class="sl">TRADE JOURNAL</div>
-
-  <!-- Stats row -->
-  <div class="journal-stats">
-    <div class="jstat card green-top">
-      <div class="jstat-lbl">TOTAL TRADES</div>
-      <div class="jstat-val" id="jTotal">0</div>
-    </div>
-    <div class="jstat card">
-      <div class="jstat-lbl">WIN RATE</div>
-      <div class="jstat-val" id="jWR">—</div>
-    </div>
-    <div class="jstat card">
-      <div class="jstat-lbl">NET R</div>
-      <div class="jstat-val" id="jNetR">0.0R</div>
-    </div>
-    <div class="jstat card">
-      <div class="jstat-lbl">AVG R / TRADE</div>
-      <div class="jstat-val" id="jAvgR">—</div>
-    </div>
-    <div class="jstat card gold-top">
-      <div class="jstat-lbl">EXPECTANCY</div>
-      <div class="jstat-val" id="jExpect">—</div>
-    </div>
-  </div>
-
-  <!-- Setup performance breakdown -->
-  <div class="sl">SETUP PERFORMANCE</div>
-  <div class="setup-perf" id="setupPerf">
-    <div class="sp-box card"><div class="sp-name">No data yet</div></div>
-  </div>
-
-  <!-- Add trade form -->
-  <div class="add-trade-form">
-    <div class="form-title">+ LOG NEW TRADE</div>
-    <div class="form-grid">
-      <div class="form-group">
-        <label class="form-label">DATE (IST)</label>
-        <input class="form-input" id="jDate" type="datetime-local">
-      </div>
-      <div class="form-group">
-        <label class="form-label">DIRECTION</label>
-        <select class="form-select" id="jDir">
-          <option value="LONG">🟢 LONG</option>
-          <option value="SHORT">🔴 SHORT</option>
-        </select>
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">4H LEVEL ($)</label>
-        <input class="form-input" id="jLevel" type="number" placeholder="69144">
-      </div>
-      <div class="form-group">
-        <label class="form-label">ENTRY ($)</label>
-        <input class="form-input" id="jEntry" type="number" placeholder="69900">
-      </div>
-      <div class="form-group">
-        <label class="form-label">SL ($)</label>
-        <input class="form-input" id="jSL" type="number" placeholder="68600">
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">TP ($)</label>
-        <input class="form-input" id="jTP" type="number" placeholder="71500">
-      </div>
-      <div class="form-group">
-        <label class="form-label">EXIT ($)</label>
-        <input class="form-input" id="jExit" type="number" placeholder="71200">
-      </div>
-      <div class="form-group">
-        <label class="form-label">RESULT</label>
-        <select class="form-select" id="jResult">
-          <option value="open">⏳ Open</option>
-          <option value="win">✅ Win</option>
-          <option value="loss">❌ Loss</option>
-          <option value="be">➡️ BE</option>
-        </select>
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">GRADE</label>
-        <select class="form-select" id="jGrade">
-          <option value="A+">A+</option>
-          <option value="A">A</option>
-          <option value="B">B</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">HTF BIAS</label>
-        <select class="form-select" id="jBias">
-          <option value="BULLISH">BULLISH</option>
-          <option value="BEARISH">BEARISH</option>
-          <option value="RANGING">RANGING</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">SETUP TYPE</label>
-        <select class="form-select" id="jSetup">
-          <option value="CRT">CRT (Full)</option>
-          <option value="MSNR+MSS">MSNR + MSS</option>
-          <option value="OB">Order Block</option>
-          <option value="FVG">FVG</option>
-          <option value="Sweep">Sweep Only</option>
-          <option value="MSNR_ONLY">MSNR Level Only</option>
-          <option value="OTHER">Other</option>
-        </select>
-      </div>
-    </div>
-    <div class="form-group" style="margin-bottom:12px">
-      <label class="form-label">NOTES</label>
-      <textarea class="form-input" id="jNotes" placeholder="What did you see? Was the sweep clean? How was the retest?"></textarea>
-    </div>
-    <button class="btn-add" onclick="addJournalTrade()">+ ADD TRADE</button>
-  </div>
-
-  <!-- Filters -->
-  <div class="sl">ALL TRADES</div>
-  <div style="margin-bottom:10px">
-    <div class="jf-row">
-      <span style="font-size:10px;color:var(--t3);align-self:center;letter-spacing:.1em">RESULT</span>
-      <button class="jf-btn active" onclick="setJFilter('result','all',this)">ALL</button>
-      <button class="jf-btn" onclick="setJFilter('result','win',this)">WIN</button>
-      <button class="jf-btn" onclick="setJFilter('result','loss',this)">LOSS</button>
-      <button class="jf-btn" onclick="setJFilter('result','be',this)">BE</button>
-      <button class="jf-btn" onclick="setJFilter('result','open',this)">OPEN</button>
-    </div>
-    <div class="jf-row">
-      <span style="font-size:10px;color:var(--t3);align-self:center;letter-spacing:.1em">GRADE</span>
-      <button class="jf-btn active" onclick="setJFilter('grade','all',this)">ALL</button>
-      <button class="jf-btn" onclick="setJFilter('grade','A+',this)">A+</button>
-      <button class="jf-btn" onclick="setJFilter('grade','A',this)">A</button>
-      <button class="jf-btn" onclick="setJFilter('grade','B',this)">B</button>
-      <span style="font-size:10px;color:var(--t3);align-self:center;letter-spacing:.1em;margin-left:8px">SETUP</span>
-      <select class="jf-select" id="jFilterSetup" onchange="applyJFilters()">
-        <option value="all">ALL SETUPS</option>
-        <option value="CRT">CRT</option>
-        <option value="MSNR+MSS">MSNR+MSS</option>
-        <option value="OB">OB</option>
-        <option value="FVG">FVG</option>
-        <option value="Sweep">Sweep</option>
-        <option value="MSNR_ONLY">MSNR Only</option>
-        <option value="OTHER">Other</option>
-      </select>
-    </div>
-  </div>
-
-  <!-- Table -->
-  <div class="journal-table card">
-    <div id="journalTableWrap">
-      <div class="empty-state">
-        <div class="empty-icon">📓</div>
-        <div class="empty-txt">No trades logged yet.<br>Add your first trade above.</div>
-      </div>
-    </div>
-  </div>
-
-  <div style="text-align:center;margin-top:8px">
-    <button class="rbtn" onclick="exportJournal()" style="margin-right:8px">↓ EXPORT CSV</button>
-    <button class="rbtn" onclick="clearJournal()" style="color:var(--red);border-color:var(--red2)">✕ CLEAR ALL</button>
-  </div>
-
-</div>
 
 </div><!-- /main -->
 
@@ -1447,38 +1363,44 @@ function renderPreTrade(rs) {
   const alert = rs?.lastAlert;
   document.getElementById('ptBalance').textContent = '$' + fmt(bal, 2);
 
-  if (!alert) return;
+  if (!alert) {
+    document.getElementById('ptcAlertBadge').textContent = 'Waiting for alert';
+    return;
+  }
 
-  const entry  = alert.mssClose || 0;
-  const sl     = alert.sweepWick || 0;
-  const tp1    = alert.mssTarget || 0;
-  const bull   = alert.direction === 'LONG';
+  const entry  = alert.mssClose   || 0;
+  const sl     = alert.sweepWick  || 0;
+  const tp1    = alert.mssTarget  || 0;
+  const bull   = alert.direction  === 'LONG';
   const slDist = entry && sl ? Math.abs(entry - sl) : 0;
   const risk   = slDist;
 
-  document.getElementById('ptEntry').textContent = entry ? '$' + fmt(entry, 0) : '—';
-  document.getElementById('ptSL').textContent    = sl    ? '$' + fmt(sl, 0)    : '—';
-  document.getElementById('ptTP').textContent    = tp1   ? '$' + fmt(tp1, 0)   : '—';
-  document.getElementById('ptDist').textContent  = risk  ? '$' + fmt(risk, 0) + ' (' + ((risk/entry)*100).toFixed(2) + '%)' : '—';
+  document.getElementById('ptcAlertBadge').textContent  = alert.direction + ' · ' + alert.grade;
+  document.getElementById('ptcAlertBadge').style.color  = bull ? 'var(--green)' : 'var(--red)';
+  document.getElementById('ptEntry').textContent        = entry ? '$' + fmt(entry, 0) : '—';
+  document.getElementById('ptSL').textContent           = sl    ? '$' + fmt(sl, 0)    : '—';
+  document.getElementById('ptTP').textContent           = tp1   ? '$' + fmt(tp1, 0)   : '—';
+  document.getElementById('ptDist').textContent         = risk  ? '$' + fmt(risk, 0) + ' (' + ((risk/entry)*100).toFixed(2) + '%)' : '—';
+  document.getElementById('ptDirGrade').textContent     = (bull ? '▲ LONG' : '▼ SHORT') + ' · ' + (alert.grade || '—');
+  document.getElementById('ptDirGrade').style.color     = bull ? 'var(--green)' : 'var(--red)';
 
-  const rr = (entry && sl && tp1 && risk > 0) ? Math.abs(tp1 - entry) / risk : 0;
+  const rr   = (entry && sl && tp1 && risk > 0) ? Math.abs(tp1 - entry) / risk : 0;
   const rrEl = document.getElementById('ptRR');
   rrEl.textContent = rr > 0 ? rr.toFixed(2) + 'R' : '—';
-  rrEl.style.color = rr >= 2 ? 'var(--green)' : rr >= 1 ? 'var(--gold)' : 'var(--red)';
+  rrEl.style.color = rr >= 2 ? 'var(--green)' : rr >= 1 ? 'var(--gold)' : 'var(--t3)';
+  document.getElementById('ptRRsub').textContent = rr >= 2 ? '✓ Good RR' : rr >= 1 ? '~ Acceptable' : rr > 0 ? '✕ Poor RR' : '';
 
-  // grade boxes
   for (const [grade, pct] of [['A+', 3], ['A', 2], ['B', 1]]) {
-    const riskAmt  = bal * pct / 100;
-    const posSize  = risk > 0 ? riskAmt / risk : 0;
-    const profit   = posSize * Math.abs(tp1 - entry);
-    const sfx      = grade === 'A+' ? 'Aplus' : grade;
+    const riskAmt = bal * pct / 100;
+    const posSize = risk > 0 ? riskAmt / risk : 0;
+    const profit  = posSize * Math.abs(tp1 - entry);
+    const sfx     = grade === 'A+' ? 'Aplus' : grade;
     document.getElementById('ptg'+sfx+'Risk').textContent   = '$' + fmt(riskAmt, 2);
     document.getElementById('ptg'+sfx+'Size').textContent   = posSize > 0 ? fmt(posSize, 4) + ' BTC' : '—';
     document.getElementById('ptg'+sfx+'Profit').textContent = profit > 0 ? '+$' + fmt(profit, 2) : '—';
-    // highlight active grade
     const boxEl = document.getElementById('ptg'+sfx);
     const gKey  = alert.grade;
-    boxEl.className = 'ptg-box' + (gKey === grade ? ' active-' + (grade === 'A+' ? 'aplus' : grade.toLowerCase()) : '');
+    boxEl.className = 'ptc-grade-card' + (gKey === grade ? ' active-' + (grade === 'A+' ? 'aplus' : grade.toLowerCase()) : '');
   }
 }
 
@@ -1486,19 +1408,22 @@ function renderSimulator() {
   const rs = remoteState;
   if (!rs) return;
 
-  const bal  = rs.balance ?? SIM_START;
-  const pnl  = bal - SIM_START;
-  const ret  = pnl / SIM_START * 100;
-  const st   = rs.stats || {};
-  const done = (st.wins || 0) + (st.losses || 0) + (st.be || 0);
-  const wr   = done ? ((st.wins / done) * 100).toFixed(0) + '%' : '—';
-  const netR = st.netR || 0;
-  const c    = pnl >= 0 ? 'var(--green)' : 'var(--red)';
-  const hist = rs.history || [];
+  const bal   = rs.balance ?? SIM_START;
+  const pnl   = bal - SIM_START;
+  const ret   = pnl / SIM_START * 100;
+  const st    = rs.stats || {};
+  const done  = (st.wins || 0) + (st.losses || 0) + (st.be || 0);
+  const wr    = done ? ((st.wins / done) * 100).toFixed(0) + '%' : '—';
+  const netR  = st.netR || 0;
+  const cG    = 'var(--green)', cR = 'var(--red)';
+  const c     = pnl >= 0 ? cG : cR;
+  const hist  = rs.history || [];
 
-  // ── Top stats ──────────────────────────────────────────────
-  document.getElementById('simVal').textContent   = '$' + fmt(bal, 2);
-  document.getElementById('simVal').style.color   = c;
+  // ── L1 Primary ─────────────────────────────────────────────
+  const valEl = document.getElementById('simVal');
+  valEl.textContent  = '$' + fmt(bal, 2);
+  valEl.style.color  = c;
+  document.getElementById('simStart').textContent = fmt(SIM_START, 0);
   document.getElementById('simPnl').textContent   = (pnl >= 0 ? '+' : '') + '$' + fmt(Math.abs(pnl), 2);
   document.getElementById('simPnl').style.color   = c;
   document.getElementById('simRet').textContent   = (ret >= 0 ? '+' : '') + ret.toFixed(2) + '%';
@@ -1507,49 +1432,65 @@ function renderSimulator() {
   document.getElementById('simNetR').textContent  = (netR >= 0 ? '+' : '') + netR.toFixed(1) + 'R';
   document.getElementById('simNetR').style.color  = c;
   document.getElementById('simOpen').textContent  = (rs.activeTrades || []).length;
-  document.getElementById('simBar').style.width   = Math.min(bal / SIM_START * 100, 200) + '%';
-  document.getElementById('simBar').style.background = c;
-  document.getElementById('dashBal').textContent  = '$' + fmt(bal, 0);
-  document.getElementById('dashBal').style.color   = c;
-  document.getElementById('dashRet').textContent   = (ret >= 0 ? '+' : '') + ret.toFixed(2) + '%';
-  document.getElementById('dashRet').style.color   = c;
+  const barEl = document.getElementById('simBar');
+  barEl.style.width      = Math.min(Math.max(bal / SIM_START * 50, 2), 100) + '%';
+  barEl.style.background = c;
 
-  // ── Session bar ────────────────────────────────────────────
+  // Dashboard sync
+  document.getElementById('dashBal').textContent = '$' + fmt(bal, 0);
+  document.getElementById('dashBal').style.color  = c;
+  document.getElementById('dashRet').textContent  = (ret >= 0 ? '+' : '') + ret.toFixed(2) + '%';
+  document.getElementById('dashRet').style.color  = c;
+
+  // ── Session ────────────────────────────────────────────────
   if (sessionStartBalance === null) {
     sessionStartBalance = bal;
     sessionStartR       = netR;
     sessionStartTrades  = done;
   }
-  const sessPnl    = bal - sessionStartBalance;
-  const sessRTotal = netR - sessionStartR;
-  const sessCount  = done - sessionStartTrades;
-  document.getElementById('sessBal').textContent   = '$' + fmt(sessionStartBalance, 2);
-  document.getElementById('sessRet').textContent   = (sessPnl >= 0 ? '+' : '') + '$' + fmt(Math.abs(sessPnl), 2);
-  document.getElementById('sessRet').style.color   = sessPnl >= 0 ? 'var(--green)' : 'var(--red)';
-  document.getElementById('sessR').textContent     = (sessRTotal >= 0 ? '+' : '') + sessRTotal.toFixed(1) + 'R';
-  document.getElementById('sessR').style.color     = sessRTotal >= 0 ? 'var(--green)' : 'var(--red)';
-  document.getElementById('sessCount').textContent = sessCount;
+  const sessPnl  = bal - sessionStartBalance;
+  const sessR    = netR - sessionStartR;
+  const sessCnt  = done - sessionStartTrades;
+  document.getElementById('ssStart').textContent    = '$' + fmt(sessionStartBalance, 2);
+  document.getElementById('ssCurrent').textContent  = '$' + fmt(bal, 2);
+  document.getElementById('ssCurrent').style.color  = c;
+  document.getElementById('ssPnl').textContent      = (sessPnl >= 0 ? '+' : '') + '$' + fmt(Math.abs(sessPnl), 2);
+  document.getElementById('ssPnl').style.color      = sessPnl >= 0 ? cG : cR;
+  document.getElementById('ssR').textContent        = (sessR >= 0 ? '+' : '') + sessR.toFixed(1) + 'R';
+  document.getElementById('ssR').style.color        = sessR >= 0 ? cG : cR;
 
-  // ── Metrics panel ──────────────────────────────────────────
-  const m     = calcMetrics(hist);
-  const dd    = calcDrawdown(rs.equityCurve);
-  const bst   = calcBestSetup(hist);
+  // ── Risk Status Panel ──────────────────────────────────────
+  const DAILY_LIMIT = 3.0;
+  const remaining   = DAILY_LIMIT + sessR;  // sessR is negative when losing
+  const rpTradesEl  = document.getElementById('rpTrades');
+  const rpSessEl    = document.getElementById('rpSessR');
+  const rpRemEl     = document.getElementById('rpRemain');
+  rpTradesEl.textContent = sessCnt;
+  rpSessEl.textContent   = (sessR >= 0 ? '+' : '') + sessR.toFixed(1) + 'R';
+  rpSessEl.style.color   = sessR >= 0 ? cG : sessR < -2 ? cR : 'var(--gold)';
+  rpRemEl.textContent    = remaining > 0 ? remaining.toFixed(1) + 'R left' : 'LIMIT HIT';
+  rpRemEl.className      = 'rp-val ' + (remaining <= 0 ? 'danger' : remaining < 1 ? 'warn' : 'safe');
+
+  // ── L2 Metrics ─────────────────────────────────────────────
+  const m   = calcMetrics(hist);
+  const dd  = calcDrawdown(rs.equityCurve);
+  const bst = calcBestSetup(hist);
 
   const avgREl = document.getElementById('smAvgR');
   avgREl.textContent = m.total ? (m.avgR >= 0 ? '+' : '') + m.avgR.toFixed(2) + 'R' : '—';
-  avgREl.style.color = m.avgR >= 0 ? 'var(--green)' : 'var(--red)';
+  avgREl.style.color = m.total ? (m.avgR >= 0 ? cG : cR) : 'var(--t3)';
 
   const expEl = document.getElementById('smExpect');
   expEl.textContent = m.total >= 3 ? (m.expect >= 0 ? '+' : '') + m.expect.toFixed(2) + 'R' : '—';
-  expEl.style.color = m.expect >= 0 ? 'var(--green)' : 'var(--red)';
+  expEl.style.color = m.total >= 3 ? (m.expect >= 0 ? cG : cR) : 'var(--t3)';
 
   const ddEl = document.getElementById('smDD');
   ddEl.textContent = dd > 0 ? '-' + dd.toFixed(1) + '%' : '0%';
-  ddEl.style.color = dd > 10 ? 'var(--red)' : dd > 5 ? 'var(--gold)' : 'var(--green)';
+  ddEl.style.color = dd > 10 ? cR : dd > 5 ? 'var(--gold)' : 'var(--t2)';
 
   const bstEl = document.getElementById('smBestSetup');
   bstEl.textContent = bst ? bst.grade + ' (' + (bst.wr*100).toFixed(0) + '%)' : '—';
-  bstEl.style.color = bst ? gradeColor(bst.grade) : 'var(--t2)';
+  bstEl.style.color = bst ? gradeColor(bst.grade) : 'var(--t3)';
 
   // ── Pre-trade panel ────────────────────────────────────────
   renderPreTrade(rs);
@@ -1560,124 +1501,129 @@ function renderSimulator() {
   const trades = rs.activeTrades || [];
 
   if (!trades.length) {
-    atEl.innerHTML = '<div class="card empty-state"><div class="empty-icon">📋</div><div class="empty-txt">No active trades. CRT alerts are automatically logged here.</div></div>';
+    atEl.innerHTML = '<div class="card es"><div class="es-icon">📋</div><div class="es-txt">No active trades.<br>CRT alerts are automatically logged here.</div></div>';
   } else {
     atEl.innerHTML = trades.map((t, idx) => {
-      const risk     = t.rawRisk || Math.abs(t.rawEntry - t.rawSL);
-      const unrealR  = cur && risk > 0 ? ((t.bull ? cur - t.rawEntry : t.rawEntry - cur) / risk) : 0;
-      const rc       = unrealR >= 0 ? 'var(--green)' : 'var(--red)';
-      const riskPct  = { 'A+': 3, 'A': 2, 'B': 1 }[t.grade] || 1;
-      const riskAmt  = (t.entryBalance || SIM_START) * riskPct / 100;
-      const posSize  = risk > 0 ? riskAmt / risk : 0;
-      const tpLvls   = t.tpLevels || [t.rawTP1];
-      const tpIdx    = t.tpIndex  || 0;
-      const phase    = t.phase    || 'entry';
+      const risk    = t.rawRisk || Math.abs(t.rawEntry - t.rawSL);
+      const unrealR = cur && risk > 0 ? ((t.bull ? cur - t.rawEntry : t.rawEntry - cur) / risk) : 0;
+      const rc      = unrealR >= 0 ? cG : cR;
+      const riskPct = { 'A+': 3, 'A': 2, 'B': 1 }[t.grade] || 1;
+      const riskAmt = (t.entryBalance || SIM_START) * riskPct / 100;
+      const posSize = risk > 0 ? riskAmt / risk : 0;
+      const tpLvls  = t.tpLevels || [t.rawTP1];
+      const tpIdx   = t.tpIndex  || 0;
+      const phase   = t.phase    || 'entry';
+      const slDist  = risk > 0 && t.rawEntry ? ((risk / t.rawEntry) * 100).toFixed(2) + '%' : '—';
+      const finalRR = tpLvls.length && risk > 0 ? (Math.abs(tpLvls[tpLvls.length-1] - t.rawEntry) / risk).toFixed(1) + 'R' : '—';
 
-      // phase trail nodes
-      const phaseNodes = ['entry', ...tpLvls.map((_,i) => 'tp'+(i+1))];
-      const curPhaseIdx = phaseNodes.indexOf(phase);
-
-      const phaseTrail = phaseNodes.map((p, i) => {
+      // phase trail
+      const phaseNodes   = ['entry', ...tpLvls.map((_, i) => 'tp'+(i+1))];
+      const curPhaseIdx  = phaseNodes.indexOf(phase);
+      const phaseHtml    = phaseNodes.map((p, i) => {
         const cls = i < curPhaseIdx ? 'done' : i === curPhaseIdx ? 'current' : '';
-        const arr  = i < phaseNodes.length - 1 ? `<span class="pt-step-arrow">→</span>` : '';
-        return `<div class="pt-step"><span class="pt-step-node ${cls}">${p.toUpperCase()}</span>${arr}</div>`;
+        const arr = i < phaseNodes.length - 1 ? `<span class="atc3-parrow">›</span>` : '';
+        return `<span class="atc3-pnode ${cls}">${p.toUpperCase()}</span>${arr}`;
       }).join('');
 
       // tp pills
-      const tpPills = tpLvls.map((tp, i) => {
-        const cls = i < tpIdx ? 'done' : i === tpIdx ? 'next' : 'pending';
-        const rr  = risk > 0 ? (Math.abs(tp - t.rawEntry) / risk).toFixed(1) + 'R' : '';
-        return `<div class="tp-pill ${cls}">TP${i+1} $${fmt(tp,0)} <span style="opacity:.7">${rr}</span></div>`;
+      const tpHtml = tpLvls.map((tp, i) => {
+        const cls = i < tpIdx ? 'done' : i === tpIdx ? 'active' : '';
+        const rr  = risk > 0 ? ' ' + (Math.abs(tp - t.rawEntry)/risk).toFixed(1)+'R' : '';
+        return `<span class="atc3-tp ${cls}">TP${i+1} $${fmt(tp,0)}${rr}</span>`;
       }).join('');
 
-      const slDist = risk > 0 ? ((risk / t.rawEntry) * 100).toFixed(2) + '%' : '—';
-      const finalRR = tpLvls.length && risk > 0 ? (Math.abs(tpLvls[tpLvls.length-1] - t.rawEntry) / risk).toFixed(1) + 'R' : '—';
+      // mistake selector (stored in localStorage)
+      const mKey   = 'msnr_mistake_' + t.id;
+      const mVal   = localStorage.getItem(mKey) || 'none';
+      const misBadge = mVal !== 'none'
+        ? `<span class="atc3-mistake">${mVal.replace(/-/g,' ')}</span>` : '';
 
-      return `<div class="atc2 ${t.bull ? 'long-border' : 'short-border'}">
-        <div class="atc2-hdr" onclick="toggleTradeCard('atc2body_${idx}', this)">
-          <div class="atc2-left">
-            <span class="atc2-dir ${t.bull ? 'long' : 'short'}">${t.direction}</span>
-            <span class="grade-chip" style="color:${gradeColor(t.grade)}">${t.grade}</span>
-            <span class="atc2-phase">${phase.toUpperCase()}</span>
+      return `<div class="atc3 ${t.bull ? 'long-side' : 'short-side'}">
+        <div class="atc3-hdr" onclick="toggleAtc3('ab_${idx}','ac_${idx}')">
+          <div class="atc3-left">
+            <span class="atc3-dir ${t.bull ? 'long' : 'short'}">${t.direction}</span>
+            <span class="gc3" style="color:${gradeColor(t.grade)}">${t.grade}</span>
+            <span class="atc3-phase-tag">${phase.toUpperCase()}</span>
+            ${misBadge}
           </div>
-          <div class="atc2-right">
-            <span class="atc2-r" style="color:${rc}">${cur ? (unrealR >= 0 ? '+' : '') + unrealR.toFixed(1) + 'R' : '—'}</span>
-            <span style="font-size:11px;color:var(--t3);margin-left:4px">${cur ? '$' + fmt(cur, 0) : ''}</span>
-            <span class="atc2-chevron" id="chev_${idx}">▼</span>
+          <div class="atc3-right">
+            <span class="atc3-unrealr" style="color:${rc}">${cur ? (unrealR >= 0 ? '+' : '') + unrealR.toFixed(1)+'R' : '—'}</span>
+            <span style="font-size:10px;color:var(--t4)">${cur ? '$'+fmt(cur,0) : ''}</span>
+            <span class="atc3-chev" id="ac_${idx}">▼</span>
           </div>
         </div>
-        <div class="atc2-body" id="atc2body_${idx}">
-          <div class="atc2-section">
-            <div class="atc2-sec-title">TRADE INFO</div>
-            <div class="atc2-kv">
-              <div class="atc2-item"><span>Entry Balance</span><span style="color:var(--gold)">$${fmt(t.entryBalance || SIM_START, 2)}</span></div>
-              <div class="atc2-item"><span>Risk %</span><span>${riskPct}%</span></div>
-              <div class="atc2-item"><span>Risk $</span><span style="color:var(--red)">$${fmt(riskAmt, 2)}</span></div>
-              <div class="atc2-item"><span>Position Size</span><span>${fmt(posSize, 4)} BTC</span></div>
-              <div class="atc2-item"><span>Entry</span><span style="color:var(--gold)">$${fmt(t.rawEntry, 0)}</span></div>
-              <div class="atc2-item"><span>SL</span><span style="color:var(--red)">$${fmt(t.rawSL, 0)} (${slDist})</span></div>
-              <div class="atc2-item"><span>HTF Bias</span><span style="color:${biasColor(t.bias || '—')}">${t.bias || '—'}</span></div>
-              <div class="atc2-item"><span>Final RR</span><span style="color:var(--purple)">${finalRR}</span></div>
-            </div>
+        <div class="atc3-body" id="ab_${idx}">
+          <div class="atc3-grid">
+            <div class="atc3-kv"><div class="atc3-kv-l">Entry Bal</div><div class="atc3-kv-v" style="color:var(--t1)">$${fmt(t.entryBalance||SIM_START,2)}</div></div>
+            <div class="atc3-kv"><div class="atc3-kv-l">Risk % / $</div><div class="atc3-kv-v" style="color:var(--red)">${riskPct}% · $${fmt(riskAmt,2)}</div></div>
+            <div class="atc3-kv"><div class="atc3-kv-l">Position</div><div class="atc3-kv-v">${fmt(posSize,4)} BTC</div></div>
+            <div class="atc3-kv"><div class="atc3-kv-l">Entry</div><div class="atc3-kv-v" style="color:var(--t1)">$${fmt(t.rawEntry,0)}</div></div>
+            <div class="atc3-kv"><div class="atc3-kv-l">SL</div><div class="atc3-kv-v" style="color:var(--red)">$${fmt(t.rawSL,0)} (${slDist})</div></div>
+            <div class="atc3-kv"><div class="atc3-kv-l">HTF Bias</div><div class="atc3-kv-v" style="color:${biasColor(t.bias||'')}">${t.bias||'—'}</div></div>
+            <div class="atc3-kv"><div class="atc3-kv-l">Final RR</div><div class="atc3-kv-v" style="color:var(--t2)">${finalRR}</div></div>
+            <div class="atc3-kv"><div class="atc3-kv-l">Setup</div><div class="atc3-kv-v" style="color:var(--t3)">CRT / MSNR</div></div>
           </div>
-          <div class="atc2-section">
-            <div class="atc2-sec-title">TP LEVELS</div>
-            <div class="tp-chain">${tpPills}</div>
-          </div>
-          <div class="atc2-section">
-            <div class="atc2-sec-title">PHASE TRAIL</div>
-            <div class="phase-trail">${phaseTrail}</div>
-          </div>
-          <div class="atc2-section" style="font-size:10px;color:var(--t3)">
-            Entered: ${t.enteredAt ? t.enteredAt.slice(0,16).replace('T',' ') : '—'}
+          <div class="atc3-tp-row">${tpHtml}</div>
+          <div class="atc3-phase-row">${phaseHtml}</div>
+          <div class="atc3-context">
+            <span style="color:var(--t4)">MISTAKE:</span>
+            <select onchange="saveMistake('${t.id}',this.value)" style="background:var(--s2);border:1px solid var(--border2);color:var(--t2);padding:2px 6px;font-family:var(--font-mono);font-size:9px;outline:none;cursor:pointer">
+              <option value="none"    ${mVal==='none'?'selected':''}>None</option>
+              <option value="early-entry"    ${mVal==='early-entry'?'selected':''}>Early entry</option>
+              <option value="ignored-bias"   ${mVal==='ignored-bias'?'selected':''}>Ignored bias</option>
+              <option value="over-risk"      ${mVal==='over-risk'?'selected':''}>Over-risk</option>
+              <option value="emotional"      ${mVal==='emotional'?'selected':''}>Emotional trade</option>
+              <option value="fomo"           ${mVal==='fomo'?'selected':''}>FOMO</option>
+              <option value="poor-setup"     ${mVal==='poor-setup'?'selected':''}>Poor setup</option>
+            </select>
+            <span style="color:var(--t4)">Entered: ${t.enteredAt ? t.enteredAt.slice(0,16).replace('T',' ') : '—'}</span>
           </div>
         </div>
       </div>`;
     }).join('');
   }
 
-  // ── History table v2 ──────────────────────────────────────
+  // ── L3 Trade history ───────────────────────────────────────
   const hEl = document.getElementById('simHistory');
   if (!hist.length) {
-    hEl.innerHTML = '<div class="empty-state"><div class="empty-txt">No completed trades yet.</div></div>';
+    hEl.innerHTML = '<div class="es"><div class="es-txt">No completed trades yet.</div></div>';
   } else {
-    let h = `<table class="htbl"><thead><tr>
-      <th>TIME</th><th>DIR</th><th>GRADE</th><th>ENTRY</th><th>CLOSE</th><th>RESULT</th><th>P&L</th><th>R</th>
+    let h = `<table class="htbl3"><thead><tr>
+      <th>DIR</th><th>GRADE</th><th>RESULT</th><th>P&amp;L</th><th>R</th><th>DATE</th>
     </tr></thead><tbody>`;
     for (let i = 0; i < Math.min(hist.length, 50); i++) {
-      const t  = hist[i];
-      const pc = (t.pnl || 0) >= 0 ? 'var(--green)' : 'var(--red)';
-      const res = (t.result || '').toUpperCase();
-      // detail row data
-      const riskPct  = { 'A+': 3, 'A': 2, 'B': 1 }[t.grade] || 1;
-      const riskAmt  = (t.entryBalance || SIM_START) * riskPct / 100;
-      const rawRisk  = t.rawRisk || Math.abs((t.rawEntry||0) - (t.rawSL||0));
-      const posSize  = rawRisk > 0 ? riskAmt / rawRisk : 0;
-      const tpLvls   = t.tpLevels || [t.rawTP1];
-      const finalRR  = tpLvls.length && rawRisk > 0 ? (Math.abs(tpLvls[tpLvls.length-1] - (t.rawEntry||0)) / rawRisk).toFixed(1) + 'R' : '—';
-      const tpStr    = (tpLvls||[]).map((tp,j) => `TP${j+1}:$${fmt(tp,0)}`).join('  ');
+      const t       = hist[i];
+      const pc      = (t.pnl||0) >= 0 ? cG : cR;
+      const res     = (t.result||'').toUpperCase();
+      const riskPct = { 'A+': 3, 'A': 2, 'B': 1 }[t.grade] || 1;
+      const riskAmt = (t.entryBalance || SIM_START) * riskPct / 100;
+      const rawRisk = t.rawRisk || Math.abs((t.rawEntry||0) - (t.rawSL||0));
+      const posSize = rawRisk > 0 ? riskAmt / rawRisk : 0;
+      const tpLvls  = t.tpLevels || [t.rawTP1];
+      const finalRR = tpLvls.length && rawRisk > 0 ? (Math.abs(tpLvls[tpLvls.length-1] - (t.rawEntry||0)) / rawRisk).toFixed(1)+'R' : '—';
+      const tpStr   = (tpLvls||[]).map((tp,j) => `TP${j+1}:$${fmt(tp,0)}`).join('  ');
+      const mKey    = 'msnr_mistake_' + t.id;
+      const mVal    = t.id ? (localStorage.getItem(mKey) || 'none') : 'none';
 
-      h += `<tr onclick="toggleHistRow('hd_${i}')">
-        <td style="color:var(--t3);font-size:10px">${(t.closedAt||'').slice(0,16).replace('T',' ')}</td>
-        <td style="color:${t.direction==='LONG'?'var(--green)':'var(--red)'}">${t.direction||'—'}</td>
-        <td><span style="color:${gradeColor(t.grade)}">${t.grade||'—'}</span></td>
-        <td style="color:var(--gold)">$${fmt(t.rawEntry,0)}</td>
-        <td style="color:var(--t2)">$${fmt(t.closePrice||0,0)}</td>
-        <td><span class="rtag ${t.result}">${res}</span></td>
-        <td style="color:${pc};font-weight:700">${(t.pnl||0)>=0?'+':''}$${fmt(Math.abs(t.pnl||0),2)}</td>
-        <td style="color:${pc};font-weight:700">${(t.pnlR||0)>=0?'+':''}${(t.pnlR||0).toFixed(1)}R</td>
+      h += `<tr onclick="toggleHistRow3('hd3_${i}')">
+        <td style="color:${t.direction==='LONG'?cG:cR};font-weight:600">${t.direction||'—'}</td>
+        <td><span class="gc3" style="color:${gradeColor(t.grade)}">${t.grade||'—'}</span></td>
+        <td><span class="rtag3 ${t.result}">${res}</span></td>
+        <td style="color:${pc};font-weight:600">${(t.pnl||0)>=0?'+':''}$${fmt(Math.abs(t.pnl||0),2)}</td>
+        <td style="color:${pc}">${(t.pnlR||0)>=0?'+':''}${(t.pnlR||0).toFixed(1)}R</td>
+        <td style="color:var(--t4);font-size:9px">${(t.closedAt||'').slice(0,10)}</td>
       </tr>
-      <tr class="htbl-detail" id="hd_${i}"><td colspan="8">
-        <div class="htbl-detail-inner">
-          <div class="hd-item"><div class="hd-lbl">Entry Balance</div><div class="hd-val">$${fmt(t.entryBalance||SIM_START,2)}</div></div>
-          <div class="hd-item"><div class="hd-lbl">Risk % / $</div><div class="hd-val">${riskPct}% / $${fmt(riskAmt,2)}</div></div>
-          <div class="hd-item"><div class="hd-lbl">Position Size</div><div class="hd-val">${fmt(posSize,4)} BTC</div></div>
-          <div class="hd-item"><div class="hd-lbl">SL Price</div><div class="hd-val" style="color:var(--red)">$${fmt(t.rawSL||0,0)}</div></div>
-          <div class="hd-item"><div class="hd-lbl">SL Distance</div><div class="hd-val">$${fmt(rawRisk,0)} (${rawRisk>0&&t.rawEntry?((rawRisk/t.rawEntry)*100).toFixed(2):'—'}%)</div></div>
-          <div class="hd-item"><div class="hd-lbl">Final RR</div><div class="hd-val" style="color:var(--purple)">${finalRR}</div></div>
-          <div class="hd-item"><div class="hd-lbl">HTF Bias</div><div class="hd-val" style="color:${biasColor(t.bias||'')}">${t.bias||'—'}</div></div>
-          <div class="hd-item"><div class="hd-lbl">Phase Closed</div><div class="hd-val">${(t.phase||'entry').toUpperCase()}</div></div>
-          <div class="hd-item" style="grid-column:1/-1"><div class="hd-lbl">TP Levels</div><div class="hd-val" style="font-size:11px;color:var(--t2)">${tpStr||'—'}</div></div>
+      <tr class="htbl3-detail" id="hd3_${i}"><td colspan="6">
+        <div class="htbl3-detail-grid">
+          <div class="hd3-item"><div class="hd3-lbl">Entry Balance</div><div class="hd3-val">$${fmt(t.entryBalance||SIM_START,2)}</div></div>
+          <div class="hd3-item"><div class="hd3-lbl">Risk % / $</div><div class="hd3-val" style="color:var(--red)">${riskPct}% / $${fmt(riskAmt,2)}</div></div>
+          <div class="hd3-item"><div class="hd3-lbl">Position Size</div><div class="hd3-val">${fmt(posSize,4)} BTC</div></div>
+          <div class="hd3-item"><div class="hd3-lbl">SL Price</div><div class="hd3-val" style="color:var(--red)">$${fmt(t.rawSL||0,0)}</div></div>
+          <div class="hd3-item"><div class="hd3-lbl">SL Distance</div><div class="hd3-val">$${fmt(rawRisk,0)} (${rawRisk>0&&t.rawEntry?((rawRisk/t.rawEntry)*100).toFixed(2):'—'}%)</div></div>
+          <div class="hd3-item"><div class="hd3-lbl">Final RR</div><div class="hd3-val">${finalRR}</div></div>
+          <div class="hd3-item"><div class="hd3-lbl">HTF Bias</div><div class="hd3-val" style="color:${biasColor(t.bias||'')}">${t.bias||'—'}</div></div>
+          <div class="hd3-item"><div class="hd3-lbl">Mistake</div><div class="hd3-val" style="color:${mVal!=='none'?'var(--red)':'var(--t4)'}">${mVal==='none'?'—':mVal.replace(/-/g,' ')}</div></div>
+          <div class="hd3-item" style="grid-column:1/-1"><div class="hd3-lbl">TP Levels</div><div class="hd3-val" style="color:var(--t3)">${tpStr||'—'}</div></div>
         </div>
       </td></tr>`;
     }
@@ -1685,19 +1631,29 @@ function renderSimulator() {
   }
 }
 
-function toggleTradeCard(bodyId, hdr) {
+function toggleAtc3(bodyId, chevId) {
   const body = document.getElementById(bodyId);
-  const idx  = bodyId.split('_')[1];
-  const chev = document.getElementById('chev_' + idx);
+  const chev = document.getElementById(chevId);
   if (!body) return;
-  const isOpen = body.classList.toggle('open');
-  if (chev) chev.classList.toggle('open', isOpen);
+  const open = body.classList.toggle('open');
+  if (chev) chev.classList.toggle('open', open);
 }
 
-function toggleHistRow(rowId) {
+function toggleHistRow3(rowId) {
   const el = document.getElementById(rowId);
   if (el) el.classList.toggle('open');
 }
+
+function saveMistake(tradeId, val) {
+  localStorage.setItem('msnr_mistake_' + tradeId, val);
+  // re-render so badge updates
+  renderSimulator();
+  renderEquityChart();
+}
+
+// keep old toggle names as aliases so nothing breaks
+function toggleTradeCard(b, h) { toggleAtc3(b, h); }
+function toggleHistRow(r) { toggleHistRow3(r); }
 
 // ═══════════════════════════════════════════════════════════════
 // CHART
@@ -1840,7 +1796,6 @@ function showPage(id, btn) {
   btn.classList.add('active');
   if (id === 'simulator') { renderSimulator(); renderEquityChart(); }
   if (id === 'levels')    renderLevels();
-  if (id === 'journal')   { renderJournal(); initJournalDate(); }
 }
 
 function showNotif(msg) {
@@ -1854,199 +1809,6 @@ function resetSim() {
   if (confirm('Reset simulator to $1000?')) {
     showNotif('Simulator reset is managed by the scanner');
   }
-}
-
-// ═══════════════════════════════════════════════════════════════
-// JOURNAL v2
-// ═══════════════════════════════════════════════════════════════
-const JOURNAL_KEY = 'msnr_journal_v2';
-
-// Filter state
-let jFilters = { result: 'all', grade: 'all' };
-
-function loadJournal() {
-  try { return JSON.parse(localStorage.getItem(JOURNAL_KEY)) || []; }
-  catch(e) { return []; }
-}
-
-function saveJournal(trades) {
-  try { localStorage.setItem(JOURNAL_KEY, JSON.stringify(trades)); } catch(e) {}
-}
-
-function setJFilter(key, val, btn) {
-  jFilters[key] = val;
-  // update button states for that row
-  const parent = btn.parentElement;
-  parent.querySelectorAll('.jf-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderJournal();
-}
-
-function applyJFilters() { renderJournal(); }
-
-function getFilteredTrades() {
-  const trades  = loadJournal();
-  const setup   = document.getElementById('jFilterSetup')?.value || 'all';
-  return trades.filter(t => {
-    if (jFilters.result !== 'all' && t.result !== jFilters.result) return false;
-    if (jFilters.grade  !== 'all' && t.grade  !== jFilters.grade)  return false;
-    if (setup !== 'all' && t.setup !== setup) return false;
-    return true;
-  });
-}
-
-function addJournalTrade() {
-  const g = id => document.getElementById(id)?.value || '';
-  const entry = {
-    id:        Date.now(),
-    date:      g('jDate'),
-    pair:      g('jPair') || 'BTCUSDT',
-    direction: g('jDir'),
-    grade:     g('jGrade'),
-    bias:      g('jBias'),
-    setup:     g('jSetup'),
-    entry:     parseFloat(g('jEntry')) || 0,
-    sl:        parseFloat(g('jSL'))    || 0,
-    tp1:       parseFloat(g('jTP'))    || 0,
-    exit:      parseFloat(g('jExit'))  || 0,
-    result:    g('jResult'),
-    pnlR:      0,
-    notes:     g('jNotes'),
-  };
-  // auto-calc R if entry/sl/exit present
-  if (entry.entry && entry.sl && entry.exit) {
-    const risk = Math.abs(entry.entry - entry.sl);
-    if (risk > 0) {
-      const dir = entry.direction === 'LONG' ? 1 : -1;
-      entry.pnlR = parseFloat(((entry.exit - entry.entry) * dir / risk).toFixed(2));
-    }
-  }
-  const trades = loadJournal();
-  trades.unshift(entry);
-  saveJournal(trades);
-  renderJournal();
-  showNotif('Trade added ✓');
-  document.getElementById('journalCount').textContent = trades.length;
-}
-
-function deleteJournalTrade(id) {
-  saveJournal(loadJournal().filter(t => t.id !== id));
-  renderJournal();
-}
-
-function renderJournal() {
-  const all      = loadJournal();
-  const filtered = getFilteredTrades();
-
-  // ── Stats (all trades) ──────────────────────────────────────
-  const wins   = all.filter(t => t.result === 'win').length;
-  const losses = all.filter(t => t.result === 'loss').length;
-  const be     = all.filter(t => t.result === 'be').length;
-  const total  = wins + losses + be;
-  const wr     = total ? ((wins / total) * 100).toFixed(0) + '%' : '—';
-  const netR   = all.reduce((s, t) => s + (t.pnlR || 0), 0);
-  const avgR   = total ? netR / total : 0;
-  // expectancy
-  const wTrades = all.filter(t => t.result === 'win');
-  const lTrades = all.filter(t => t.result === 'loss');
-  const avgW    = wTrades.length ? wTrades.reduce((s,t) => s + (t.pnlR||0), 0) / wTrades.length : 0;
-  const avgL    = lTrades.length ? lTrades.reduce((s,t) => s + Math.abs(t.pnlR||0), 0) / lTrades.length : 0;
-  const wRate   = total ? wins / total : 0;
-  const lRate   = total ? losses / total : 0;
-  const expect  = total >= 3 ? wRate * avgW - lRate * avgL : null;
-
-  document.getElementById('jTotal').textContent = all.length;
-  document.getElementById('jWR').textContent    = wr;
-  const nrEl = document.getElementById('jNetR');
-  nrEl.textContent = (netR >= 0 ? '+' : '') + netR.toFixed(1) + 'R';
-  nrEl.style.color  = netR >= 0 ? 'var(--green)' : 'var(--red)';
-  const arEl = document.getElementById('jAvgR');
-  arEl.textContent = total ? (avgR >= 0 ? '+' : '') + avgR.toFixed(2) + 'R' : '—';
-  arEl.style.color  = avgR >= 0 ? 'var(--green)' : 'var(--red)';
-  const expEl = document.getElementById('jExpect');
-  expEl.textContent = expect !== null ? (expect >= 0 ? '+' : '') + expect.toFixed(2) + 'R' : '—';
-  expEl.style.color  = expect !== null ? (expect >= 0 ? 'var(--green)' : 'var(--red)') : 'var(--t2)';
-
-  // ── Setup performance breakdown ─────────────────────────────
-  const setupEl = document.getElementById('setupPerf');
-  const setupMap = {};
-  for (const t of all) {
-    const s = t.setup || 'OTHER';
-    if (!setupMap[s]) setupMap[s] = { wins:0, losses:0, total:0, netR:0 };
-    if (['win','tp1','tp2','tp3','tp4'].includes(t.result)) setupMap[s].wins++;
-    if (t.result === 'loss') setupMap[s].losses++;
-    if (['win','loss','be'].includes(t.result)) setupMap[s].total++;
-    setupMap[s].netR += (t.pnlR || 0);
-  }
-  const setupEntries = Object.entries(setupMap);
-  if (!setupEntries.length) {
-    setupEl.innerHTML = '<div class="sp-box card"><div class="sp-name" style="color:var(--t3)">No data yet</div></div>';
-  } else {
-    setupEl.innerHTML = setupEntries.map(([name, d]) => {
-      const swr = d.total ? ((d.wins / d.total) * 100).toFixed(0) + '%' : '—';
-      const c   = d.netR >= 0 ? 'var(--green)' : 'var(--red)';
-      return `<div class="sp-box card">
-        <div class="sp-name">${name}</div>
-        <div class="sp-wr" style="color:${c}">${swr}</div>
-        <div class="sp-sub">${d.total} trades · ${(d.netR>=0?'+':'')}${d.netR.toFixed(1)}R</div>
-      </div>`;
-    }).join('');
-  }
-
-  // ── Table (filtered) ────────────────────────────────────────
-  const wrap = document.getElementById('journalTableWrap');
-  if (!filtered.length) {
-    wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">📓</div><div class="empty-txt">No trades match current filters.</div></div>';
-    return;
-  }
-
-  let h = `<table class="jtbl"><thead><tr>
-    <th>DATE</th><th>DIR</th><th>GRADE</th><th>SETUP</th><th>BIAS</th><th>ENTRY</th><th>RESULT</th><th>R</th><th>NOTES</th><th></th>
-  </tr></thead><tbody>`;
-  for (const t of filtered) {
-    const rc  = t.result === 'win' ? 'win' : t.result === 'loss' ? 'loss' : t.result === 'be' ? 'be' : 'open';
-    const rv  = (t.pnlR || 0) >= 0 ? 'r-pos' : 'r-neg';
-    const dt  = t.date ? t.date.slice(0, 16).replace('T', ' ') : '—';
-    h += `<tr>
-      <td style="color:var(--t2);font-size:10px">${dt}</td>
-      <td style="color:${t.direction === 'LONG' ? 'var(--green)' : 'var(--red)'}">${t.direction}</td>
-      <td style="color:${gradeColor(t.grade)}">${t.grade}</td>
-      <td style="color:var(--t2);font-size:10px">${t.setup || '—'}</td>
-      <td style="color:${biasColor(t.bias||'')};font-size:10px">${t.bias || '—'}</td>
-      <td style="color:var(--gold)">$${fmt(t.entry, 0)}</td>
-      <td><span class="result-pill ${rc}">${(t.result || 'open').toUpperCase()}</span></td>
-      <td class="${rv}">${(t.pnlR || 0) >= 0 ? '+' : ''}${(t.pnlR || 0).toFixed(1)}R</td>
-      <td class="notes-cell">${t.notes || '—'}</td>
-      <td><button class="btn-del" onclick="deleteJournalTrade(${t.id})">✕</button></td>
-    </tr>`;
-  }
-  wrap.innerHTML = h + '</tbody></table>';
-  document.getElementById('journalCount').textContent = all.length;
-}
-
-function exportJournal() {
-  const trades = loadJournal();
-  if (!trades.length) return showNotif('No trades to export');
-  const csv  = ['Date,Pair,Direction,Grade,Bias,Setup,Entry,SL,TP1,Exit,Result,R,Notes']
-    .concat(trades.map(t => [t.date, t.pair, t.direction, t.grade, t.bias, t.setup, t.entry, t.sl, t.tp1, t.exit, t.result, t.pnlR, `"${t.notes || ''}"`].join(',')))
-    .join('\n');
-  const a    = document.createElement('a');
-  a.href     = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-  a.download = 'msnr_journal.csv';
-  a.click();
-}
-
-function clearJournal() {
-  if (confirm('Clear all journal trades?')) {
-    saveJournal([]);
-    renderJournal();
-    showNotif('Journal cleared');
-  }
-}
-
-function initJournalDate() {
-  const el = document.getElementById('jDate');
-  if (el && !el.value) el.value = new Date().toISOString().slice(0, 16);
 }
 
 // ── INIT ─────────────────────────────────────────────────────
