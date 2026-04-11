@@ -1,0 +1,15 @@
+{
+  "leverage": 25,
+  "risk_pct": {
+    "A+": 3.0,
+    "A": 2.0,
+    "B": 1.0
+  },
+  "sl_buffer_pct": 0.1,
+  "trade_demo": true,
+  "trade_real": true,
+  "min_grade": "B",
+  "max_open_trades": 1,
+  "poll_interval_minutes": 5,
+  "notes": "Change anything here from GitHub. Trader picks it up within 5 minutes. Set trade_real to false to pause live trading. min_grade options: A+, A, B"
+}
