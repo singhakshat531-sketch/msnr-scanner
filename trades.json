@@ -670,7 +670,7 @@
     "MSS_1775775600000": "2026-04-09T23:25:28.295412+00:00"
   },
   "levelAlerts": {},
-  "lastUpdated": "2026-04-11T05:18:27.444886+00:00",
+  "lastUpdated": "2026-04-11T08:01:42.198514+00:00",
   "currentLevels": [
     {
       "type": "A",
@@ -733,17 +733,17 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 9.91
+      "dist": 9.9
     }
   ],
-  "currentPrice": 72761.42,
+  "currentPrice": 72759.74,
   "currentBias": "RANGING",
   "currentTrend": {
     "w1": "RANGING",
     "d1": "RANGING",
     "h4": "RANGING"
   },
-  "scanTime": "11 Apr 2026  10:48 AM IST",
+  "scanTime": "11 Apr 2026  01:31 PM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "SHORT",
