@@ -671,17 +671,8 @@
     "MSS_1775923200000": "2026-04-11T18:01:53.499565+00:00"
   },
   "levelAlerts": {},
-  "lastUpdated": "2026-04-12T09:32:49.494262+00:00",
+  "lastUpdated": "2026-04-12T11:49:23.560152+00:00",
   "currentLevels": [
-    {
-      "type": "V",
-      "price": 71626.58,
-      "fresh": false,
-      "hsl": false,
-      "has1d": true,
-      "grade": "A",
-      "dist": 0.02
-    },
     {
       "type": "A",
       "price": 71709.83,
@@ -689,7 +680,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "A",
-      "dist": 0.1
+      "dist": 0.3
     },
     {
       "type": "A",
@@ -698,7 +689,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 2.81
+      "dist": 3.01
     },
     {
       "type": "A",
@@ -707,16 +698,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 3.82
-    },
-    {
-      "type": "A",
-      "price": 74884.52,
-      "fresh": false,
-      "hsl": false,
-      "has1d": true,
-      "grade": "B",
-      "dist": 4.33
+      "dist": 4.01
     },
     {
       "type": "V",
@@ -725,7 +707,16 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 5.12
+      "dist": 4.91
+    },
+    {
+      "type": "A",
+      "price": 74884.52,
+      "fresh": false,
+      "hsl": false,
+      "has1d": true,
+      "grade": "B",
+      "dist": 4.53
     },
     {
       "type": "V",
@@ -734,7 +725,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 7.23
+      "dist": 7.02
     },
     {
       "type": "V",
@@ -743,17 +734,17 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 8.21
+      "dist": 7.99
     }
   ],
-  "currentPrice": 71638.51,
+  "currentPrice": 71495.52,
   "currentBias": "BULLISH",
   "currentTrend": {
     "w1": "RANGING",
     "d1": "BULLISH",
     "h4": "RANGING"
   },
-  "scanTime": "12 Apr 2026  03:02 PM IST",
+  "scanTime": "12 Apr 2026  05:19 PM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "SHORT",
