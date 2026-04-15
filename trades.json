@@ -705,16 +705,16 @@
     "MSS_1776142800000": "2026-04-14T06:19:04.672056+00:00"
   },
   "levelAlerts": {},
-  "lastUpdated": "2026-04-15T18:49:17.661676+00:00",
+  "lastUpdated": "2026-04-15T21:38:42.755688+00:00",
   "currentLevels": [
     {
       "type": "A",
-      "price": 74375.61,
-      "fresh": false,
+      "price": 75035.12,
+      "fresh": true,
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 0.03
+      "dist": 0.52
     },
     {
       "type": "V",
@@ -723,16 +723,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 0.67
-    },
-    {
-      "type": "A",
-      "price": 75366.59,
-      "fresh": true,
-      "hsl": false,
-      "has1d": true,
-      "grade": "A",
-      "dist": 1.34
+      "dist": 1.06
     },
     {
       "type": "V",
@@ -741,7 +732,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 4.97
+      "dist": 5.38
     },
     {
       "type": "V",
@@ -750,7 +741,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 9.1
+      "dist": 9.53
     },
     {
       "type": "V",
@@ -759,7 +750,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 11.3
+      "dist": 11.73
     },
     {
       "type": "V",
@@ -768,17 +759,17 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 12.31
+      "dist": 12.75
     }
   ],
-  "currentPrice": 74355.0,
+  "currentPrice": 74645.76,
   "currentBias": "BULLISH",
   "currentTrend": {
     "w1": "RANGING",
     "d1": "BULLISH",
     "h4": "RANGING"
   },
-  "scanTime": "16 Apr 2026  12:19 AM IST",
+  "scanTime": "16 Apr 2026  03:08 AM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "SHORT",
