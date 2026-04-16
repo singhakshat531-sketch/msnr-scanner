@@ -1,30 +1,7 @@
 {
   "balance": 2333.2282042644965,
-  "activeTrades": [
-    {
-      "id": "t_1776328099",
-      "bull": false,
-      "direction": "SHORT",
-      "grade": "B",
-      "level": 75035.12,
-      "rawEntry": 74635.55,
-      "rawSL": 74635.55,
-      "rawRisk": 535.47,
-      "tpLevels": [
-        73860.3,
-        70836.77,
-        68152.09,
-        66806.34,
-        66202.65
-      ],
-      "tpIndex": 1,
-      "rawTP1": 73860.3,
-      "rawTP2": 70836.77,
-      "phase": "tp1",
-      "entryBalance": 2269.72,
-      "enteredAt": "2026-04-16T08:28:19.609730+00:00",
-      "bias": "BULLISH"
-    },
+  "activeTrades": [],
+  "history": [
     {
       "id": "t_1776334547",
       "bull": false,
@@ -47,10 +24,42 @@
       "phase": "tp1",
       "entryBalance": 2269.72,
       "enteredAt": "2026-04-16T10:15:47.861509+00:00",
-      "bias": "BULLISH"
-    }
-  ],
-  "history": [
+      "bias": "BULLISH",
+      "result": "be",
+      "pnl": 0.0,
+      "pnlR": 0.0,
+      "closePrice": 74748.65,
+      "closedAt": "2026-04-16T16:23:09.211531+00:00"
+    },
+    {
+      "id": "t_1776328099",
+      "bull": false,
+      "direction": "SHORT",
+      "grade": "B",
+      "level": 75035.12,
+      "rawEntry": 74635.55,
+      "rawSL": 74635.55,
+      "rawRisk": 535.47,
+      "tpLevels": [
+        73860.3,
+        70836.77,
+        68152.09,
+        66806.34,
+        66202.65
+      ],
+      "tpIndex": 1,
+      "rawTP1": 73860.3,
+      "rawTP2": 70836.77,
+      "phase": "tp1",
+      "entryBalance": 2269.72,
+      "enteredAt": "2026-04-16T08:28:19.609730+00:00",
+      "bias": "BULLISH",
+      "result": "be",
+      "pnl": 0.0,
+      "pnlR": 0.0,
+      "closePrice": 74748.65,
+      "closedAt": "2026-04-16T16:23:09.211531+00:00"
+    },
     {
       "id": "t_1776334547",
       "bull": false,
@@ -782,13 +791,21 @@
     {
       "t": "2026-04-16T14:07:15.426411+00:00",
       "v": 2333.23
+    },
+    {
+      "t": "2026-04-16T16:23:09.211531+00:00",
+      "v": 2333.23
+    },
+    {
+      "t": "2026-04-16T16:23:09.211531+00:00",
+      "v": 2333.23
     }
   ],
   "stats": {
-    "totalTrades": 8,
+    "totalTrades": 10,
     "wins": 0,
     "losses": 4,
-    "be": 4,
+    "be": 6,
     "netR": 48.9,
     "bestR": 16.8
   },
@@ -822,16 +839,16 @@
     "MSS_1776330000000": "2026-04-16T10:15:47.861461+00:00"
   },
   "levelAlerts": {},
-  "lastUpdated": "2026-04-16T14:07:15.426575+00:00",
+  "lastUpdated": "2026-04-16T16:23:09.211603+00:00",
   "currentLevels": [
     {
       "type": "V",
-      "price": 73768.86,
-      "fresh": false,
+      "price": 74588.9,
+      "fresh": true,
       "hsl": false,
-      "has1d": false,
-      "grade": "B",
-      "dist": 0.03
+      "has1d": true,
+      "grade": "A+",
+      "dist": 0.21
     },
     {
       "type": "A",
@@ -839,8 +856,17 @@
       "fresh": false,
       "hsl": false,
       "has1d": true,
-      "grade": "B",
-      "dist": 1.66
+      "grade": "A",
+      "dist": 0.38
+    },
+    {
+      "type": "V",
+      "price": 73860.3,
+      "fresh": false,
+      "hsl": false,
+      "has1d": true,
+      "grade": "A",
+      "dist": 1.2
     },
     {
       "type": "V",
@@ -849,7 +875,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 4.17
+      "dist": 5.52
     },
     {
       "type": "V",
@@ -858,7 +884,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 8.27
+      "dist": 9.68
     },
     {
       "type": "V",
@@ -867,7 +893,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 10.45
+      "dist": 11.89
     },
     {
       "type": "V",
@@ -876,17 +902,17 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 11.46
+      "dist": 12.91
     }
   ],
-  "currentPrice": 73790.1,
+  "currentPrice": 74748.65,
   "currentBias": "BULLISH",
   "currentTrend": {
     "w1": "BULLISH",
     "d1": "BULLISH",
     "h4": "RANGING"
   },
-  "scanTime": "16 Apr 2026  07:37 PM IST",
+  "scanTime": "16 Apr 2026  09:53 PM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "SHORT",
