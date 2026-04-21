@@ -842,8 +842,17 @@
     "MSS_1776618000000": "2026-04-20T16:09:57.677988+00:00"
   },
   "levelAlerts": {},
-  "lastUpdated": "2026-04-21T05:27:53.962769+00:00",
+  "lastUpdated": "2026-04-21T07:51:38.607199+00:00",
   "currentLevels": [
+    {
+      "type": "A",
+      "price": 76330.56,
+      "fresh": true,
+      "hsl": false,
+      "has1d": true,
+      "grade": "A+",
+      "dist": 0.15
+    },
     {
       "type": "V",
       "price": 75740.17,
@@ -851,16 +860,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "A",
-      "dist": 0.2
-    },
-    {
-      "type": "A",
-      "price": 76330.56,
-      "fresh": true,
-      "hsl": false,
-      "has1d": true,
-      "grade": "A",
-      "dist": 0.58
+      "dist": 0.63
     },
     {
       "type": "A",
@@ -869,7 +869,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 2.5
+      "dist": 2.08
     },
     {
       "type": "V",
@@ -878,7 +878,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 2.8
+      "dist": 3.24
     },
     {
       "type": "V",
@@ -887,7 +887,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 7.14
+      "dist": 7.6
     },
     {
       "type": "V",
@@ -896,7 +896,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 11.36
+      "dist": 11.84
     },
     {
       "type": "V",
@@ -905,7 +905,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 13.6
+      "dist": 14.09
     },
     {
       "type": "V",
@@ -914,17 +914,17 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 14.64
+      "dist": 15.13
     }
   ],
-  "currentPrice": 75891.51,
+  "currentPrice": 76219.47,
   "currentBias": "BULLISH",
   "currentTrend": {
     "w1": "BULLISH",
     "d1": "BULLISH",
     "h4": "RANGING"
   },
-  "scanTime": "21 Apr 2026  10:57 AM IST",
+  "scanTime": "21 Apr 2026  01:21 PM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "LONG",
