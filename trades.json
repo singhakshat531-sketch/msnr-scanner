@@ -842,16 +842,16 @@
     "MSS_1776618000000": "2026-04-20T16:09:57.677988+00:00"
   },
   "levelAlerts": {},
-  "lastUpdated": "2026-04-24T11:57:23.644656+00:00",
+  "lastUpdated": "2026-04-24T13:53:11.964683+00:00",
   "currentLevels": [
     {
       "type": "A",
-      "price": 78283.64,
-      "fresh": false,
+      "price": 78260.68,
+      "fresh": true,
       "hsl": false,
       "has1d": true,
-      "grade": "A",
-      "dist": 0.03
+      "grade": "A+",
+      "dist": 0.24
     },
     {
       "type": "V",
@@ -860,7 +860,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "A",
-      "dist": 0.75
+      "dist": 0.51
     },
     {
       "type": "A",
@@ -869,7 +869,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 1.34
+      "dist": 1.57
     },
     {
       "type": "V",
@@ -878,7 +878,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "A",
-      "dist": 4.31
+      "dist": 4.06
     },
     {
       "type": "V",
@@ -887,7 +887,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 6.01
+      "dist": 5.76
     },
     {
       "type": "V",
@@ -896,7 +896,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 10.48
+      "dist": 10.22
     },
     {
       "type": "V",
@@ -905,7 +905,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 14.84
+      "dist": 14.56
     },
     {
       "type": "V",
@@ -914,7 +914,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 17.15
+      "dist": 16.87
     },
     {
       "type": "V",
@@ -923,17 +923,17 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 18.22
+      "dist": 17.93
     }
   ],
-  "currentPrice": 78262.72,
+  "currentPrice": 78074.53,
   "currentBias": "BULLISH",
   "currentTrend": {
     "w1": "BULLISH",
     "d1": "BULLISH",
     "h4": "RANGING"
   },
-  "scanTime": "24 Apr 2026  05:27 PM IST",
+  "scanTime": "24 Apr 2026  07:23 PM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "LONG",
