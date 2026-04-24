@@ -842,17 +842,8 @@
     "MSS_1776618000000": "2026-04-20T16:09:57.677988+00:00"
   },
   "levelAlerts": {},
-  "lastUpdated": "2026-04-24T20:50:18.835742+00:00",
+  "lastUpdated": "2026-04-24T21:48:36.372540+00:00",
   "currentLevels": [
-    {
-      "type": "V",
-      "price": 77660.05,
-      "fresh": true,
-      "hsl": false,
-      "has1d": false,
-      "grade": "A",
-      "dist": 0.02
-    },
     {
       "type": "A",
       "price": 78260.68,
@@ -860,7 +851,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 0.75
+      "dist": 0.86
     },
     {
       "type": "A",
@@ -869,7 +860,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 2.08
+      "dist": 2.18
     },
     {
       "type": "V",
@@ -878,7 +869,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "A",
-      "dist": 3.52
+      "dist": 3.41
     },
     {
       "type": "V",
@@ -887,7 +878,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 5.21
+      "dist": 5.1
     },
     {
       "type": "V",
@@ -896,7 +887,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 9.65
+      "dist": 9.54
     },
     {
       "type": "V",
@@ -905,7 +896,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 13.97
+      "dist": 13.85
     },
     {
       "type": "V",
@@ -914,7 +905,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 16.27
+      "dist": 16.14
     },
     {
       "type": "V",
@@ -923,17 +914,17 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 17.33
+      "dist": 17.2
     }
   ],
-  "currentPrice": 77673.8,
+  "currentPrice": 77591.19,
   "currentBias": "BULLISH",
   "currentTrend": {
     "w1": "BULLISH",
     "d1": "BULLISH",
     "h4": "RANGING"
   },
-  "scanTime": "25 Apr 2026  02:20 AM IST",
+  "scanTime": "25 Apr 2026  03:18 AM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "LONG",
