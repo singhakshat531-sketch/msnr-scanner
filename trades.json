@@ -842,17 +842,8 @@
     "MSS_1776618000000": "2026-04-20T16:09:57.677988+00:00"
   },
   "levelAlerts": {},
-  "lastUpdated": "2026-04-24T17:53:47.624020+00:00",
+  "lastUpdated": "2026-04-24T18:53:46.844440+00:00",
   "currentLevels": [
-    {
-      "type": "V",
-      "price": 77680.11,
-      "fresh": false,
-      "hsl": false,
-      "has1d": false,
-      "grade": "B",
-      "dist": 0.07
-    },
     {
       "type": "A",
       "price": 78260.68,
@@ -860,7 +851,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 0.67
+      "dist": 0.84
     },
     {
       "type": "A",
@@ -869,7 +860,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 2.0
+      "dist": 2.17
     },
     {
       "type": "V",
@@ -878,7 +869,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "A",
-      "dist": 3.61
+      "dist": 3.43
     },
     {
       "type": "V",
@@ -887,7 +878,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 5.3
+      "dist": 5.12
     },
     {
       "type": "V",
@@ -896,7 +887,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 9.74
+      "dist": 9.55
     },
     {
       "type": "V",
@@ -905,7 +896,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 14.06
+      "dist": 13.87
     },
     {
       "type": "V",
@@ -914,7 +905,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 16.36
+      "dist": 16.16
     },
     {
       "type": "V",
@@ -923,17 +914,17 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 17.42
+      "dist": 17.22
     }
   ],
-  "currentPrice": 77736.67,
+  "currentPrice": 77602.09,
   "currentBias": "BULLISH",
   "currentTrend": {
     "w1": "BULLISH",
     "d1": "BULLISH",
     "h4": "RANGING"
   },
-  "scanTime": "24 Apr 2026  11:23 PM IST",
+  "scanTime": "25 Apr 2026  12:23 AM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "LONG",
