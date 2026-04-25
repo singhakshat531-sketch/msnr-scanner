@@ -842,8 +842,17 @@
     "MSS_1776618000000": "2026-04-20T16:09:57.677988+00:00"
   },
   "levelAlerts": {},
-  "lastUpdated": "2026-04-24T23:39:33.484834+00:00",
+  "lastUpdated": "2026-04-25T02:30:25.975752+00:00",
   "currentLevels": [
+    {
+      "type": "V",
+      "price": 77463.4,
+      "fresh": true,
+      "hsl": false,
+      "has1d": true,
+      "grade": "A+",
+      "dist": 0.25
+    },
     {
       "type": "A",
       "price": 78260.68,
@@ -851,7 +860,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 1.02
+      "dist": 0.77
     },
     {
       "type": "A",
@@ -860,7 +869,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 2.34
+      "dist": 2.1
     },
     {
       "type": "V",
@@ -869,7 +878,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "A",
-      "dist": 3.25
+      "dist": 3.5
     },
     {
       "type": "V",
@@ -878,7 +887,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 4.93
+      "dist": 5.19
     },
     {
       "type": "V",
@@ -887,7 +896,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 9.36
+      "dist": 9.63
     },
     {
       "type": "V",
@@ -896,7 +905,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 13.67
+      "dist": 13.95
     },
     {
       "type": "V",
@@ -905,7 +914,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 15.96
+      "dist": 16.24
     },
     {
       "type": "V",
@@ -914,17 +923,17 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 17.01
+      "dist": 17.3
     }
   ],
-  "currentPrice": 77465.45,
+  "currentPrice": 77658.98,
   "currentBias": "BULLISH",
   "currentTrend": {
     "w1": "BULLISH",
     "d1": "BULLISH",
     "h4": "RANGING"
   },
-  "scanTime": "25 Apr 2026  05:09 AM IST",
+  "scanTime": "25 Apr 2026  08:00 AM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "LONG",
