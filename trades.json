@@ -842,7 +842,7 @@
     "MSS_1776618000000": "2026-04-20T16:09:57.677988+00:00"
   },
   "levelAlerts": {},
-  "lastUpdated": "2026-04-25T02:30:25.975752+00:00",
+  "lastUpdated": "2026-04-25T05:12:14.321875+00:00",
   "currentLevels": [
     {
       "type": "V",
@@ -851,7 +851,16 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 0.25
+      "dist": 0.09
+    },
+    {
+      "type": "A",
+      "price": 77697.03,
+      "fresh": true,
+      "hsl": false,
+      "has1d": true,
+      "grade": "A+",
+      "dist": 0.21
     },
     {
       "type": "A",
@@ -860,7 +869,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 0.77
+      "dist": 0.92
     },
     {
       "type": "A",
@@ -869,7 +878,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 2.1
+      "dist": 2.25
     },
     {
       "type": "V",
@@ -878,7 +887,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "A",
-      "dist": 3.5
+      "dist": 3.34
     },
     {
       "type": "V",
@@ -887,7 +896,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 5.19
+      "dist": 5.03
     },
     {
       "type": "V",
@@ -896,7 +905,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 9.63
+      "dist": 9.46
     },
     {
       "type": "V",
@@ -905,7 +914,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 13.95
+      "dist": 13.77
     },
     {
       "type": "V",
@@ -914,7 +923,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 16.24
+      "dist": 16.06
     },
     {
       "type": "V",
@@ -923,17 +932,17 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 17.3
+      "dist": 17.12
     }
   ],
-  "currentPrice": 77658.98,
+  "currentPrice": 77536.88,
   "currentBias": "BULLISH",
   "currentTrend": {
     "w1": "BULLISH",
     "d1": "BULLISH",
-    "h4": "RANGING"
+    "h4": "BULLISH"
   },
-  "scanTime": "25 Apr 2026  08:00 AM IST",
+  "scanTime": "25 Apr 2026  10:42 AM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "LONG",
