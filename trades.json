@@ -842,16 +842,16 @@
     "MSS_1776618000000": "2026-04-20T16:09:57.677988+00:00"
   },
   "levelAlerts": {},
-  "lastUpdated": "2026-04-26T13:07:25.192420+00:00",
+  "lastUpdated": "2026-04-26T14:43:47.823120+00:00",
   "currentLevels": [
     {
       "type": "A",
       "price": 78124.47,
-      "fresh": true,
+      "fresh": false,
       "hsl": false,
       "has1d": true,
-      "grade": "A+",
-      "dist": 0.36
+      "grade": "A",
+      "dist": 0.07
     },
     {
       "type": "V",
@@ -860,7 +860,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 0.56
+      "dist": 0.86
     },
     {
       "type": "A",
@@ -869,7 +869,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 1.87
+      "dist": 1.58
     },
     {
       "type": "V",
@@ -878,7 +878,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "A",
-      "dist": 3.75
+      "dist": 4.05
     },
     {
       "type": "V",
@@ -887,7 +887,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 5.44
+      "dist": 5.75
     },
     {
       "type": "V",
@@ -896,7 +896,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 9.89
+      "dist": 10.21
     },
     {
       "type": "V",
@@ -905,7 +905,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 14.22
+      "dist": 14.56
     },
     {
       "type": "V",
@@ -914,7 +914,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 16.52
+      "dist": 16.86
     },
     {
       "type": "V",
@@ -923,17 +923,17 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 17.58
+      "dist": 17.93
     }
   ],
-  "currentPrice": 77842.28,
+  "currentPrice": 78072.54,
   "currentBias": "BULLISH",
   "currentTrend": {
     "w1": "BULLISH",
     "d1": "BULLISH",
     "h4": "RANGING"
   },
-  "scanTime": "26 Apr 2026  06:37 PM IST",
+  "scanTime": "26 Apr 2026  08:13 PM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "LONG",
