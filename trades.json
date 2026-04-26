@@ -842,16 +842,16 @@
     "MSS_1776618000000": "2026-04-20T16:09:57.677988+00:00"
   },
   "levelAlerts": {},
-  "lastUpdated": "2026-04-26T07:40:25.983094+00:00",
+  "lastUpdated": "2026-04-26T09:01:22.691660+00:00",
   "currentLevels": [
     {
       "type": "A",
-      "price": 78260.68,
+      "price": 78124.47,
       "fresh": true,
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 0.34
+      "dist": 0.1
     },
     {
       "type": "V",
@@ -860,7 +860,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 0.75
+      "dist": 0.82
     },
     {
       "type": "A",
@@ -869,7 +869,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 1.68
+      "dist": 1.61
     },
     {
       "type": "V",
@@ -878,7 +878,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "A",
-      "dist": 3.95
+      "dist": 4.02
     },
     {
       "type": "V",
@@ -887,7 +887,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 5.65
+      "dist": 5.72
     },
     {
       "type": "V",
@@ -896,7 +896,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 10.1
+      "dist": 10.17
     },
     {
       "type": "V",
@@ -905,7 +905,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 14.44
+      "dist": 14.51
     },
     {
       "type": "V",
@@ -914,7 +914,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 16.75
+      "dist": 16.82
     },
     {
       "type": "V",
@@ -923,17 +923,17 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 17.81
+      "dist": 17.89
     }
   ],
-  "currentPrice": 77994.73,
+  "currentPrice": 78043.33,
   "currentBias": "BULLISH",
   "currentTrend": {
     "w1": "BULLISH",
     "d1": "BULLISH",
     "h4": "RANGING"
   },
-  "scanTime": "26 Apr 2026  01:10 PM IST",
+  "scanTime": "26 Apr 2026  02:31 PM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "LONG",
