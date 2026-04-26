@@ -1,6 +1,7 @@
 {
-  "balance": 2333.2282042644965,
-  "activeTrades": [
+  "balance": 2286.5636042644965,
+  "activeTrades": [],
+  "history": [
     {
       "id": "t_1777225144",
       "bull": false,
@@ -25,10 +26,13 @@
       "phase": "entry",
       "entryBalance": 2333.23,
       "enteredAt": "2026-04-26T17:39:04.488016+00:00",
-      "bias": "BULLISH"
-    }
-  ],
-  "history": [
+      "bias": "BULLISH",
+      "result": "loss",
+      "pnl": -46.66,
+      "pnlR": -1.0,
+      "closePrice": 78312.45,
+      "closedAt": "2026-04-26T18:56:03.093938+00:00"
+    },
     {
       "id": "t_1776334547",
       "bull": false,
@@ -826,14 +830,18 @@
     {
       "t": "2026-04-16T16:23:09.211531+00:00",
       "v": 2333.23
+    },
+    {
+      "t": "2026-04-26T18:56:03.093938+00:00",
+      "v": 2286.56
     }
   ],
   "stats": {
-    "totalTrades": 10,
+    "totalTrades": 11,
     "wins": 0,
-    "losses": 4,
+    "losses": 5,
     "be": 6,
-    "netR": 48.9,
+    "netR": 47.9,
     "bestR": 16.8
   },
   "mssAlerts": {
@@ -867,19 +875,20 @@
     "MSS_1776366000000": "2026-04-16T19:59:44.874824+00:00",
     "MSS_1776362400000": "2026-04-16T19:59:45.394561+00:00",
     "MSS_1776618000000": "2026-04-20T16:09:57.677988+00:00",
-    "MSS_1777219200000": "2026-04-26T17:39:04.487972+00:00"
+    "MSS_1777219200000": "2026-04-26T17:39:04.487972+00:00",
+    "MSS_1777068000000": "2026-04-26T18:56:03.093696+00:00"
   },
   "levelAlerts": {},
-  "lastUpdated": "2026-04-26T17:39:04.488441+00:00",
+  "lastUpdated": "2026-04-26T18:56:03.094018+00:00",
   "currentLevels": [
     {
       "type": "A",
-      "price": 78124.47,
+      "price": 78415.09,
       "fresh": false,
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 0.16
+      "dist": 0.13
     },
     {
       "type": "V",
@@ -888,7 +897,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 0.76
+      "dist": 1.17
     },
     {
       "type": "A",
@@ -897,7 +906,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 1.67
+      "dist": 1.27
     },
     {
       "type": "V",
@@ -906,7 +915,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "A",
-      "dist": 3.96
+      "dist": 4.37
     },
     {
       "type": "V",
@@ -915,7 +924,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 5.66
+      "dist": 6.08
     },
     {
       "type": "V",
@@ -924,7 +933,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 10.11
+      "dist": 10.55
     },
     {
       "type": "V",
@@ -933,7 +942,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 14.45
+      "dist": 14.91
     },
     {
       "type": "V",
@@ -942,7 +951,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 16.76
+      "dist": 17.22
     },
     {
       "type": "V",
@@ -951,17 +960,17 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 17.82
+      "dist": 18.29
     }
   ],
-  "currentPrice": 78001.61,
+  "currentPrice": 78312.45,
   "currentBias": "BULLISH",
   "currentTrend": {
     "w1": "BULLISH",
     "d1": "BULLISH",
     "h4": "RANGING"
   },
-  "scanTime": "26 Apr 2026  11:09 PM IST",
+  "scanTime": "27 Apr 2026  12:26 AM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "SHORT",
