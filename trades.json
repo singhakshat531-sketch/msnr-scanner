@@ -879,17 +879,8 @@
     "MSS_1777068000000": "2026-04-26T18:56:03.093696+00:00"
   },
   "levelAlerts": {},
-  "lastUpdated": "2026-04-27T02:49:38.729812+00:00",
+  "lastUpdated": "2026-04-27T05:55:20.925178+00:00",
   "currentLevels": [
-    {
-      "type": "A",
-      "price": 79323.66,
-      "fresh": true,
-      "hsl": false,
-      "has1d": false,
-      "grade": "A",
-      "dist": 0.28
-    },
     {
       "type": "V",
       "price": 77410.57,
@@ -897,7 +888,16 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 2.19
+      "dist": 0.54
+    },
+    {
+      "type": "A",
+      "price": 79122.28,
+      "fresh": true,
+      "hsl": false,
+      "has1d": true,
+      "grade": "A",
+      "dist": 1.63
     },
     {
       "type": "V",
@@ -906,7 +906,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "A",
-      "dist": 5.43
+      "dist": 3.73
     },
     {
       "type": "V",
@@ -915,7 +915,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 7.15
+      "dist": 5.43
     },
     {
       "type": "V",
@@ -924,7 +924,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 11.67
+      "dist": 9.87
     },
     {
       "type": "V",
@@ -933,7 +933,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 16.07
+      "dist": 14.2
     },
     {
       "type": "V",
@@ -942,7 +942,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 18.41
+      "dist": 16.5
     },
     {
       "type": "V",
@@ -951,17 +951,17 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 19.49
+      "dist": 17.56
     }
   ],
-  "currentPrice": 79104.29,
+  "currentPrice": 77830.06,
   "currentBias": "BULLISH",
   "currentTrend": {
     "w1": "BULLISH",
     "d1": "BULLISH",
     "h4": "RANGING"
   },
-  "scanTime": "27 Apr 2026  08:19 AM IST",
+  "scanTime": "27 Apr 2026  11:25 AM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "SHORT",
