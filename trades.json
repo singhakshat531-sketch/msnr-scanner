@@ -879,16 +879,25 @@
     "MSS_1777068000000": "2026-04-26T18:56:03.093696+00:00"
   },
   "levelAlerts": {},
-  "lastUpdated": "2026-04-27T11:04:52.032764+00:00",
+  "lastUpdated": "2026-04-27T13:55:03.567497+00:00",
   "currentLevels": [
     {
       "type": "V",
       "price": 77625.85,
+      "fresh": false,
+      "hsl": false,
+      "has1d": true,
+      "grade": "A",
+      "dist": 0.13
+    },
+    {
+      "type": "A",
+      "price": 77851.6,
       "fresh": true,
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 0.25
+      "dist": 0.16
     },
     {
       "type": "A",
@@ -897,7 +906,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 1.64
+      "dist": 1.77
     },
     {
       "type": "V",
@@ -906,7 +915,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "A",
-      "dist": 3.72
+      "dist": 3.59
     },
     {
       "type": "V",
@@ -915,7 +924,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 5.41
+      "dist": 5.28
     },
     {
       "type": "V",
@@ -924,7 +933,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 9.86
+      "dist": 9.72
     },
     {
       "type": "V",
@@ -933,7 +942,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 14.19
+      "dist": 14.05
     },
     {
       "type": "V",
@@ -942,7 +951,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 16.49
+      "dist": 16.34
     },
     {
       "type": "V",
@@ -951,17 +960,17 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 17.55
+      "dist": 17.4
     }
   ],
-  "currentPrice": 77821.4,
+  "currentPrice": 77724.43,
   "currentBias": "BULLISH",
   "currentTrend": {
     "w1": "BULLISH",
     "d1": "BULLISH",
     "h4": "RANGING"
   },
-  "scanTime": "27 Apr 2026  04:34 PM IST",
+  "scanTime": "27 Apr 2026  07:25 PM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "SHORT",
