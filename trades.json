@@ -912,17 +912,8 @@
     "MSS_1777636800000": "2026-05-01T13:19:24.585977+00:00"
   },
   "levelAlerts": {},
-  "lastUpdated": "2026-05-02T10:52:43.429717+00:00",
+  "lastUpdated": "2026-05-02T11:45:32.623372+00:00",
   "currentLevels": [
-    {
-      "type": "V",
-      "price": 78221.4,
-      "fresh": true,
-      "hsl": false,
-      "has1d": false,
-      "grade": "A",
-      "dist": 0.05
-    },
     {
       "type": "A",
       "price": 78414.06,
@@ -930,7 +921,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 0.2
+      "dist": 0.34
     },
     {
       "type": "A",
@@ -939,7 +930,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 1.09
+      "dist": 1.23
     },
     {
       "type": "V",
@@ -948,7 +939,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 2.91
+      "dist": 2.77
     },
     {
       "type": "V",
@@ -957,7 +948,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 3.6
+      "dist": 3.46
     },
     {
       "type": "V",
@@ -966,7 +957,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 4.3
+      "dist": 4.15
     },
     {
       "type": "V",
@@ -975,7 +966,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 6.0
+      "dist": 5.85
     },
     {
       "type": "V",
@@ -984,7 +975,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 10.48
+      "dist": 10.32
     },
     {
       "type": "V",
@@ -993,7 +984,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 14.83
+      "dist": 14.66
     },
     {
       "type": "V",
@@ -1002,7 +993,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 17.14
+      "dist": 16.97
     },
     {
       "type": "V",
@@ -1011,17 +1002,17 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 18.21
+      "dist": 18.04
     }
   ],
-  "currentPrice": 78257.13,
+  "currentPrice": 78145.64,
   "currentBias": "BULLISH",
   "currentTrend": {
     "w1": "BULLISH",
     "d1": "BULLISH",
     "h4": "RANGING"
   },
-  "scanTime": "02 May 2026  04:22 PM IST",
+  "scanTime": "02 May 2026  05:15 PM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "LONG",
