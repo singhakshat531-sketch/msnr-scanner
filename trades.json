@@ -912,7 +912,7 @@
     "MSS_1777636800000": "2026-05-01T13:19:24.585977+00:00"
   },
   "levelAlerts": {},
-  "lastUpdated": "2026-05-02T21:41:02.115995+00:00",
+  "lastUpdated": "2026-05-02T22:41:37.495773+00:00",
   "currentLevels": [
     {
       "type": "A",
@@ -920,8 +920,8 @@
       "fresh": true,
       "hsl": false,
       "has1d": false,
-      "grade": "A",
-      "dist": 0.45
+      "grade": "B",
+      "dist": 0.54
     },
     {
       "type": "V",
@@ -930,7 +930,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 3.58
+      "dist": 3.49
     },
     {
       "type": "V",
@@ -939,7 +939,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 4.27
+      "dist": 4.18
     },
     {
       "type": "V",
@@ -948,7 +948,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 4.97
+      "dist": 4.88
     },
     {
       "type": "V",
@@ -957,7 +957,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 6.69
+      "dist": 6.6
     },
     {
       "type": "V",
@@ -966,7 +966,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 11.19
+      "dist": 11.09
     },
     {
       "type": "V",
@@ -975,7 +975,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 15.57
+      "dist": 15.47
     },
     {
       "type": "V",
@@ -984,7 +984,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 17.9
+      "dist": 17.79
     },
     {
       "type": "V",
@@ -993,17 +993,17 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 18.97
+      "dist": 18.87
     }
   ],
-  "currentPrice": 78762.51,
+  "currentPrice": 78694.21,
   "currentBias": "BULLISH",
   "currentTrend": {
     "w1": "BULLISH",
     "d1": "BULLISH",
     "h4": "RANGING"
   },
-  "scanTime": "03 May 2026  03:11 AM IST",
+  "scanTime": "03 May 2026  04:11 AM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "LONG",
