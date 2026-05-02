@@ -912,7 +912,7 @@
     "MSS_1777636800000": "2026-05-01T13:19:24.585977+00:00"
   },
   "levelAlerts": {},
-  "lastUpdated": "2026-05-02T09:07:01.476858+00:00",
+  "lastUpdated": "2026-05-02T10:52:43.429717+00:00",
   "currentLevels": [
     {
       "type": "V",
@@ -921,7 +921,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "A",
-      "dist": 0.1
+      "dist": 0.05
     },
     {
       "type": "A",
@@ -930,7 +930,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 0.15
+      "dist": 0.2
     },
     {
       "type": "A",
@@ -939,7 +939,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 1.04
+      "dist": 1.09
     },
     {
       "type": "V",
@@ -948,7 +948,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 2.97
+      "dist": 2.91
     },
     {
       "type": "V",
@@ -957,7 +957,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 3.66
+      "dist": 3.6
     },
     {
       "type": "V",
@@ -966,7 +966,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 4.36
+      "dist": 4.3
     },
     {
       "type": "V",
@@ -975,7 +975,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 6.06
+      "dist": 6.0
     },
     {
       "type": "V",
@@ -984,7 +984,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 10.54
+      "dist": 10.48
     },
     {
       "type": "V",
@@ -993,7 +993,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 14.89
+      "dist": 14.83
     },
     {
       "type": "V",
@@ -1002,7 +1002,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 17.2
+      "dist": 17.14
     },
     {
       "type": "V",
@@ -1011,17 +1011,17 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 18.27
+      "dist": 18.21
     }
   ],
-  "currentPrice": 78299.81,
+  "currentPrice": 78257.13,
   "currentBias": "BULLISH",
   "currentTrend": {
     "w1": "BULLISH",
     "d1": "BULLISH",
     "h4": "RANGING"
   },
-  "scanTime": "02 May 2026  02:37 PM IST",
+  "scanTime": "02 May 2026  04:22 PM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "LONG",
