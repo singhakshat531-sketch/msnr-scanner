@@ -1,6 +1,36 @@
 {
   "balance": 2218.4241042644962,
-  "activeTrades": [],
+  "activeTrades": [
+    {
+      "id": "t_1777938847",
+      "bull": false,
+      "direction": "SHORT",
+      "grade": "B",
+      "level": 80302.37,
+      "rawEntry": 79833.47,
+      "rawSL": 80475.36,
+      "rawRisk": 641.89,
+      "tpLevels": [
+        78783.36,
+        78191.46,
+        76041.8,
+        75534.91,
+        75030.4,
+        73824.27,
+        70836.77,
+        68152.09,
+        66806.34,
+        66202.65
+      ],
+      "tpIndex": 0,
+      "rawTP1": 78783.36,
+      "rawTP2": 78191.46,
+      "phase": "entry",
+      "entryBalance": 2218.42,
+      "enteredAt": "2026-05-04T23:54:07.429306+00:00",
+      "bias": "BULLISH"
+    }
+  ],
   "history": [
     {
       "id": "t_1777852006",
@@ -947,11 +977,21 @@
     "MSS_1777330800000": "2026-04-27T23:54:36.692511+00:00",
     "MSS_1777532400000": "2026-04-30T10:06:26.512924+00:00",
     "MSS_1777636800000": "2026-05-01T13:19:24.585977+00:00",
-    "MSS_1777849200000": "2026-05-03T23:46:46.066062+00:00"
+    "MSS_1777849200000": "2026-05-03T23:46:46.066062+00:00",
+    "MSS_1777935600000": "2026-05-04T23:54:07.429256+00:00"
   },
   "levelAlerts": {},
-  "lastUpdated": "2026-05-04T22:01:25.999226+00:00",
+  "lastUpdated": "2026-05-04T23:54:07.429714+00:00",
   "currentLevels": [
+    {
+      "type": "A",
+      "price": 80302.37,
+      "fresh": false,
+      "hsl": false,
+      "has1d": false,
+      "grade": "B",
+      "dist": 0.58
+    },
     {
       "type": "V",
       "price": 78783.36,
@@ -959,7 +999,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 1.98
+      "dist": 1.33
     },
     {
       "type": "V",
@@ -968,7 +1008,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 2.75
+      "dist": 2.1
     },
     {
       "type": "V",
@@ -977,7 +1017,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 5.66
+      "dist": 4.99
     },
     {
       "type": "V",
@@ -986,7 +1026,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 6.37
+      "dist": 5.69
     },
     {
       "type": "V",
@@ -995,7 +1035,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 7.08
+      "dist": 6.4
     },
     {
       "type": "V",
@@ -1004,7 +1044,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 8.83
+      "dist": 8.14
     },
     {
       "type": "V",
@@ -1013,7 +1053,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 13.42
+      "dist": 12.7
     },
     {
       "type": "V",
@@ -1022,7 +1062,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 17.89
+      "dist": 17.14
     },
     {
       "type": "V",
@@ -1031,7 +1071,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 20.26
+      "dist": 19.5
     },
     {
       "type": "V",
@@ -1040,30 +1080,30 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 21.36
+      "dist": 20.59
     }
   ],
-  "currentPrice": 80343.75,
+  "currentPrice": 79833.47,
   "currentBias": "BULLISH",
   "currentTrend": {
     "w1": "BULLISH",
     "d1": "RANGING",
     "h4": "BULLISH"
   },
-  "scanTime": "05 May 2026  03:31 AM IST",
+  "scanTime": "05 May 2026  05:24 AM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "SHORT",
-    "level": 79323.66,
+    "level": 80302.37,
     "grade": "B",
-    "has1d": true,
-    "sweepTime": "04 May  03:30 AM",
-    "mssTime": "04 May  04:30 AM",
-    "mssClose": 78538.58,
-    "mssTarget": 78615.17,
-    "sweepWick": 79430.55,
+    "has1d": false,
+    "sweepTime": "05 May  03:30 AM",
+    "mssTime": "05 May  04:30 AM",
+    "mssClose": 79833.47,
+    "mssTarget": 80047.31,
+    "sweepWick": 80394.97,
     "bias": "BULLISH",
-    "c0Time": "22 Apr  05:30 PM",
-    "time": "04 May 2026  05:16 AM IST"
+    "c0Time": "04 May  05:30 AM",
+    "time": "05 May 2026  05:24 AM IST"
   }
 }
