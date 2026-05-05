@@ -1,6 +1,37 @@
 {
   "balance": 2196.239904264496,
-  "activeTrades": [],
+  "activeTrades": [
+    {
+      "id": "t_1777978000",
+      "bull": false,
+      "direction": "SHORT",
+      "grade": "A",
+      "level": 80881.04,
+      "rawEntry": 80577.24,
+      "rawSL": 80968.83,
+      "rawRisk": 391.59,
+      "tpLevels": [
+        79847.88,
+        78783.36,
+        78191.46,
+        76041.8,
+        75534.91,
+        75030.4,
+        73824.27,
+        70836.77,
+        68152.09,
+        66806.34,
+        66202.65
+      ],
+      "tpIndex": 0,
+      "rawTP1": 79847.88,
+      "rawTP2": 78783.36,
+      "phase": "entry",
+      "entryBalance": 2196.24,
+      "enteredAt": "2026-05-05T10:46:40.442084+00:00",
+      "bias": "BULLISH"
+    }
+  ],
   "history": [
     {
       "id": "t_1777938847",
@@ -986,19 +1017,20 @@
     "MSS_1777532400000": "2026-04-30T10:06:26.512924+00:00",
     "MSS_1777636800000": "2026-05-01T13:19:24.585977+00:00",
     "MSS_1777849200000": "2026-05-03T23:46:46.066062+00:00",
-    "MSS_1777935600000": "2026-05-04T23:54:07.429256+00:00"
+    "MSS_1777935600000": "2026-05-04T23:54:07.429256+00:00",
+    "MSS_1777971600000": "2026-05-05T10:46:40.442033+00:00"
   },
   "levelAlerts": {},
-  "lastUpdated": "2026-05-05T08:10:29.013266+00:00",
+  "lastUpdated": "2026-05-05T10:46:40.442654+00:00",
   "currentLevels": [
     {
       "type": "A",
       "price": 80881.04,
-      "fresh": false,
+      "fresh": true,
       "hsl": false,
       "has1d": false,
-      "grade": "B",
-      "dist": 0.0
+      "grade": "A",
+      "dist": 0.06
     },
     {
       "type": "V",
@@ -1007,7 +1039,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "A",
-      "dist": 1.29
+      "dist": 1.23
     },
     {
       "type": "V",
@@ -1016,7 +1048,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 2.66
+      "dist": 2.6
     },
     {
       "type": "V",
@@ -1025,7 +1057,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 3.44
+      "dist": 3.37
     },
     {
       "type": "V",
@@ -1034,7 +1066,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 6.36
+      "dist": 6.3
     },
     {
       "type": "V",
@@ -1043,7 +1075,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 7.08
+      "dist": 7.01
     },
     {
       "type": "V",
@@ -1052,7 +1084,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 7.8
+      "dist": 7.73
     },
     {
       "type": "V",
@@ -1061,7 +1093,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 9.56
+      "dist": 9.49
     },
     {
       "type": "V",
@@ -1070,7 +1102,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 14.18
+      "dist": 14.11
     },
     {
       "type": "V",
@@ -1079,7 +1111,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 18.68
+      "dist": 18.6
     },
     {
       "type": "V",
@@ -1088,7 +1120,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 21.07
+      "dist": 20.99
     },
     {
       "type": "V",
@@ -1097,30 +1129,30 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 22.17
+      "dist": 22.09
     }
   ],
-  "currentPrice": 80880.04,
+  "currentPrice": 80829.98,
   "currentBias": "BULLISH",
   "currentTrend": {
     "w1": "BULLISH",
     "d1": "RANGING",
     "h4": "BULLISH"
   },
-  "scanTime": "05 May 2026  01:40 PM IST",
+  "scanTime": "05 May 2026  04:16 PM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "SHORT",
-    "level": 80302.37,
-    "grade": "B",
+    "level": 80881.04,
+    "grade": "A",
     "has1d": false,
-    "sweepTime": "05 May  03:30 AM",
-    "mssTime": "05 May  04:30 AM",
-    "mssClose": 79833.47,
-    "mssTarget": 80047.31,
-    "sweepWick": 80394.97,
+    "sweepTime": "05 May  01:30 PM",
+    "mssTime": "05 May  02:30 PM",
+    "mssClose": 80577.24,
+    "mssTarget": 80713.28,
+    "sweepWick": 80887.94,
     "bias": "BULLISH",
-    "c0Time": "04 May  05:30 AM",
-    "time": "05 May 2026  05:24 AM IST"
+    "c0Time": "05 May  05:30 AM",
+    "time": "05 May 2026  04:16 PM IST"
   }
 }
