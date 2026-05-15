@@ -1,6 +1,34 @@
 {
   "balance": 2514.826976806818,
-  "activeTrades": [],
+  "activeTrades": [
+    {
+      "id": "t_1778818341",
+      "bull": false,
+      "direction": "SHORT",
+      "grade": "A",
+      "level": 81427.53,
+      "rawEntry": 81056.12,
+      "rawSL": 81685.97,
+      "rawRisk": 629.85,
+      "tpLevels": [
+        79220.07,
+        78795.46,
+        78191.46,
+        76041.8,
+        75534.91,
+        75030.4,
+        73824.27,
+        70836.77
+      ],
+      "tpIndex": 0,
+      "rawTP1": 79220.07,
+      "rawTP2": 78795.46,
+      "phase": "entry",
+      "entryBalance": 2514.83,
+      "enteredAt": "2026-05-15T04:12:21.144960+00:00",
+      "bias": "BULLISH"
+    }
+  ],
   "history": [
     {
       "id": "t_1778673865",
@@ -1364,19 +1392,20 @@
     "MSS_1778670000000": "2026-05-13T12:04:25.152244+00:00",
     "MSS_1778727600000": "2026-05-14T04:06:52.410225+00:00",
     "MSS_1777906800000": "2026-05-14T04:06:52.410458+00:00",
-    "MSS_1778785200000": "2026-05-14T21:10:24.332422+00:00"
+    "MSS_1778785200000": "2026-05-14T21:10:24.332422+00:00",
+    "MSS_1778814000000": "2026-05-15T04:12:21.144899+00:00"
   },
   "levelAlerts": {},
-  "lastUpdated": "2026-05-14T23:59:59.729091+00:00",
+  "lastUpdated": "2026-05-15T04:12:21.145439+00:00",
   "currentLevels": [
     {
       "type": "A",
       "price": 81427.53,
-      "fresh": true,
+      "fresh": false,
       "hsl": false,
       "has1d": true,
-      "grade": "A+",
-      "dist": 0.43
+      "grade": "A",
+      "dist": 0.49
     },
     {
       "type": "A",
@@ -1385,7 +1414,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 1.07
+      "dist": 1.13
     },
     {
       "type": "A",
@@ -1394,7 +1423,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 1.74
+      "dist": 1.8
     },
     {
       "type": "V",
@@ -1403,7 +1432,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 2.35
+      "dist": 2.28
     },
     {
       "type": "V",
@@ -1412,7 +1441,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 2.9
+      "dist": 2.83
     },
     {
       "type": "V",
@@ -1421,7 +1450,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 3.69
+      "dist": 3.62
     },
     {
       "type": "V",
@@ -1430,7 +1459,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 6.62
+      "dist": 6.55
     },
     {
       "type": "V",
@@ -1439,7 +1468,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 7.34
+      "dist": 7.27
     },
     {
       "type": "V",
@@ -1448,7 +1477,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 8.06
+      "dist": 7.99
     },
     {
       "type": "V",
@@ -1457,7 +1486,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 9.83
+      "dist": 9.75
     },
     {
       "type": "V",
@@ -1466,30 +1495,30 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 14.46
+      "dist": 14.38
     }
   ],
-  "currentPrice": 81078.77,
+  "currentPrice": 81024.71,
   "currentBias": "BULLISH",
   "currentTrend": {
     "w1": "BULLISH",
     "d1": "BULLISH",
     "h4": "RANGING"
   },
-  "scanTime": "15 May 2026  05:29 AM IST",
+  "scanTime": "15 May 2026  09:42 AM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "SHORT",
-    "level": 79614.96,
-    "grade": "B",
-    "has1d": false,
-    "sweepTime": "14 May  07:30 AM",
-    "mssTime": "14 May  08:30 AM",
-    "mssClose": 79011.35,
-    "mssTarget": 79203.3,
-    "sweepWick": 79651.03,
+    "level": 81427.53,
+    "grade": "A",
+    "has1d": true,
+    "sweepTime": "15 May  06:30 AM",
+    "mssTime": "15 May  08:30 AM",
+    "mssClose": 81056.12,
+    "mssTarget": 81094.33,
+    "sweepWick": 81604.37,
     "bias": "BULLISH",
-    "c0Time": "13 May  09:30 PM",
-    "time": "14 May 2026  09:36 AM IST"
+    "c0Time": "14 May  09:30 PM",
+    "time": "15 May 2026  09:42 AM IST"
   }
 }
