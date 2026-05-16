@@ -1,6 +1,35 @@
 {
-  "balance": 2661.4445404013236,
+  "balance": 2841.9692871759516,
   "activeTrades": [
+    {
+      "id": "t_1778818341",
+      "bull": false,
+      "direction": "SHORT",
+      "grade": "A",
+      "level": 81427.53,
+      "rawEntry": 81056.12,
+      "rawSL": 79220.07,
+      "rawRisk": 629.85,
+      "tpLevels": [
+        79220.07,
+        78795.46,
+        78191.46,
+        76041.8,
+        75534.91,
+        75030.4,
+        73824.27,
+        70836.77
+      ],
+      "tpIndex": 2,
+      "rawTP1": 79220.07,
+      "rawTP2": 78795.46,
+      "phase": "tp2",
+      "entryBalance": 2514.83,
+      "enteredAt": "2026-05-15T04:12:21.144960+00:00",
+      "bias": "BULLISH"
+    }
+  ],
+  "history": [
     {
       "id": "t_1778818341",
       "bull": false,
@@ -26,10 +55,13 @@
       "phase": "tp1",
       "entryBalance": 2514.83,
       "enteredAt": "2026-05-15T04:12:21.144960+00:00",
-      "bias": "BULLISH"
-    }
-  ],
-  "history": [
+      "bias": "BULLISH",
+      "result": "tp2",
+      "pnl": 180.52,
+      "pnlR": 3.6,
+      "closePrice": 78342.56,
+      "closedAt": "2026-05-16T08:06:08.830058+00:00"
+    },
     {
       "id": "t_1778818341",
       "bull": false,
@@ -1368,6 +1400,10 @@
     {
       "t": "2026-05-15T15:13:01.840270+00:00",
       "v": 2661.44
+    },
+    {
+      "t": "2026-05-16T08:06:08.830058+00:00",
+      "v": 2841.97
     }
   ],
   "stats": {
@@ -1375,7 +1411,7 @@
     "wins": 0,
     "losses": 12,
     "be": 9,
-    "netR": 52.6,
+    "netR": 56.2,
     "bestR": 16.8
   },
   "mssAlerts": {
@@ -1432,34 +1468,16 @@
     "MSS_1778814000000": "2026-05-15T04:12:21.144899+00:00"
   },
   "levelAlerts": {},
-  "lastUpdated": "2026-05-16T05:55:39.467368+00:00",
+  "lastUpdated": "2026-05-16T08:06:08.830144+00:00",
   "currentLevels": [
     {
       "type": "V",
-      "price": 78795.46,
-      "fresh": false,
-      "hsl": false,
-      "has1d": true,
-      "grade": "A",
-      "dist": 0.23
-    },
-    {
-      "type": "V",
-      "price": 78191.46,
+      "price": 78340.94,
       "fresh": true,
       "hsl": false,
-      "has1d": true,
-      "grade": "A+",
-      "dist": 1.0
-    },
-    {
-      "type": "A",
-      "price": 81427.53,
-      "fresh": false,
-      "hsl": false,
-      "has1d": true,
-      "grade": "B",
-      "dist": 3.01
+      "has1d": false,
+      "grade": "A",
+      "dist": 0.0
     },
     {
       "type": "V",
@@ -1468,16 +1486,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 3.86
-    },
-    {
-      "type": "A",
-      "price": 81952.44,
-      "fresh": false,
-      "hsl": false,
-      "has1d": true,
-      "grade": "B",
-      "dist": 3.63
+      "dist": 3.03
     },
     {
       "type": "V",
@@ -1486,16 +1495,16 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 4.55
+      "dist": 3.72
     },
     {
       "type": "A",
-      "price": 82512.24,
-      "fresh": true,
+      "price": 81427.53,
+      "fresh": false,
       "hsl": false,
       "has1d": true,
-      "grade": "A",
-      "dist": 4.29
+      "grade": "B",
+      "dist": 3.79
     },
     {
       "type": "V",
@@ -1504,7 +1513,25 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 5.26
+      "dist": 4.41
+    },
+    {
+      "type": "A",
+      "price": 81952.44,
+      "fresh": false,
+      "hsl": false,
+      "has1d": true,
+      "grade": "B",
+      "dist": 4.4
+    },
+    {
+      "type": "A",
+      "price": 82512.24,
+      "fresh": true,
+      "hsl": false,
+      "has1d": true,
+      "grade": "A",
+      "dist": 5.05
     },
     {
       "type": "V",
@@ -1513,7 +1540,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 6.98
+      "dist": 6.12
     },
     {
       "type": "V",
@@ -1522,17 +1549,17 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 11.49
+      "dist": 10.6
     }
   ],
-  "currentPrice": 78974.41,
+  "currentPrice": 78342.56,
   "currentBias": "BULLISH",
   "currentTrend": {
     "w1": "BULLISH",
     "d1": "RANGING",
     "h4": "RANGING"
   },
-  "scanTime": "16 May 2026  11:25 AM IST",
+  "scanTime": "16 May 2026  01:36 PM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "SHORT",
