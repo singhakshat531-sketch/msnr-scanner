@@ -1504,7 +1504,7 @@
     "MSS_1778814000000": "2026-05-15T04:12:21.144899+00:00"
   },
   "levelAlerts": {},
-  "lastUpdated": "2026-05-20T21:54:18.617327+00:00",
+  "lastUpdated": "2026-05-20T23:13:48.540573+00:00",
   "currentLevels": [
     {
       "type": "A",
@@ -1513,16 +1513,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "A",
-      "dist": 0.09
-    },
-    {
-      "type": "A",
-      "price": 78382.89,
-      "fresh": true,
-      "hsl": false,
-      "has1d": false,
-      "grade": "B",
-      "dist": 1.06
+      "dist": 0.34
     },
     {
       "type": "V",
@@ -1531,7 +1522,16 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 1.16
+      "dist": 0.91
+    },
+    {
+      "type": "A",
+      "price": 78382.89,
+      "fresh": true,
+      "hsl": false,
+      "has1d": false,
+      "grade": "B",
+      "dist": 1.31
     },
     {
       "type": "V",
@@ -1540,7 +1540,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 1.99
+      "dist": 1.73
     },
     {
       "type": "V",
@@ -1549,7 +1549,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 2.67
+      "dist": 2.41
     },
     {
       "type": "V",
@@ -1558,7 +1558,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 3.36
+      "dist": 3.1
     },
     {
       "type": "V",
@@ -1567,7 +1567,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 5.05
+      "dist": 4.78
     },
     {
       "type": "A",
@@ -1576,7 +1576,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 4.76
+      "dist": 5.0
     },
     {
       "type": "A",
@@ -1585,7 +1585,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 5.37
+      "dist": 5.61
     },
     {
       "type": "A",
@@ -1594,17 +1594,17 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 6.01
+      "dist": 6.25
     }
   ],
-  "currentPrice": 77551.91,
+  "currentPrice": 77355.89,
   "currentBias": "BULLISH",
   "currentTrend": {
     "w1": "BULLISH",
     "d1": "RANGING",
     "h4": "RANGING"
   },
-  "scanTime": "21 May 2026  03:24 AM IST",
+  "scanTime": "21 May 2026  04:43 AM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "SHORT",
