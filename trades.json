@@ -1,6 +1,35 @@
 {
-  "balance": 3070.7263851453085,
+  "balance": 3471.144337533972,
   "activeTrades": [
+    {
+      "id": "t_1778818341",
+      "bull": false,
+      "direction": "SHORT",
+      "grade": "A",
+      "level": 81427.53,
+      "rawEntry": 81056.12,
+      "rawSL": 78191.46,
+      "rawRisk": 629.85,
+      "tpLevels": [
+        79220.07,
+        78795.46,
+        78191.46,
+        76041.8,
+        75534.91,
+        75030.4,
+        73824.27,
+        70836.77
+      ],
+      "tpIndex": 4,
+      "rawTP1": 79220.07,
+      "rawTP2": 78795.46,
+      "phase": "tp4",
+      "entryBalance": 2514.83,
+      "enteredAt": "2026-05-15T04:12:21.144960+00:00",
+      "bias": "BULLISH"
+    }
+  ],
+  "history": [
     {
       "id": "t_1778818341",
       "bull": false,
@@ -26,10 +55,13 @@
       "phase": "tp3",
       "entryBalance": 2514.83,
       "enteredAt": "2026-05-15T04:12:21.144960+00:00",
-      "bias": "BULLISH"
-    }
-  ],
-  "history": [
+      "bias": "BULLISH",
+      "result": "tp4",
+      "pnl": 400.42,
+      "pnlR": 8.0,
+      "closePrice": 75719.27,
+      "closedAt": "2026-05-22T19:45:19.353342+00:00"
+    },
     {
       "id": "t_1778818341",
       "bull": false,
@@ -1440,6 +1472,10 @@
     {
       "t": "2026-05-16T10:16:08.629801+00:00",
       "v": 3070.73
+    },
+    {
+      "t": "2026-05-22T19:45:19.353342+00:00",
+      "v": 3471.14
     }
   ],
   "stats": {
@@ -1447,7 +1483,7 @@
     "wins": 0,
     "losses": 12,
     "be": 9,
-    "netR": 60.7,
+    "netR": 68.7,
     "bestR": 16.8
   },
   "mssAlerts": {
@@ -1507,61 +1543,25 @@
     "MSS_1779253200000": "2026-05-22T15:47:40.127467+00:00"
   },
   "levelAlerts": {},
-  "lastUpdated": "2026-05-22T17:51:40.286846+00:00",
+  "lastUpdated": "2026-05-22T19:45:19.353425+00:00",
   "currentLevels": [
-    {
-      "type": "V",
-      "price": 76715.83,
-      "fresh": true,
-      "hsl": false,
-      "has1d": true,
-      "grade": "A+",
-      "dist": 0.04
-    },
-    {
-      "type": "V",
-      "price": 76041.8,
-      "fresh": false,
-      "hsl": false,
-      "has1d": true,
-      "grade": "B",
-      "dist": 0.92
-    },
-    {
-      "type": "A",
-      "price": 77716.67,
-      "fresh": true,
-      "hsl": false,
-      "has1d": false,
-      "grade": "A",
-      "dist": 1.25
-    },
     {
       "type": "V",
       "price": 75534.91,
       "fresh": false,
       "hsl": false,
-      "has1d": true,
-      "grade": "B",
-      "dist": 1.6
-    },
-    {
-      "type": "A",
-      "price": 78382.89,
-      "fresh": true,
-      "hsl": false,
       "has1d": false,
-      "grade": "A",
-      "dist": 2.09
+      "grade": "B",
+      "dist": 0.24
     },
     {
       "type": "V",
       "price": 75030.4,
       "fresh": false,
       "hsl": false,
-      "has1d": true,
+      "has1d": false,
       "grade": "B",
-      "dist": 2.28
+      "dist": 0.92
     },
     {
       "type": "V",
@@ -1570,7 +1570,25 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 3.95
+      "dist": 2.57
+    },
+    {
+      "type": "A",
+      "price": 77716.67,
+      "fresh": true,
+      "hsl": false,
+      "has1d": false,
+      "grade": "A",
+      "dist": 2.57
+    },
+    {
+      "type": "A",
+      "price": 78382.89,
+      "fresh": true,
+      "hsl": false,
+      "has1d": false,
+      "grade": "A",
+      "dist": 3.4
     },
     {
       "type": "A",
@@ -1579,7 +1597,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 5.75
+      "dist": 7.01
     },
     {
       "type": "A",
@@ -1588,7 +1606,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 6.36
+      "dist": 7.61
     },
     {
       "type": "A",
@@ -1597,17 +1615,17 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 6.99
+      "dist": 8.23
     }
   ],
-  "currentPrice": 76743.11,
+  "currentPrice": 75719.27,
   "currentBias": "BEARISH",
   "currentTrend": {
     "w1": "BULLISH",
     "d1": "BEARISH",
     "h4": "RANGING"
   },
-  "scanTime": "22 May 2026  11:21 PM IST",
+  "scanTime": "23 May 2026  01:15 AM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "SHORT",
