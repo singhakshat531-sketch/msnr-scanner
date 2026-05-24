@@ -1623,8 +1623,17 @@
     "MSS_1779253200000": "2026-05-22T15:47:40.127467+00:00"
   },
   "levelAlerts": {},
-  "lastUpdated": "2026-05-24T19:17:24.203972+00:00",
+  "lastUpdated": "2026-05-24T20:56:14.799492+00:00",
   "currentLevels": [
+    {
+      "type": "A",
+      "price": 76699.28,
+      "fresh": true,
+      "hsl": false,
+      "has1d": true,
+      "grade": "A+",
+      "dist": 0.16
+    },
     {
       "type": "V",
       "price": 76303.11,
@@ -1632,7 +1641,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 0.38
+      "dist": 0.36
     },
     {
       "type": "A",
@@ -1641,7 +1650,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 0.83
+      "dist": 0.86
     },
     {
       "type": "A",
@@ -1650,7 +1659,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 1.45
+      "dist": 1.47
     },
     {
       "type": "A",
@@ -1659,7 +1668,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "A",
-      "dist": 2.28
+      "dist": 2.3
     },
     {
       "type": "V",
@@ -1668,7 +1677,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 2.76
+      "dist": 2.74
     },
     {
       "type": "A",
@@ -1677,7 +1686,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 5.94
+      "dist": 5.96
     },
     {
       "type": "A",
@@ -1686,7 +1695,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 6.54
+      "dist": 6.56
     },
     {
       "type": "A",
@@ -1695,17 +1704,17 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 7.17
+      "dist": 7.19
     }
   ],
-  "currentPrice": 76593.55,
+  "currentPrice": 76576.68,
   "currentBias": "BEARISH",
   "currentTrend": {
     "w1": "BULLISH",
     "d1": "BEARISH",
     "h4": "RANGING"
   },
-  "scanTime": "25 May 2026  12:47 AM IST",
+  "scanTime": "25 May 2026  02:26 AM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "SHORT",
