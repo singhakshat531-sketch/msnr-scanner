@@ -1621,19 +1621,29 @@
     "MSS_1779321600000": "2026-05-21T03:43:08.563612+00:00",
     "MSS_1779354000000": "2026-05-21T11:25:44.418264+00:00",
     "MSS_1779253200000": "2026-05-22T15:47:40.127467+00:00",
-    "MSS_1779663600000": "2026-05-25T03:52:41.736576+00:00"
+    "MSS_1779663600000": "2026-05-25T03:52:41.736576+00:00",
+    "MSS_1779458400000": "2026-05-25T08:21:16.155113+00:00"
   },
   "levelAlerts": {},
-  "lastUpdated": "2026-05-25T03:52:41.736841+00:00",
+  "lastUpdated": "2026-05-25T08:21:16.155305+00:00",
   "currentLevels": [
     {
       "type": "A",
-      "price": 77000.57,
+      "price": 77337.56,
       "fresh": true,
       "hsl": false,
-      "has1d": true,
-      "grade": "A+",
-      "dist": 0.01
+      "has1d": false,
+      "grade": "A",
+      "dist": 0.06
+    },
+    {
+      "type": "A",
+      "price": 78024.72,
+      "fresh": false,
+      "hsl": false,
+      "has1d": false,
+      "grade": "B",
+      "dist": 0.94
     },
     {
       "type": "V",
@@ -1642,25 +1652,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "B",
-      "dist": 0.9
-    },
-    {
-      "type": "A",
-      "price": 77716.67,
-      "fresh": true,
-      "hsl": false,
-      "has1d": true,
-      "grade": "A+",
-      "dist": 0.93
-    },
-    {
-      "type": "A",
-      "price": 78382.89,
-      "fresh": true,
-      "hsl": false,
-      "has1d": false,
-      "grade": "A",
-      "dist": 1.78
+      "dist": 1.29
     },
     {
       "type": "V",
@@ -1669,7 +1661,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 3.29
+      "dist": 3.69
     },
     {
       "type": "A",
@@ -1678,7 +1670,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 5.45
+      "dist": 5.08
     },
     {
       "type": "A",
@@ -1687,7 +1679,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 6.05
+      "dist": 5.69
     },
     {
       "type": "A",
@@ -1696,17 +1688,17 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 6.69
+      "dist": 6.33
     }
   ],
-  "currentPrice": 76990.37,
+  "currentPrice": 77290.18,
   "currentBias": "BEARISH",
   "currentTrend": {
     "w1": "BULLISH",
     "d1": "BEARISH",
     "h4": "RANGING"
   },
-  "scanTime": "25 May 2026  09:22 AM IST",
+  "scanTime": "25 May 2026  01:51 PM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "SHORT",
