@@ -1687,8 +1687,17 @@
     "MSS_1779886800000": "2026-05-27T16:37:32.929965+00:00"
   },
   "levelAlerts": {},
-  "lastUpdated": "2026-05-28T23:17:06.165276+00:00",
+  "lastUpdated": "2026-05-29T03:38:48.023523+00:00",
   "currentLevels": [
+    {
+      "type": "A",
+      "price": 73531.95,
+      "fresh": true,
+      "hsl": false,
+      "has1d": false,
+      "grade": "A",
+      "dist": 0.37
+    },
     {
       "type": "V",
       "price": 72815.08,
@@ -1696,7 +1705,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 0.96
+      "dist": 0.61
     },
     {
       "type": "A",
@@ -1705,7 +1714,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 3.1
+      "dist": 3.44
     },
     {
       "type": "A",
@@ -1714,7 +1723,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 4.68
+      "dist": 5.02
     },
     {
       "type": "A",
@@ -1723,7 +1732,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 5.23
+      "dist": 5.57
     },
     {
       "type": "A",
@@ -1732,7 +1741,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 5.78
+      "dist": 6.11
     },
     {
       "type": "A",
@@ -1741,7 +1750,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 9.72
+      "dist": 10.03
     },
     {
       "type": "A",
@@ -1750,7 +1759,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 10.3
+      "dist": 10.61
     },
     {
       "type": "A",
@@ -1759,17 +1768,17 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 10.9
+      "dist": 11.22
     }
   ],
-  "currentPrice": 73514.86,
+  "currentPrice": 73256.92,
   "currentBias": "BEARISH",
   "currentTrend": {
     "w1": "RANGING",
     "d1": "BEARISH",
     "h4": "RANGING"
   },
-  "scanTime": "29 May 2026  04:47 AM IST",
+  "scanTime": "29 May 2026  09:08 AM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "SHORT",
