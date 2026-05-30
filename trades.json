@@ -26,6 +26,33 @@
       "entryBalance": 4592.07,
       "enteredAt": "2026-05-29T15:33:08.494792+00:00",
       "bias": "BEARISH"
+    },
+    {
+      "id": "t_1780111656",
+      "bull": true,
+      "direction": "LONG",
+      "grade": "B",
+      "level": 73211.17,
+      "rawEntry": 73702.28,
+      "rawSL": 73084.11,
+      "rawRisk": 618.17,
+      "tpLevels": [
+        73716.13,
+        75869.31,
+        77125.42,
+        77574.54,
+        78024.72,
+        81427.53,
+        81952.44,
+        82512.24
+      ],
+      "tpIndex": 0,
+      "rawTP1": 73716.13,
+      "rawTP2": 75869.31,
+      "phase": "entry",
+      "entryBalance": 4592.07,
+      "enteredAt": "2026-05-30T03:27:36.425207+00:00",
+      "bias": "BEARISH"
     }
   ],
   "history": [
@@ -1713,37 +1740,38 @@
     "MSS_1779807600000": "2026-05-26T15:29:37.510719+00:00",
     "MSS_1779886800000": "2026-05-27T16:37:32.929965+00:00",
     "MSS_1780066800000": "2026-05-29T15:33:08.494744+00:00",
-    "MSS_1780070400000": "2026-05-29T18:33:08.299698+00:00"
+    "MSS_1780070400000": "2026-05-29T18:33:08.299698+00:00",
+    "MSS_1780106400000": "2026-05-30T03:27:36.425150+00:00"
   },
   "levelAlerts": {},
-  "lastUpdated": "2026-05-29T23:12:50.902660+00:00",
+  "lastUpdated": "2026-05-30T03:27:36.425627+00:00",
   "currentLevels": [
+    {
+      "type": "A",
+      "price": 73716.13,
+      "fresh": false,
+      "hsl": false,
+      "has1d": false,
+      "grade": "B",
+      "dist": 0.14
+    },
     {
       "type": "V",
       "price": 73211.17,
       "fresh": false,
       "hsl": false,
-      "has1d": false,
+      "has1d": true,
       "grade": "B",
-      "dist": 0.19
-    },
-    {
-      "type": "A",
-      "price": 73716.13,
-      "fresh": true,
-      "hsl": false,
-      "has1d": false,
-      "grade": "A",
-      "dist": 0.5
+      "dist": 0.55
     },
     {
       "type": "V",
       "price": 72815.08,
       "fresh": false,
       "hsl": false,
-      "has1d": false,
+      "has1d": true,
       "grade": "B",
-      "dist": 0.73
+      "dist": 1.1
     },
     {
       "type": "A",
@@ -1752,7 +1780,7 @@
       "hsl": false,
       "has1d": false,
       "grade": "B",
-      "dist": 3.32
+      "dist": 2.97
     },
     {
       "type": "A",
@@ -1761,7 +1789,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 4.9
+      "dist": 4.55
     },
     {
       "type": "A",
@@ -1770,7 +1798,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 5.45
+      "dist": 5.1
     },
     {
       "type": "A",
@@ -1779,7 +1807,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 5.99
+      "dist": 5.65
     },
     {
       "type": "A",
@@ -1788,7 +1816,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 9.92
+      "dist": 9.59
     },
     {
       "type": "A",
@@ -1797,7 +1825,7 @@
       "hsl": false,
       "has1d": true,
       "grade": "A",
-      "dist": 10.5
+      "dist": 10.17
     },
     {
       "type": "A",
@@ -1806,30 +1834,30 @@
       "hsl": false,
       "has1d": true,
       "grade": "A+",
-      "dist": 11.11
+      "dist": 10.78
     }
   ],
-  "currentPrice": 73349.16,
+  "currentPrice": 73615.66,
   "currentBias": "BEARISH",
   "currentTrend": {
     "w1": "RANGING",
     "d1": "BEARISH",
-    "h4": "RANGING"
+    "h4": "BEARISH"
   },
-  "scanTime": "30 May 2026  04:42 AM IST",
+  "scanTime": "30 May 2026  08:57 AM IST",
   "lastAlert": {
     "type": "MSS",
     "direction": "LONG",
-    "level": 72815.08,
-    "grade": "A",
+    "level": 73211.17,
+    "grade": "B",
     "has1d": true,
-    "sweepTime": "29 May  07:30 PM",
-    "mssTime": "29 May  08:30 PM",
-    "mssClose": 73803.41,
-    "mssTarget": 73099.92,
-    "sweepWick": 72412.84,
+    "sweepTime": "30 May  12:30 AM",
+    "mssTime": "30 May  07:30 AM",
+    "mssClose": 73702.28,
+    "mssTarget": 73639.07,
+    "sweepWick": 73157.27,
     "bias": "BEARISH",
-    "c0Time": "28 May  05:30 PM",
-    "time": "29 May 2026  09:03 PM IST"
+    "c0Time": "29 May  05:30 AM",
+    "time": "30 May 2026  08:57 AM IST"
   }
 }
